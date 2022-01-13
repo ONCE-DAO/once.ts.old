@@ -1,7 +1,9 @@
-import { Loader, LoaderConfig } from './Loader.interface.js'
-import { Url } from './DefaultURL.class.js'
+import { IOR } from '../3_services/IOR.interface.js';
+import { Loader, LoaderConfig } from '../3_services/Loader.interface.js';
+import { URL } from '../3_services/URL.interface.js';
+import { DefaultUrl } from './DefaultURL.class.js';
 
-export class IOR extends Url {
+export class DefaultIOR extends DefaultUrl implements IOR {
     referencedObject: any = undefined
     objectID: string
     private _connection: any
@@ -13,18 +15,18 @@ export class IOR extends Url {
     }
 
     // does not return true but makes sure that if it is an IOR you also have an IOR object.
-    static isIOR (stringOrIOR: string | IOR, forceString = false) {
+    static isIOR (stringOrIOR: string | DefaultIOR, forceString = false) {
       if (typeof stringOrIOR === 'string' &&
             (stringOrIOR.toLowerCase().startsWith('ior:') || forceString)) {
-        return IOR.getInstance().init(stringOrIOR)
-      } else if (stringOrIOR instanceof IOR) {
+        return DefaultIOR.getInstance().init(stringOrIOR)
+      } else if (stringOrIOR instanceof DefaultIOR) {
         return stringOrIOR
       }
       return false
     }
 
     static getInstance () {
-      return new IOR()
+      return new DefaultIOR()
     }
 
     static async load (iorString: string, config?: any) {
@@ -41,7 +43,7 @@ export class IOR extends Url {
     //     ior.type = object.type
     //     return ior
     //   }
-    static getIORType (urlObject: IOR | Url | string) {
+    static getIORType (urlObject: IOR | URL | string) {
       // @ts-ignore check how to make save typecheck
       const href = urlObject.href ? urlObject.href : urlObject
       if (href.startsWith('ior')) {
@@ -60,12 +62,13 @@ export class IOR extends Url {
       // this._private = this._private || {};
     }
 
-    init (value: IOR | URL | string, queryParameters?: string): IOR {
+    init (value: IOR | URL | string, queryParameters?: string): DefaultIOR {
       if (!value) { throw Error('IOR cannot be initialized on undefined.') }
-      if (value instanceof IOR) {
+      
+      if (value instanceof DefaultIOR) {
         return value
       }
-      if (value instanceof Url) {
+      if (value instanceof DefaultUrl) {
         value = value.href
       }
       // @ts-ignore

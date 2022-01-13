@@ -1,6 +1,7 @@
-import { ThingImplementation } from './DefaultThing.class.js'
+import { URL } from './../3_services/URL.interface';
+import { DefaultThing } from "./DefaultThing.class";
 
-export class Url extends ThingImplementation {
+export class DefaultUrl extends DefaultThing {
   static get implements () {
     return null
   }
@@ -13,27 +14,27 @@ export class Url extends ThingImplementation {
   private _hash: any;
 
   get href () {
-    return this._formatUrl()
+    return this.formatUrl()
   }
 
   set href (url) {
-    this._parseUrl(url)
+    this.parseUrl(url)
   }
 
   get url () {
-    return this._formatUrl()
+    return this.formatUrl()
   }
 
   set url (url) {
     this.href = url
   }
 
-  init (url: string):Url {
-    this._parseUrl(url)
+  init (url: string):URL {
+    this.parseUrl(url)
     return this
   }
 
-  _parseUrl (url: string) {
+  private parseUrl (url: string) {
     url = url || ''
     const urlParsed = url.match(/^(([^/]+):(\/\/)?)?([^:/]+)?(:(\d+))?(\/[^?#]*)?(\?([^#]+))?(#(.*))?$/)
     if (!urlParsed || urlParsed.length < 11) {
@@ -58,7 +59,7 @@ export class Url extends ThingImplementation {
     this.hash = urlParsed[11]
   }
 
-  _formatUrl (protocolFilter: string[] = [], type = 'normal') {
+  private formatUrl (protocolFilter: string[] = [], type = 'normal') {
     let url = ''
     let protocol
     const hostName = this.hostName
@@ -123,7 +124,7 @@ export class Url extends ThingImplementation {
   }
 
   get origin () {
-    return this._formatUrl(['https', 'http', 'ws', 'wss'], 'origin')
+    return this.formatUrl(['https', 'http', 'ws', 'wss'], 'origin')
   }
 
   // TODO typestuff
@@ -136,7 +137,7 @@ export class Url extends ThingImplementation {
   //     }
   // }
   get originPath () {
-    return this._formatUrl(['https', 'http', 'ws', 'wss'], 'originPath')
+    return this.formatUrl(['https', 'http', 'ws', 'wss'], 'originPath')
   }
   // TODO typestuff
   // get defaultOrigin() {
@@ -261,7 +262,7 @@ export class Url extends ThingImplementation {
     // let href = Thinglish.lookupInObject(this,"loader.normalizeHref");
     // if (!href) href = this._formatUrl(['https', 'http', 'ws', 'wss']);
     // return href;
-    return this._formatUrl(['https', 'http', 'ws', 'wss'])
+    return this.formatUrl(['https', 'http', 'ws', 'wss'])
   }
 
   get isIOR () {

@@ -1,5 +1,6 @@
 import { Client } from './Client.interface.js'
-import { Thing } from '../once/Thing.interface.js'
+import { IOR } from './IOR.interface.js'
+import { Thing } from './Thing.interface.js'
 
 /**
  * doc loader config
