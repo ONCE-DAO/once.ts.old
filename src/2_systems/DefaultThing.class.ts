@@ -1,4 +1,4 @@
-import { Thing } from "../3_services/Thing.interface";
+import { Thing } from '../3_services/Thing.interface'
 
 export class DefaultThing implements Thing {
     private _id: string | undefined;

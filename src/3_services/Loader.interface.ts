@@ -11,12 +11,12 @@ export type LoaderConfig = {
 }
 
 export interface Loader extends Thing {
-    canLoad(ior: IOR): Number
+    canLoad(ior: IOR): number
     /**
      * doc load
      * @param ior ior ...
      * @param config pleas insert valid config
      */
-    load(ior: IOR, config?: LoaderConfig): Promise<String>;
+    load(ior: IOR, config?: LoaderConfig): Promise<string>;
     client(): Client
 }

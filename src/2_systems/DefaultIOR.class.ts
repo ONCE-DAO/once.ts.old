@@ -1,7 +1,7 @@
-import { IOR } from '../3_services/IOR.interface.js';
-import { Loader, LoaderConfig } from '../3_services/Loader.interface.js';
-import { URL } from '../3_services/URL.interface.js';
-import { DefaultUrl } from './DefaultURL.class.js';
+import { IOR } from '../3_services/IOR.interface.js'
+import { Loader, LoaderConfig } from '../3_services/Loader.interface.js'
+import { URL } from '../3_services/URL.interface.js'
+import { DefaultUrl } from './DefaultURL.class.js'
 
 export class DefaultIOR extends DefaultUrl implements IOR {
     referencedObject: any = undefined
@@ -64,7 +64,7 @@ export class DefaultIOR extends DefaultUrl implements IOR {
 
     init (value: IOR | URL | string, queryParameters?: string): DefaultIOR {
       if (!value) { throw Error('IOR cannot be initialized on undefined.') }
-      
+
       if (value instanceof DefaultIOR) {
         return value
       }

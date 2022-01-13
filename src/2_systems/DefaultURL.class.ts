@@ -1,5 +1,5 @@
-import { URL } from './../3_services/URL.interface';
-import { DefaultThing } from "./DefaultThing.class";
+import { URL } from './../3_services/URL.interface'
+import { DefaultThing } from './DefaultThing.class'
 
 export class DefaultUrl extends DefaultThing {
   static get implements () {
