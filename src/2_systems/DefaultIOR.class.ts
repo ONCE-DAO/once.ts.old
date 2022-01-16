@@ -1,7 +1,7 @@
-import { IOR } from '../3_services/IOR.interface.js'
-import { Loader, LoaderConfig } from '../3_services/Loader.interface.js'
-import { URL } from '../3_services/URL.interface.js'
-import { DefaultUrl } from './DefaultURL.class.js'
+import { IOR } from '../3_services/IOR.interface'
+import { Loader, LoaderConfig } from '../3_services/Loader.interface'
+import { URL } from '../3_services/URL.interface'
+import { DefaultUrl } from './DefaultURL.class'
 
 export class DefaultIOR extends DefaultUrl implements IOR {
     referencedObject: any = undefined
