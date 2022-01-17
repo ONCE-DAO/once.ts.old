@@ -4,7 +4,7 @@ import { URL } from '../3_services/URL.interface'
 import { DefaultUrl } from './DefaultURL.class'
 
 export class DefaultIOR extends DefaultUrl implements IOR {
-    referencedObject: any = undefined
+    private _referencedObject: any = undefined
     objectID: string
     private _connection: any
     private _loader: Loader | undefined
@@ -57,7 +57,7 @@ export class DefaultIOR extends DefaultUrl implements IOR {
 
     constructor () {
       super()
-      this.referencedObject = null
+      this._referencedObject = null
       this.objectID = ''
       // this._private = this._private || {};
     }
@@ -114,17 +114,17 @@ export class DefaultIOR extends DefaultUrl implements IOR {
       // if (!this.referencedObject && this.class) {
       //     this.referencedObject = this.class;
       // }
-      return this.referencedObject != null
+      return this._referencedObject != null
     }
 
     get class () {
       console.warn('Please refactor ior.class to ior.referencedObject')
-      return this.referencedObject
+      return this._referencedObject
     }
 
     set class (newValue) {
       console.warn("Please refactor 'ior.class = ...' to ior.referencedObject = ")
-      this.referencedObject = newValue
+      this._referencedObject = newValue
     }
 
     // @ToDo Remove if possible as this is also the URL
@@ -387,8 +387,8 @@ export class DefaultIOR extends DefaultUrl implements IOR {
 
     async load (config: LoaderConfig) {
       if (!this.loader) throw new Error("couldn't find loader")
-      this.referencedObject = await this.loader.load(this, config)
-      return this.referencedObject
+      this._referencedObject = await this.loader.load(this, config)
+      return this._referencedObject
     }
 
     // TODO maybe deleted

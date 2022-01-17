@@ -1,9 +1,8 @@
-import { IOR } from '../3_services/IOR.interface'
 import { Thing } from '../3_services/Thing.interface'
 
 export class DefaultThing implements Thing {
-  discover (): IOR[] {
-    throw new Error('Method not implemented.')
+  async discover () {
+    return []
   }
 
   private _id: string | undefined;
