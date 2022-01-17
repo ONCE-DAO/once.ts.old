@@ -11,7 +11,6 @@ export class NodeLoader {
 
   static start (once: Once) {
     this.singleton = new NodeLoader(once)
-    once.mode = OnceMode.NodeLoader
     return NodeLoader.singleton
   }
 

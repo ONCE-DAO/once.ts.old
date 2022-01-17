@@ -19,4 +19,5 @@ export interface Loader extends Thing {
      */
     load(ior: IOR, config?: LoaderConfig): Promise<string>;
     client(): Client
+    name:string
 }

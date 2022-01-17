@@ -1,6 +1,5 @@
 import { NodeLoader } from './../unsorted/NodeLoader'
-import { Once as OnceInterface, OnceInstallationMode, OnceMode } from '../3_services/Once.interface'
-import { Scenario } from './Scenario'
+import { Once as OnceInterface, OnceInstallationMode, OnceMode, OnceState } from '../3_services/Once.interface'
 import { Server } from '../3_services/Server.interface'
 // import { NodeLoader } from '../unsorted/NodeLoader'
 
@@ -20,8 +19,9 @@ class Once implements OnceInterface {
   }
 
   private onces: Once[] = []
-  private installationMode: OnceInstallationMode = OnceInstallationMode.Transient
-  private mode: OnceMode = OnceMode.Booting
+  private installationMode: OnceInstallationMode = OnceInstallationMode.TRANSIENT
+  private mode: OnceMode = OnceMode.BOOTING
+  private state: OnceState = OnceState.DISCOVER
 
   static async start () {
     const once = new Once()
@@ -32,17 +32,22 @@ class Once implements OnceInterface {
   async discover () {
     if (Once.isNodeLoader) {
       const nodeLoader = NodeLoader.start(this)
+      this.mode = OnceMode.NODE_LOADER
+      this.state = OnceState.STARTED
+
       load = nodeLoader.load
       resolve = nodeLoader.resolve
     }
 
     if (Once.isNode) {
       if (global.ONCE) this.onces.push(global.ONCE)
-      this.mode = OnceMode.NodeJs
+      this.mode = OnceMode.NODE_JS
       // @ts-ignore
       const OnceExpress = (await import('./../../../once.express@main/src/2_systems/OnceExpress.js')).OnceExpress
       OnceExpress.start()
+      this.state = OnceState.STARTED
     }
+
     this.onces.push(this)
     global.ONCE = this
     return []
