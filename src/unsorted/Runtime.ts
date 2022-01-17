@@ -5,7 +5,15 @@ export class Runtime {
     )
   }
 
+  static get isNodeLoader () {
+    return Runtime.isNodeRuntime && global.ONCE === undefined
+  }
+
   static get isNode () {
+    return Runtime.isNodeRuntime && global.ONCE !== undefined
+  }
+
+  private static get isNodeRuntime () {
     return (
       typeof process !== 'undefined' &&
           process.versions != null &&

@@ -1,5 +1,4 @@
 import { Server } from './Server.interface'
+export interface Proxy extends Server {
 
-export interface Client {
-    server: Server
 }

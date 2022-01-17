@@ -1,6 +1,35 @@
+import { Once } from '../2_systems/Once.class'
+import { OnceMode } from '../3_services/Once.interface'
+
 export class NodeLoader {
-  static resolve (specifier: any, context: any, defaultResolve: any) {
-    console.log('import called with specifier: ', specifier)
+  private static singleton: NodeLoader
+  private once: Once | undefined
+
+  private constructor (once: Once) {
+    this.once = once
+  }
+
+  static start (once: Once) {
+    this.singleton = new NodeLoader(once)
+    once.mode = OnceMode.NodeLoader
+    return NodeLoader.singleton
+  }
+
+  init () {
+    // Load all loader implementation
+  }
+
+  resolve (specifier: any, context: any, defaultResolve: any) {
+    // console.log('NodeLoader: resolve', specifier)
+
+    // loop all loader
+    //    foreach
+
+    // if (NodeLoader.singleton === undefined) {
+    //   NodeLoader.singleton.init()
+    // }
+
+    // console.log('import called with specifier: ', specifier)
     const {
       parentURL = null
     } = context
@@ -26,7 +55,9 @@ export class NodeLoader {
     return defaultResolve(specifier, context, defaultResolve)
   }
 
-  static load (url: string, context: any, defaultLoad: any) {
+  load (url: string, context: any, defaultLoad: any) {
+    // console.log('NodeLoader: load')
+
     // if (url.startsWith('ior:')) {
     //   return await IOR.load(url)
     // }

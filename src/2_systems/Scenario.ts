@@ -1,5 +1,5 @@
-import { OnceState } from '../3_services/Once.interface'
+import { OnceInstallationMode } from '../3_services/Once.interface'
 
 export class Scenario {
-    state: OnceState = OnceState.Transient;
+    state: OnceInstallationMode = OnceInstallationMode.Transient;
 }
