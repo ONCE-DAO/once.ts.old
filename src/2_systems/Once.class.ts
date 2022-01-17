@@ -11,26 +11,21 @@ declare global {
 }
 
 class Once implements OnceInterface {
-  private creationDate: number
-  private _scenario: Scenario
+  server: Server[] = []
 
-  private constructor (scenario?: Scenario) {
+  private creationDate: number
+
+  private constructor () {
     this.creationDate = Date.now()
-    this._scenario = scenario || new Scenario()
   }
 
   private onces: Once[] = []
-  id: string | undefined
-  name: string | undefined
-  installationMode: OnceInstallationMode = OnceInstallationMode.Transient
-  mode: OnceMode = OnceMode.Booting
+  private installationMode: OnceInstallationMode = OnceInstallationMode.Transient
+  private mode: OnceMode = OnceMode.Booting
 
-  server: Server[] = []
-
-  static async start (scenario?: Scenario) {
+  static async start () {
     const once = new Once()
     await once.discover()
-
     console.log('ONCE Started', once)
   }
 
