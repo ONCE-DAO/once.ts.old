@@ -1,16 +1,18 @@
 import { Once } from '../2_systems/Once.class'
-import { OnceMode } from '../3_services/Once.interface'
+import { OnceMode, OnceState } from '../3_services/Once.interface'
 
-export class NodeLoader {
+export class NodeLoader extends Once {
   private static singleton: NodeLoader
-  private once: Once | undefined
 
-  private constructor (once: Once) {
-    this.once = once
+  private constructor () {
+    super()
+    this.mode = OnceMode.NODE_LOADER;
   }
 
-  static start (once: Once) {
-    this.singleton = new NodeLoader(once)
+  static async start () {
+    console.log("NODELOADER start")
+    this.singleton = new NodeLoader()
+    this.singleton.state = OnceState.STARTED
     return NodeLoader.singleton
   }
 
@@ -19,7 +21,7 @@ export class NodeLoader {
   }
 
   resolve (specifier: any, context: any, defaultResolve: any) {
-    // console.log('NodeLoader: resolve', specifier)
+    console.log('NodeLoader: resolve', specifier)
 
     // loop all loader
     //    foreach
@@ -55,7 +57,7 @@ export class NodeLoader {
   }
 
   load (url: string, context: any, defaultLoad: any) {
-    // console.log('NodeLoader: load')
+    console.log('NodeLoader: load')
 
     // if (url.startsWith('ior:')) {
     //   return await IOR.load(url)
