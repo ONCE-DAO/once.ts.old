@@ -7,6 +7,8 @@ import {
 import { Server } from '../3_services/Server.interface'
 import { IOR } from '../3_services/IOR.interface'
 import { NodeLoader } from '../3_services/NodeLoader.interface'
+// @ts-ignore
+import { ServiceWorkerOnce } from '../../../once.serviceWorker@main/src/2_systems/ServiceWorkerOnce.class'
 
 abstract class Once implements OnceInterface {
   // #region startup
@@ -14,17 +16,14 @@ abstract class Once implements OnceInterface {
     const once = await this.discoverOnce()
 
     once &&
-      console.log(
-        'once started',
-        once.mode.toString(),
-        once.state.toString()
-      )
+      console.log('once started', once.mode.toString(), once.state.toString())
     return once
   }
 
   static async discoverOnce (): Promise<Once | undefined> {
     if (this.isNodeLoader) {
       global.ONCE = await DefaultNodeLoader.start()
+      return global.ONCE
     } else if (this.isNode) {
       const OnceExpress = (
         await import(
@@ -33,14 +32,18 @@ abstract class Once implements OnceInterface {
         )
       ).OnceExpress
       global.ONCE = await OnceExpress.start()
+      return global.ONCE
     } else if (this.isBrowser) {
-      // this.mode = OnceMode.BROWSER;
-      // this.state = OnceState.STARTED;
-      // console.log("ONCE STARTED IN BROWSER");
-      // window.ONCE = this;
-      // document.body.textContent = "Once started"
+      const BrowserOnce = await (
+        await import(
+          // @ts-ignore
+          '../../../once.browser@main/src/2_systems/BrowserOnce.class.js'
+        )
+      ).BrowserOnce
+      window.ONCE = await BrowserOnce.start()
+      return window.ONCE
     } else if (this.isServiceWorker) {
-      throw new Error('not implemented')
+      (await ServiceWorkerOnce.start()).addEventListener(self)
     } else if (this.isWebWorker) {
       throw new Error('not implemented')
     }
@@ -53,7 +56,7 @@ abstract class Once implements OnceInterface {
   server: Server[] = [];
 
   protected creationDate: number;
-  protected onces: Once[] = [];
+  onces: Once[] = [];
   protected mode: OnceMode = OnceMode.BOOTING;
   protected state: OnceState = OnceState.DISCOVER;
   protected installationMode: OnceInstallationMode =
@@ -116,7 +119,7 @@ abstract class Once implements OnceInterface {
     )
   }
 
-  private static isServiceWorkerSupported () {
+  protected static get isServiceWorkerSupported () {
     return navigator && 'serviceWorker' in navigator
   }
   // #endregion
@@ -193,7 +196,5 @@ class DefaultNodeLoader extends Once implements NodeLoader {
 
 const load = DefaultNodeLoader.loadHook
 const resolve = DefaultNodeLoader.resolveHook
-
-Once.start()
 
 export { load, resolve, Once }

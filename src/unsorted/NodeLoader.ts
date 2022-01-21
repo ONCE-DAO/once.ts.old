@@ -6,11 +6,11 @@ export class NodeLoader extends Once {
 
   private constructor () {
     super()
-    this.mode = OnceMode.NODE_LOADER;
+    this.mode = OnceMode.NODE_LOADER
   }
 
   static async start () {
-    console.log("NODELOADER start")
+    console.log('NODELOADER start')
     this.singleton = new NodeLoader()
     this.singleton.state = OnceState.STARTED
     return NodeLoader.singleton
