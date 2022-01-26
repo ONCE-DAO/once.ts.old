@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-var */
-import { Once } from './2_systems/Once.class'
+import { AbstractOnce } from './2_systems/AbstractOnce.class'
 
 declare global {
-    var ONCE: Once | undefined
+    var ONCE: AbstractOnce | undefined
   }
