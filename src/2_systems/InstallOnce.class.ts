@@ -36,6 +36,7 @@ export class InstallOnce extends AbstractOnce {
     fs.mkdirSync(onceDevFolder, { recursive: true });
 
     const currentFolder = path.basename(process.cwd());
+    const currentDirectory = process.cwd();
 
     const options: Partial<SimpleGitOptions> = {
       baseDir: process.cwd(),
@@ -53,10 +54,12 @@ export class InstallOnce extends AbstractOnce {
     fs.cpSync(`../${currentFolder}`, branchFolder, {
       recursive: true,
     });
-    fs.symlinkSync(branchFolder,path.join(onceDevFolder, "current"));
+    fs.symlinkSync(branchFolder, path.join(onceDevFolder, "current"));
 
     // fs.rmdirSync(once.directory, { recursive: true });
     console.log("CURRENT", currentFolder);
+    fs.rmSync(currentDirectory, { recursive: true });
+    fs.symlinkSync(once.directory, currentDirectory);
 
     return once;
   }
