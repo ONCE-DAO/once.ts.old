@@ -79,8 +79,8 @@ export class InstallOnce extends AbstractOnce {
     fs.cpSync(`../${currentDirectoryName}`, branchFolder, {
       recursive: true,
     });
-    const currentFolder = path.join(onceDevFolder, "current");
-    fs.symlinkSync(branchFolder, currentFolder);
+    // const currentFolder = path.join(onceDevFolder, "current");
+    // fs.symlinkSync(branchFolder, currentFolder);
     // fs.symlinkSync(
     //   path.join(currentFolder, "eamd-package.json"),
     //   path.join(once.directory, "package.json")
