@@ -1,5 +1,5 @@
 import { execSync } from "child_process";
-// import { GitRepository } from "src/unsorted/GitRepository.js";
+import { GitRepository } from "../unsorted/GitRepository";
 
 export async function build() {
   console.log(process.argv);
@@ -17,7 +17,7 @@ export async function build() {
   console.log("install all sub dependencies using lerna");
   execSync("npm run lerna:bootstrap");
   console.log("all node_modules installed recursive");
-  // const eamdRepository = await GitRepository.start({ baseDir: process.cwd() });
+  const eamdRepository = await GitRepository.start({ baseDir: process.cwd() });
 
   // (await eamdRepository.submodules).forEach((submodule) => {
   //   console.log(submodule);

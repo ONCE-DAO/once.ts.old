@@ -94,11 +94,11 @@
         "transform": "./src/transformer/src/jsExtTransformer.ts",
         "after": true
       },
-      {
-        "transform": "./src/transformer/src/unitTransformer.ts",
-        "type": "program",
-        "extensions": [".html"]
-      }
+      // {
+      //   "transform": "./src/transformer/src/unitTransformer.ts",
+      //   "type": "program",
+      //   "extensions": [".html"]
+      // }
     ]
   }
 }
