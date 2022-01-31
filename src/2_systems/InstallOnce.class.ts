@@ -25,6 +25,27 @@ export class InstallOnce extends AbstractOnce {
     once.mode = OnceMode.NODE_JS;
     once.state = OnceState.INITIALIZED;
 
+    const currentDirectoryName = path.basename(process.cwd());
+    // const currentDirectory = process.cwd();
+
+    const eamdGit: SimpleGit = simpleGit({
+      baseDir: once.directory,
+      binary: "git",
+      maxConcurrentProcesses: 6,
+    });
+    console.log(once.directory);
+    await eamdGit.clone(
+      "https://github.com/ONCE-DAO/EAMD.ucp.git",
+      once.directory,
+      ['-b','install']
+    );
+    // .init()
+    // .addRemote("origin", "https://github.com/ONCE-DAO/EAMD.ucp.git")
+    // .checkoutBranch("install", "origin/install")
+    // .pull();
+
+console.log("REMOTES: ", await   eamdGit.listRemote())
+
     const onceDevFolder = path.join(
       once.directory,
       "Components",
@@ -35,31 +56,65 @@ export class InstallOnce extends AbstractOnce {
     );
     fs.mkdirSync(onceDevFolder, { recursive: true });
 
-    const currentFolder = path.basename(process.cwd());
-    const currentDirectory = process.cwd();
-
-    const options: Partial<SimpleGitOptions> = {
+    const git: SimpleGit = simpleGit({
       baseDir: process.cwd(),
       binary: "git",
       maxConcurrentProcesses: 6,
-    };
-    const git: SimpleGit = simpleGit(options);
+    });
+    const remoteUrl =
+      (await (await git.getConfig("remote.origin.url")).value) || "";
+    console.log(remoteUrl);
+
+    const repoName = path.basename(remoteUrl, ".git");
 
     const currentBranch = await (await git.status()).current;
 
     if (!currentBranch) throw new Error("Branch couldn't discover");
+    const identifier = `${repoName}@${currentBranch}`;
 
-    const branchFolder = path.join(onceDevFolder, currentBranch);
+    const branchFolder = path.join(onceDevFolder, identifier);
 
-    fs.cpSync(`../${currentFolder}`, branchFolder, {
+    fs.cpSync(`../${currentDirectoryName}`, branchFolder, {
       recursive: true,
     });
-    fs.symlinkSync(branchFolder, path.join(onceDevFolder, "current"));
+    const currentFolder = path.join(onceDevFolder, "current");
+    fs.symlinkSync(branchFolder, currentFolder);
+    // fs.symlinkSync(
+    //   path.join(currentFolder, "eamd-package.json"),
+    //   path.join(once.directory, "package.json")
+    // );
+    // fs.symlinkSync(
+    //   path.join(currentFolder, ".gitignore"),
+    //   path.join(once.directory, ".gitignore")
+    // );
 
-    // fs.rmdirSync(once.directory, { recursive: true });
-    console.log("CURRENT", currentFolder);
-    fs.rmSync(currentDirectory, { recursive: true });
-    fs.symlinkSync(once.directory, currentDirectory);
+    console.log("SUBMODULE");
+    // const foo = await eamdGit.submoduleAdd(remoteUrl, branchFolder);
+    const foo = await eamdGit.subModule([
+      "add",
+      "--name",
+      identifier,
+      "-b",
+      currentBranch,
+      remoteUrl,
+      path.relative(once.directory, branchFolder),
+    ]);
+    // const f:any = {}
+    // f.add=null
+    // f['--name']="testname"
+    // f[remoteUrl]=null
+    // f[branchFolder]=null
+    // const foo = await eamdGit.subModule(f)
+
+    //  await eamdGit.submoduleUpdate(bra   kc nchFolder, "--branch":"test"})
+    // .submoduleUpdate(subModuleName, [options])
+    // "--name":"testsub", "--branch":"main",
+    // const foo = await eamdGit.subModule({"add":null,{remoteUrl:branchFolder}})
+    console.log("SUBMODULE OK", foo);
+
+    // console.log("CURRENT", currentDirectoryName);
+    // fs.rmSync(currentDirectory, { recursive: true });
+    // fs.symlinkSync(once.directory, currentDirectory);
 
     return once;
   }

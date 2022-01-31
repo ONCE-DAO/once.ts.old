@@ -1,0 +1,4 @@
+[submodule "transformer"]
+	path = src/transformer
+	url = https://github.com/ONCE-DAO/thinglish.transformer.git
+	branch = main

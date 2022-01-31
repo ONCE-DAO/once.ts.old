@@ -1,5 +1,5 @@
-import { AbstractOnce } from "./AbstractOnce.class.js";
-import { DefaultNodeLoader } from "./DefaultNodeLoader.class.js";
+import { AbstractOnce } from "./AbstractOnce.class";
+import { DefaultNodeLoader } from "./DefaultNodeLoader.class";
 
 export class Once extends AbstractOnce {
   static async start(): Promise<Once> {

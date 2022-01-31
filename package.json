@@ -6,7 +6,7 @@
   "type": "module",
   "main": "dist/2_systems/Once.class.js",
   "scripts": {
-    "prepare": "  ts-patch install",
+    "prepare": "git submodule update --init --recursive && ts-patch install",
     "start:watch": "nodemon --watch dist .",
     "start": "node .",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -25,12 +25,12 @@
     "@types/node": "^17.0.12",
     "nodemon": "^2.0.15",
     "ts-node": "^10.4.0",
-    "typescript": "^4.5.5"
+    "typescript": "^4.5.5",
+    "ts-patch": "^2.0.1"
   },
   "dependencies": {
     "dotenv": "^14.3.0",
     "os": "^0.1.2",
     "simple-git": "^3.1.0",
-    "ts-patch": "^2.0.1"
   }
 }
