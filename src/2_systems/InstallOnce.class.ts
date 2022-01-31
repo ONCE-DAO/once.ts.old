@@ -35,7 +35,7 @@ export class InstallOnce extends AbstractOnce {
     });
 
     const branchFolder = await once.copyFilesToDevFolder(onceTsRepository);
-    once.createCurrentLink(branchFolder);
+    // once.createCurrentLink(branchFolder);
 
     eamdGitRepo.addSubmodule(onceTsRepository, branchFolder)
    
@@ -43,12 +43,12 @@ export class InstallOnce extends AbstractOnce {
     return once;
   }
 
-  private createCurrentLink(branchFolder: string) {
-    const currentFolder = path.join(this.devFolder, "current");
-    if (!fs.existsSync(currentFolder)) {
-      fs.symlinkSync(branchFolder, currentFolder);
-    }
-  }
+  // private createCurrentLink(branchFolder: string) {
+  //   const currentFolder = path.join(this.devFolder, "current");
+  //   if (!fs.existsSync(currentFolder)) {
+  //     fs.symlinkSync(branchFolder, currentFolder);
+  //   }
+  // }
   async copyFilesToDevFolder(onceTsRepository: GitRepository) {
     const branchFolder = path.join(
       this.devFolder,
