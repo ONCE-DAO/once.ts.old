@@ -44,6 +44,10 @@ export class InstallOnce extends AbstractOnce {
     // .checkoutBranch("install", "origin/install")
     // .pull();
 
+    // add again later
+    // await eamdGit.removeRemote("origin")
+
+
     const onceDevFolder = path.join(
       once.directory,
       "Components",
@@ -94,6 +98,7 @@ export class InstallOnce extends AbstractOnce {
       identifier,
       "-b",
       currentBranch,
+      "-f",
       remoteUrl,
       path.relative(once.directory, branchFolder),
     ]);
