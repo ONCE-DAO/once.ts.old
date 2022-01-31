@@ -26,19 +26,23 @@ export class InstallOnce extends AbstractOnce {
     once.state = OnceState.INITIALIZED;
 
     const currentDirectoryName = path.basename(process.cwd());
-    // const currentDirectory = process.cwd();
+
+    console.log("REPO INSTALLED", once.directory);
 
     const eamdGit: SimpleGit = simpleGit({
       baseDir: once.directory,
       binary: "git",
       maxConcurrentProcesses: 6,
     });
-    console.log(once.directory);
-    await eamdGit.clone(
-      "https://github.com/ONCE-DAO/EAMD.ucp.git",
-      once.directory,
-      ['-b','install']
-    );
+
+    const gitExists = fs.existsSync(path.join(once.directory, ".git"));
+
+    gitExists ||
+      (await eamdGit.clone(
+        "https://github.com/ONCE-DAO/EAMD.ucp.git",
+        once.directory,
+        ["-b", "install"]
+      ));
     // .init()
     // .addRemote("origin", "https://github.com/ONCE-DAO/EAMD.ucp.git")
     // .checkoutBranch("install", "origin/install")
@@ -46,7 +50,6 @@ export class InstallOnce extends AbstractOnce {
 
     // add again later
     // await eamdGit.removeRemote("origin")
-
 
     const onceDevFolder = path.join(
       once.directory,
@@ -76,49 +79,35 @@ export class InstallOnce extends AbstractOnce {
 
     const branchFolder = path.join(onceDevFolder, identifier);
 
-    fs.cpSync(`../${currentDirectoryName}`, branchFolder, {
-      recursive: true,
-    });
-    // const currentFolder = path.join(onceDevFolder, "current");
+    fs.existsSync(branchFolder) ||
+      fs.cpSync(`../${currentDirectoryName}`, branchFolder, {
+        recursive: true,
+      });
+    const currentFolder = path.join(onceDevFolder, "current");
+    // if(fs.existsSync(currentFolder)){
     // fs.symlinkSync(branchFolder, currentFolder);
-    // fs.symlinkSync(
-    //   path.join(currentFolder, "eamd-package.json"),
-    //   path.join(once.directory, "package.json")
-    // );
-    // fs.symlinkSync(
-    //   path.join(currentFolder, ".gitignore"),
-    //   path.join(once.directory, ".gitignore")
-    // );
+    // }
 
-    console.log("SUBMODULE");
-    // const foo = await eamdGit.submoduleAdd(remoteUrl, branchFolder);
-    const foo = await eamdGit.subModule([
-      "add",
-      "--name",
-      identifier,
-      "-b",
-      currentBranch,
-      "-f",
-      remoteUrl,
-      path.relative(once.directory, branchFolder),
-    ]);
-    // const f:any = {}
-    // f.add=null
-    // f['--name']="testname"
-    // f[remoteUrl]=null
-    // f[branchFolder]=null
-    // const foo = await eamdGit.subModule(f)
+    const modules = await eamdGit.subModule();
 
-    //  await eamdGit.submoduleUpdate(bra   kc nchFolder, "--branch":"test"})
-    // .submoduleUpdate(subModuleName, [options])
-    // "--name":"testsub", "--branch":"main",
-    // const foo = await eamdGit.subModule({"add":null,{remoteUrl:branchFolder}})
-    console.log("SUBMODULE OK", foo);
+    const relativeBranchFolder = path.relative(once.directory, branchFolder);
 
-    // console.log("CURRENT", currentDirectoryName);
-    // fs.rmSync(currentDirectory, { recursive: true });
-    // fs.symlinkSync(once.directory, currentDirectory);
+    if (modules.indexOf(relativeBranchFolder) === -1) {
+      const foo = await eamdGit.subModule([
+        "add",
+        "--name",
+        identifier,
+        "-b",
+        currentBranch,
+        remoteUrl,
+        path.relative(once.directory, branchFolder),
+      ]);
+      console.log("SUBMODULE ADDED", foo);
+    } else {
+      console.log("SUBMODULE ALREADY EXISTS");
+    }
 
+    await eamdGit.submoduleUpdate(["--init", "--recursive"]);
     return once;
   }
 
@@ -126,6 +115,7 @@ export class InstallOnce extends AbstractOnce {
     try {
       fs.mkdirSync("/EAMD.ucp");
       this.directory = "/EAMD.ucp";
+      fs.existsSync(this.directory) || fs.mkdirSync(this.directory);
       this.installationMode = OnceInstallationMode.ROOT_INSTALLATION;
       return true;
     } catch (e: any) {
@@ -134,8 +124,8 @@ export class InstallOnce extends AbstractOnce {
     }
 
     try {
-      fs.mkdirSync("/var/EAMD.ucp");
       this.directory = "/var/EAMD.ucp";
+      fs.existsSync(this.directory) || fs.mkdirSync(this.directory);
       this.installationMode = OnceInstallationMode.ROOT_INSTALLATION;
       return true;
     } catch (e: any) {
@@ -148,7 +138,7 @@ export class InstallOnce extends AbstractOnce {
   installUserDirectory() {
     const user = os.userInfo();
     this.directory = path.join(user.homedir, "EAMD.ucp");
-    fs.mkdirSync(this.directory);
+    fs.existsSync(this.directory) || fs.mkdirSync(this.directory);
     this.installationMode = OnceInstallationMode.USER_INSTALLATION;
   }
 }

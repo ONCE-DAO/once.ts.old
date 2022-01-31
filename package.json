@@ -6,7 +6,7 @@
   "type": "module",
   "main": "dist/2_systems/Once.class.js",
   "scripts": {
-    "prepare": "git submodule update --init --recursive && ts-patch install && prepare:build",
+    "prepare": "git submodule update --init --recursive && ts-patch install && npm run prepare:build && npm run prepare:install",
     "prepare:build": "tsc --project tsconfig.install.json",
     "prepare:install": "cross-env NODE_ENV=install_once node ."
   },
