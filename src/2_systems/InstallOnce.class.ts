@@ -44,8 +44,6 @@ export class InstallOnce extends AbstractOnce {
     // .checkoutBranch("install", "origin/install")
     // .pull();
 
-console.log("REMOTES: ", await   eamdGit.listRemote())
-
     const onceDevFolder = path.join(
       once.directory,
       "Components",
