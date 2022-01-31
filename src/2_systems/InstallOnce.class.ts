@@ -7,7 +7,6 @@ import {
   OnceMode,
   OnceState,
 } from "../3_services/Once.interface";
-import simpleGit, { SimpleGit } from "simple-git";
 import { GitRepository } from "../unsorted/GitRepository";
 
 export class InstallOnce extends AbstractOnce {
@@ -19,62 +18,58 @@ export class InstallOnce extends AbstractOnce {
     once.mode = OnceMode.NODE_JS;
     once.state = OnceState.INITIALIZED;
 
-    const currentDirectoryName = path.basename(process.cwd());
-
-    const eamdGitRepo = await GitRepository.start(once.directory);
-    await eamdGitRepo.cloneIfNotExists({
-      url: "https://github.com/ONCE-DAO/EAMD.ucp.git",
-      branch: "install",
+    const eamdGitRepo = await GitRepository.start({
+      baseDir: once.directory,
+      clone: {
+        url: "https://github.com/ONCE-DAO/EAMD.ucp.git",
+        branch: "install",
+      },
     });
-    
     // add again later
-    // await eamdGit.removeRemote("origin")
+    // eamdGitRepo.removeRemote()
 
-    const onceDevFolder = path.join(
-      once.directory,
-      "Components",
-      "tla",
-      "EAM",
-      "Once",
-      "dev"
-    );
-    fs.mkdirSync(onceDevFolder, { recursive: true });
+    once.createDevFolder();
 
-    
-    const gitRepo = await GitRepository.start(process.cwd());
-    const identifier = `${await gitRepo.repoName}@${ await gitRepo.currentBranch}`;
-      const branchFolder = path.join(onceDevFolder, identifier);
+    const onceTsRepository = await GitRepository.start({
+      baseDir: process.cwd(),
+    });
 
-    fs.existsSync(branchFolder) ||
-      fs.cpSync(`../${currentDirectoryName}`, branchFolder, {
-        recursive: true,
-      });
-    const currentFolder = path.join(onceDevFolder, "current");
-    // if(fs.existsSync(currentFolder)){
-    // fs.symlinkSync(branchFolder, currentFolder);
-    // }
+    const branchFolder = await once.copyFilesToDevFolder(onceTsRepository);
+    once.createCurrentLink(branchFolder);
 
-    // // // const modules = await eamdGit.subModule();
-
-    // // // const relativeBranchFolder = path.relative(once.directory, branchFolder);
-
-    // // // if (modules.indexOf(relativeBranchFolder) === -1) {
-    // // //   const foo = await eamdGit.subModule([
-    // // //     "add",
-    // // //     "--name",
-    // // //     identifier,
-    // // //     "-b",
-    // // //     currentBranch,
-    // // //     remoteUrl,
-    // // //     path.relative(once.directory, branchFolder),
-    // // //   ]);
-    // // //   console.log("SUBMODULE ADDED", foo);
-    // // // } else {
-    // // //   console.log("SUBMODULE ALREADY EXISTS");
-    // // // }
-
+    eamdGitRepo.addSubmodule(onceTsRepository, branchFolder)
+   
     await eamdGitRepo.updateSubmodules();
     return once;
+  }
+
+  private createCurrentLink(branchFolder: string) {
+    const currentFolder = path.join(this.devFolder, "current");
+    if (!fs.existsSync(currentFolder)) {
+      fs.symlinkSync(branchFolder, currentFolder);
+    }
+  }
+  async copyFilesToDevFolder(onceTsRepository: GitRepository) {
+    const branchFolder = path.join(
+      this.devFolder,
+      await onceTsRepository.identifier
+    );
+
+    fs.existsSync(branchFolder) ||
+      fs.cpSync(`../${this.currentDirectoryName}`, branchFolder, {
+        recursive: true,
+      });
+    return branchFolder;
+  }
+
+  private get currentDirectoryName() {
+    return path.basename(process.cwd());
+  }
+  private get devFolder() {
+    return path.join(this.directory, "Components", "tla", "EAM", "Once", "dev");
+  }
+  private createDevFolder() {
+    fs.mkdirSync(this.devFolder, { recursive: true });
   }
 
   installRootDirectory(): boolean {
