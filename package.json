@@ -8,7 +8,8 @@
   "scripts": {
     "prepare": "git submodule update --init --recursive && ts-patch install && npm run prepare:build && npm run prepare:install",
     "prepare:build": "tsc --project tsconfig.install.json",
-    "prepare:install": "cross-env NODE_ENV=install_once node ."
+    "prepare:install": "cross-env NODE_ENV=install_once node .",
+    "build": "node --loader ts-node/esm ./src/2_systems/build.ts" 
   },
   "repository": {
     "type": "git",

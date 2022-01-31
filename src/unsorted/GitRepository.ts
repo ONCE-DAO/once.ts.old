@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
 import simpleGit, { Options, SimpleGit, TaskOptions } from "simple-git";
-import { createThis } from "typescript";
 import { Package } from "./Package";
 
 type GitCloneParameter = {
@@ -111,6 +110,27 @@ export class GitRepository {
     return new Promise(async (resolve) =>
       resolve(`${await this.repoName}@${await this.currentBranch}`)
     );
+  }
+
+  get submodules(): Promise<string[]> {
+    return new Promise(async (resolve) => {
+      this.gitRepo &&
+        resolve(
+          (
+            await this.gitRepo[0].raw(
+              "config",
+              "--file",
+              ".gitmodules",
+              "--get-regexp",
+              "path"
+            )
+          )
+            .split("\n")
+            .map((x) => x.split(" ")[1])
+            .filter((x) => x)
+        );
+      resolve([]);
+    });
   }
 
   get exists(): boolean {
