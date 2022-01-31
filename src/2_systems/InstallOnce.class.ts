@@ -94,6 +94,7 @@ export class InstallOnce extends AbstractOnce {
       identifier,
       "-b",
       currentBranch,
+      "-f",
       remoteUrl,
       path.relative(once.directory, branchFolder),
     ]);
