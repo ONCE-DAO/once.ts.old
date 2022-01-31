@@ -46,7 +46,6 @@ export class InstallOnce extends AbstractOnce {
 
     await eamdGit.removeRemote("origin")
 
-
     const onceDevFolder = path.join(
       once.directory,
       "Components",
