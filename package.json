@@ -13,7 +13,7 @@
     "prepare:install": "cross-env NODE_ENV=install_once node .",
     "prepare:cleanup": "rm -rf dist",
     "build:version":"tsc -p tsconfig.build.json",
-    "start": "node src/2_systems/Once.class.js"
+    "start": "node --experimental-loader ./src/2_systems/Once.class.js  src/2_systems/Once.class.js"
   },
   "repository": {
     "type": "git",
