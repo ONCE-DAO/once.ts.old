@@ -11,16 +11,11 @@ import { GitRepository } from "./GitRepository";
 import { OnceBuilder } from "./OnceBuilder.class";
 
 export class OnceInstaller extends AbstractOnce {
-  private directory: string = "";
-
   static async start() {
-    console.log("START INSTALL PROCESS");
-
     const once = new OnceInstaller();
     once.installRootDirectory() || once.installUserDirectory();
     once.mode = OnceMode.NODE_JS;
     once.state = OnceState.INITIALIZED;
-    console.log("Folder created");
 
     const eamdGitRepo = await GitRepository.start({
       baseDir: once.directory,
@@ -40,16 +35,13 @@ export class OnceInstaller extends AbstractOnce {
     await eamdGitRepo.commitAll("ONCE installed EAMD.ucp on your machine");
     await eamdGitRepo.updateSubmodules();
 
-    console.log("Installed");
-
     OnceBuilder.buildSubmodule(branchFolder);
-
     return once;
   }
 
   private addInitialFiles(eamdGitRepo: GitRepository) {
     fs.writeFileSync(
-      path.join(this.directory, "package.json"),
+      path.join(this.directory || "", "package.json"),
       JSON.stringify(
         {
           name: "eamd.ucp",
@@ -64,19 +56,19 @@ export class OnceInstaller extends AbstractOnce {
       ),
       { encoding: "utf8", flag: "w+" }
     );
-    fs.writeFileSync(path.join(this.directory, ".gitignore"), `dist`, {
+    fs.writeFileSync(path.join(this.directory || "", ".gitignore"), `dist`, {
       encoding: "utf8",
       flag: "w+",
     });
     const currentDirectory = process.cwd();
     fs.cpSync(
       path.join(currentDirectory, ".vscode"),
-      path.join(this.directory, ".vscode"),
+      path.join(this.directory || "", ".vscode"),
       { recursive: true }
     );
     fs.cpSync(
       path.join(currentDirectory, ".npmrc"),
-      path.join(this.directory, ".npmrc"),
+      path.join(this.directory || "", ".npmrc"),
       { recursive: true }
     );
   }
@@ -99,7 +91,14 @@ export class OnceInstaller extends AbstractOnce {
   }
 
   private get devFolder() {
-    return path.join(this.directory, "Components", "tla", "EAM", "Once", "dev");
+    return path.join(
+      this.directory || "",
+      "Components",
+      "tla",
+      "EAM",
+      "Once",
+      "dev"
+    );
   }
 
   private createDevFolder() {

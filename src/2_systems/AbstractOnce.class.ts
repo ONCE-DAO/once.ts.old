@@ -13,6 +13,7 @@ import path from "path";
 export abstract class AbstractOnce implements OnceInterface {
   server: Server[] = [];
   onces: AbstractOnce[] = [];
+  directory: string | undefined;
 
   protected creationDate: number;
   protected mode: OnceMode = OnceMode.BOOTING;

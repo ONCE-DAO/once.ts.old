@@ -14,7 +14,6 @@ export class OnceBuilder {
 
     const snapshot = path.basename(submodulePath).split("@")[1];
     const version = `${pkg?.version}-SNAPSHOT-${snapshot}`;
-    console.log("HUHU");
     fs.writeFileSync(
       path.join(submodulePath, "tsconfig.build.json"),
       JSON.stringify(
@@ -31,7 +30,6 @@ export class OnceBuilder {
       ),
       { encoding: "utf8", flag: "w+" }
     );
-    console.log("FOOOOO");
 
     execSync(`npm --prefix ${submodulePath} run build:version`);
     fs.cpSync(
