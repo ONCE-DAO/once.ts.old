@@ -3,6 +3,7 @@ import { GitRepository } from "./GitRepository";
 import fs from "fs";
 import { Package } from "./Package";
 import { OnceBuilder } from "./OnceBuilder.class";
+import { execSync } from "child_process";
 export class Submodule {
   static async addFromUrl(
     url: string,
@@ -13,8 +14,14 @@ export class Submodule {
     const root = "/Users/philippbartels/EAMD.ucp";
     const tmpFolder = path.join(root, "tmp");
     !fs.existsSync(tmpFolder) && fs.mkdirSync(tmpFolder);
-    const pkg = await Package.getByPath(path.join(tmpFolder, "package.json"));
 
+    const repo = await GitRepository.start({
+      baseDir: path.join(root, "tmp"),
+      clone: { url, branch },
+    });
+
+    const pkg = await Package.getByPath(path.join(tmpFolder, "package.json"));
+    execSync(`npm install --prefix ${tmpFolder}`);
     if (overwrite && pkg) {
       pkg.name = overwrite.name;
       pkg.namespace = overwrite.namespace;
@@ -24,10 +31,6 @@ export class Submodule {
       );
     }
 
-    const repo = await GitRepository.start({
-      baseDir: path.join(root, "tmp"),
-      clone: { url, branch },
-    });
     const split = pkg?.namespace?.split(".");
     const packageFolder = split ? split : ["empty"];
     const componentFolder = path.join(
