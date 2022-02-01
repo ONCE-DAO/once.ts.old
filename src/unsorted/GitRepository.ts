@@ -23,7 +23,7 @@ export class GitRepository {
   async commitAll(commitMessage: string) {
     if (!this.gitRepo) return;
     const status = await this.gitRepo[0].status();
-    await this.gitRepo[0].add(status.modified);
+    await this.gitRepo[0].add(status.not_added);
     await this.gitRepo[0].commit(commitMessage);
   }
   async addSubmodule(onceTsRepository: GitRepository, branchFolder: string) {
