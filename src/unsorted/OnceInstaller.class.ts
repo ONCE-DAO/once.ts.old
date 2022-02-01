@@ -15,23 +15,18 @@ export class OnceInstaller extends AbstractOnce {
 
   static async start() {
     console.log("START INSTALL PROCESS");
-    
+
     const once = new OnceInstaller();
     once.installRootDirectory() || once.installUserDirectory();
     once.mode = OnceMode.NODE_JS;
     once.state = OnceState.INITIALIZED;
     console.log("Folder created");
 
-
     const eamdGitRepo = await GitRepository.start({
       baseDir: once.directory,
-      clone: {
-        url: "https://github.com/ONCE-DAO/EAMD.ucp.git",
-        branch: "install",
-      },
     });
-    console.log("CLONED");
-    
+    once.addInitialFiles(eamdGitRepo);
+
     // add again later
     // eamdGitRepo.removeRemote()
 
@@ -44,10 +39,35 @@ export class OnceInstaller extends AbstractOnce {
     await eamdGitRepo.updateSubmodules();
 
     console.log("Installed");
-    
-    OnceBuilder.buildSubmodule(branchFolder)
+
+    OnceBuilder.buildSubmodule(branchFolder);
 
     return once;
+  }
+
+  private addInitialFiles(eamdGitRepo: GitRepository) {
+    fs.writeFileSync(
+      path.join(this.directory, "package.json"),
+      `{
+        "name": "eamd.ucp",
+        "version": "0.0.1",
+        "scripts": {
+          "start":"npm --prefix Components/tla/EAM/Once/dist/current run start"
+        }
+      }`,
+      { encoding: "utf8", flag: "w+" }
+    );
+    const currentDirectory = process.cwd();
+    fs.cpSync(
+      path.join(currentDirectory, ".vscode"),
+      path.join(this.directory, ".vscode"),
+      { recursive: true }
+    );
+    fs.cpSync(
+      path.join(currentDirectory, ".npmrc"),
+      path.join(this.directory, ".npmrc"),
+      { recursive: true }
+    );
   }
 
   private async copyFilesToDevFolder(onceTsRepository: GitRepository) {

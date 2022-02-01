@@ -1,0 +1,25 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true,
+    "source.fixAll.eslint": true
+  },
+  "todo-tree.highlights.customHighlight": {
+    "BUG": {
+      "foreground": "white",
+      "background": "red",
+      "type": "tag-and-subTag"
+    },
+    "FIXME": {
+      "icon": "beaker"
+    }
+  },
+  "todo-tree.general.tags":[
+    "BUG",
+    "HACK",
+    "FIXME",
+    "TODO",
+    "WARN",
+    "REFACTOR",
+    "ISSUE"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+	"recommendations": [
+		"dbaeumer.vscode-eslint",
+		"cancerberosgx.vscode-typescript-refactors",
+		"gruntfuggly.todo-tree"
+	]
+}
