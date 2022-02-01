@@ -4,7 +4,7 @@ import fs from "fs";
 import { Package } from "./Package";
 import { OnceBuilder } from "./OnceBuilder.class";
 import { execSync } from "child_process";
-import { Once } from "src/2_systems/Once.class";
+import { Once } from "../2_systems/Once.class";
 
 type AddSubmoduleArgs = {
   url: string;

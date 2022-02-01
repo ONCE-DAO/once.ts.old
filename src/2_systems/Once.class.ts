@@ -23,8 +23,11 @@ export class Once extends AbstractOnce {
         .OnceInstaller;
       const Submodule = (await import("../unsorted/Submodule.js")).Submodule;
       global.ONCE = await OnceInstaller.start();
-      const copyFolder =["bin"]
-      Submodule.addFromUrl("https://github.com/ONCE-DAO/once.cli.git",copyFolder);
+      const copyFolder = ["bin"];
+      Submodule.addFromUrl({
+        url: "https://github.com/ONCE-DAO/once.cli.git",
+        copyFolder,
+      });
       return global.ONCE;
     }
 
