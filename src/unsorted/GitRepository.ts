@@ -16,9 +16,16 @@ type Result = {
 type GitRepositoryParameter = {
   baseDir?: string;
   clone?: GitCloneParameter;
+  init?: boolean;
 };
 
 export class GitRepository {
+  async commitAll(commitMessage: string) {
+    if (!this.gitRepo) return;
+    const status = await this.gitRepo[0].status();
+    await this.gitRepo[0].add(status.modified);
+    await this.gitRepo[0].commit(commitMessage);
+  }
   async addSubmodule(onceTsRepository: GitRepository, branchFolder: string) {
     if (!this.gitRepo) throw new Error("Not Initialized");
 
@@ -40,10 +47,11 @@ export class GitRepository {
     return await new GitRepository().init(args);
   }
 
-  async init({ baseDir, clone }: GitRepositoryParameter) {
+  async init({ baseDir, clone, init }: GitRepositoryParameter) {
     if (baseDir) {
       this.gitRepo = [simpleGit({ baseDir: baseDir, binary: "git" }), baseDir];
       clone && (await this.cloneIfNotExists(clone));
+      init && this.gitRepo[0].init(["-b", "main"]);
     }
     return this;
   }

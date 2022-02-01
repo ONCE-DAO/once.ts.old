@@ -24,6 +24,7 @@ export class OnceInstaller extends AbstractOnce {
 
     const eamdGitRepo = await GitRepository.start({
       baseDir: once.directory,
+      init:true
     });
     once.addInitialFiles(eamdGitRepo);
 
@@ -37,6 +38,7 @@ export class OnceInstaller extends AbstractOnce {
     const branchFolder = await once.copyFilesToDevFolder(onceTsRepository);
     eamdGitRepo.addSubmodule(onceTsRepository, branchFolder);
     await eamdGitRepo.updateSubmodules();
+    await eamdGitRepo.commitAll("EAMD.ucp installed on machine")
 
     console.log("Installed");
 
@@ -55,6 +57,11 @@ export class OnceInstaller extends AbstractOnce {
           "start":"npm --prefix Components/tla/EAM/Once/dist/current run start"
         }
       }`,
+      { encoding: "utf8", flag: "w+" }
+    );
+    fs.writeFileSync(
+      path.join(this.directory, ".gitignore"),
+      `dist`,
       { encoding: "utf8", flag: "w+" }
     );
     const currentDirectory = process.cwd();
