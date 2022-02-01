@@ -6,12 +6,15 @@ import chmodrSync from "chmodr";
 
 export class OnceBuilder {
   static async buildSubmodule(submodulePath: string) {
+    console.log(submodulePath);
+
     const pkg = await Package.getByPath(
       path.join(submodulePath, "package.json")
     );
 
     const snapshot = path.basename(submodulePath).split("@")[1];
     const version = `${pkg?.version}-SNAPSHOT-${snapshot}`;
+    console.log("HUHU");
     fs.writeFileSync(
       path.join(submodulePath, "tsconfig.build.json"),
       `{
@@ -24,9 +27,11 @@ export class OnceBuilder {
             "src/**/*.ts"
         ],
       }`,
-      { encoding: "utf8", flag: "w" }
+      { encoding: "utf8", flag: "w+" }
     );
-    execSync(`npx --prefix ${submodulePath} tsc -p tsconfig.build.json `);
+    console.log("FOOOOO");
+
+    execSync(`npm --prefix ${submodulePath} run build:version`);
     fs.cpSync(
       path.join(submodulePath, "node_modules"),
       path.join(submodulePath, version, "node_modules"),

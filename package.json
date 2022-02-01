@@ -12,7 +12,7 @@
     "prepare:build": "tsc --project tsconfig.install.json",
     "prepare:install": "cross-env NODE_ENV=install_once node .",
     "prepare:cleanup": "rm -rf dist",
-    "build": "node --loader ts-node/esm ./src/2_systems/build.ts",
+    "build:version":"tsc -p tsconfig.build.json",
     "start": "node src/2_systems/Once.class.js"
   },
   "repository": {

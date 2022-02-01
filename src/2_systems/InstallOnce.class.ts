@@ -1,4 +1,5 @@
 import { AbstractOnce } from "./AbstractOnce.class";
+import { execSync } from "child_process";
 import fs from "fs";
 import os from "os";
 import path from "path";
@@ -40,6 +41,8 @@ export class InstallOnce extends AbstractOnce {
     eamdGitRepo.addSubmodule(onceTsRepository, branchFolder)
    
     await eamdGitRepo.updateSubmodules();
+    execSync(`npm --prefix ${once.directory} install`);
+
     return once;
   }
 

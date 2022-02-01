@@ -1,0 +1,31 @@
+import { Namespace } from 'ior:esm:git:tla.EAM.layer1.Once[#sdsgzudhsudhusidh]';
+// import Once from "ior:esm:git:tla.EAM.layer1.Once.1_0_0"
+// import Once from "ior:esm:git:tla.EAM.layer1.Once.latest"
+
+
+["tla.EAM.Once":["https://github.com/Once-Dao/Once.ts"]]
+
+
+import Once from "ior:esm:git:tla.EAM.Once[1.0.0]"
+import Once from "ior:esm:git:tla.EAM.Once[^1.0.0]"
+import Once from "ior:esm:git:tla.EAM.Once[latest]"
+import {Once, Thinglish} from "ior:esm:git:tla.EAM.Once"
+import {Thing} from "ior:esm:git:tla.EAM.Once"
+import Once from "ior:esm:git:tla.EAM.Once[#main]"
+import Once from "ior:esm:git:tla.EAM.Once[#sdsgzudhsudhusidh]"
+import Namespace from "ior:esm:git:tla.EAM.Namespace[#sdsgzudhsudhusidh]"
+import Namespace as Namespace1_0_0 from "ior:esm:git:tla.EAM.layer1.OnceServices.naming.Namespace[1.0.0]"
+
+// import Once from "ior:esm:git:tla.EAM.layer1.Once@1.0.0"
+// import Once from "ior:esm:git:tla.EAM.layer1.Once@^1.0.0"
+// import Once from "ior:esm:git:tla.EAM.layer1.Once@#main"
+// import Once from "ior:esm:git:tla.EAM.layer1.Once@#sdsgzudhsudhusidh"
+// import Once from "ior:esm:git:tla.EAM.layer1.Once@latest"
+// import Once from "ior:esm:git:tla.EAM.layer1.Once"
+
+ONCE = Once.start()
+// package is string
+ONCE.package //tla.EAM.layer1.Once["latest"]
+
+Namespace.from(ONCE.package).toPath()
+Namespace1_0_0.from(ONCE.package).toPath()
