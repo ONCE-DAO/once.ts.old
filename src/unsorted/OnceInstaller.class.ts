@@ -33,7 +33,7 @@ export class OnceInstaller extends AbstractOnce {
     const branchFolder = await once.copyFilesToDevFolder(onceTsRepository);
     await eamdGitRepo.addSubmodule(onceTsRepository, branchFolder);
     await eamdGitRepo.commitAll("ONCE installed EAMD.ucp on your machine");
-    await eamdGitRepo.updateSubmodules();
+    // await eamdGitRepo.updateSubmodules();
 
     OnceBuilder.buildSubmodule(branchFolder);
     return once;
@@ -96,7 +96,7 @@ export class OnceInstaller extends AbstractOnce {
       "Components",
       "tla",
       "EAM",
-      "Once",
+      "once.ts",
       "dev"
     );
   }

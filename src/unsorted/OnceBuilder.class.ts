@@ -32,12 +32,12 @@ export class OnceBuilder {
     );
 
     execSync(`npm --prefix ${submodulePath} run build:version`);
-    fs.cpSync(
+   fs.existsSync(path.join(submodulePath, "node_modules")) && fs.cpSync(
       path.join(submodulePath, "node_modules"),
       path.join(submodulePath, version, "node_modules"),
       { recursive: true }
     );
-    fs.cpSync(
+    fs.existsSync(path.join(submodulePath, "ressources")) &&  fs.cpSync(
       path.join(submodulePath, "ressources"),
       path.join(submodulePath, version, "ressources"),
       { recursive: true }

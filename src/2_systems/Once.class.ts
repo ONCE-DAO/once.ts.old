@@ -1,4 +1,3 @@
-import { Submodule } from "src/unsorted/Submodule";
 import { AbstractOnce } from "./AbstractOnce.class";
 import { DefaultNodeLoader } from "./DefaultNodeLoader.class";
 
@@ -22,9 +21,10 @@ export class Once extends AbstractOnce {
 
       const OnceInstaller = (await import("../unsorted/OnceInstaller.class.js"))
         .OnceInstaller;
-      const once = OnceInstaller.start();
+      const Submodule = (await import("../unsorted/Submodule.js")).Submodule;
+      global.ONCE = await OnceInstaller.start();
       Submodule.addFromUrl("https://github.com/ONCE-DAO/once.cli.git");
-      return once;
+      return global.ONCE;
     }
 
     if (this.isNodeLoader) {
