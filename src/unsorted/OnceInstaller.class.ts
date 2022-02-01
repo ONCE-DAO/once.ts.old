@@ -27,6 +27,7 @@ export class OnceInstaller extends AbstractOnce {
       init:true
     });
     once.addInitialFiles(eamdGitRepo);
+    await eamdGitRepo.commitAll("EAMD.ucp installed on machine")
 
     // add again later
     // eamdGitRepo.removeRemote()
@@ -38,7 +39,8 @@ export class OnceInstaller extends AbstractOnce {
     const branchFolder = await once.copyFilesToDevFolder(onceTsRepository);
     eamdGitRepo.addSubmodule(onceTsRepository, branchFolder);
     await eamdGitRepo.updateSubmodules();
-    await eamdGitRepo.commitAll("EAMD.ucp installed on machine")
+    await eamdGitRepo.commitAll("Once.ts installed")
+
 
     console.log("Installed");
 
