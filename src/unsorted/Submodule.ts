@@ -4,14 +4,23 @@ import fs from "fs";
 import { Package } from "./Package";
 import { OnceBuilder } from "./OnceBuilder.class";
 import { execSync } from "child_process";
+import { Once } from "src/2_systems/Once.class";
+
+type AddSubmoduleArgs = {
+  url: string;
+  branch?: string;
+  overwrite?: { name: string; namespace: string };
+  copyFolder?: string[];
+};
 export class Submodule {
-  static async addFromUrl(
-    url: string,
-    branch?: string,
-    overwrite?: { name: string; namespace: string }
-  ) {
-    // const root = ONCE?.directory || "";
-    const root = "/Users/philippbartels/EAMD.ucp";
+  static async addFromUrl({
+    url,
+    branch,
+    overwrite,
+    copyFolder,
+  }: AddSubmoduleArgs) {
+    if (!global.ONCE) global.ONCE = await Once.start();
+    const root = ONCE?.directory || "";
     const tmpFolder = path.join(root, "tmp");
     !fs.existsSync(tmpFolder) && fs.mkdirSync(tmpFolder);
 
@@ -47,6 +56,6 @@ export class Submodule {
 
     const rootRepo = await GitRepository.start({ baseDir: root });
     rootRepo.addSubmodule(repo, newBase);
-    OnceBuilder.buildSubmodule(newBase);
+    OnceBuilder.buildSubmodule(newBase, copyFolder);
   }
 }

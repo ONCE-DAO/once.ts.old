@@ -5,7 +5,7 @@ import { execSync } from "child_process";
 import chmodrSync from "chmodr";
 
 export class OnceBuilder {
-  static async buildSubmodule(submodulePath: string) {
+  static async buildSubmodule(submodulePath: string, copyFolder?: string[]) {
     console.log(submodulePath);
 
     const pkg = await Package.getByPath(
@@ -32,16 +32,18 @@ export class OnceBuilder {
     );
 
     execSync(`npm --prefix ${submodulePath} run build:version`);
-   fs.existsSync(path.join(submodulePath, "node_modules")) && fs.cpSync(
-      path.join(submodulePath, "node_modules"),
-      path.join(submodulePath, version, "node_modules"),
-      { recursive: true }
-    );
-    fs.existsSync(path.join(submodulePath, "ressources")) &&  fs.cpSync(
-      path.join(submodulePath, "ressources"),
-      path.join(submodulePath, version, "ressources"),
-      { recursive: true }
-    );
+    fs.existsSync(path.join(submodulePath, "node_modules")) &&
+      fs.cpSync(
+        path.join(submodulePath, "node_modules"),
+        path.join(submodulePath, version, "node_modules"),
+        { recursive: true }
+      );
+    fs.existsSync(path.join(submodulePath, "ressources")) &&
+      fs.cpSync(
+        path.join(submodulePath, "ressources"),
+        path.join(submodulePath, version, "ressources"),
+        { recursive: true }
+      );
     fs.cpSync(
       path.join(submodulePath, "package.json"),
       path.join(submodulePath, version, "package.json"),
@@ -55,6 +57,15 @@ export class OnceBuilder {
       ),
       ""
     );
+    copyFolder &&
+      copyFolder.forEach((f) => {
+        fs.existsSync(path.join(submodulePath, f)) &&
+          fs.cpSync(
+            path.join(submodulePath, f),
+            path.join(submodulePath, version, f),
+            { recursive: true }
+          );
+      });
     const dist = path.join(submodulePath, "..", "..", "dist", version);
     const current = path.join(dist, "..", "current");
     if (fs.existsSync(dist)) {
