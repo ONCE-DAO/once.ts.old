@@ -17,16 +17,18 @@ export class OnceBuilder {
     console.log("HUHU");
     fs.writeFileSync(
       path.join(submodulePath, "tsconfig.build.json"),
-      `{
-        "extends": "./tsconfig.json",
-        "compilerOptions": {
-            "rootDir":"./",
-          "outDir": "${version}"
+      JSON.stringify(
+        {
+          extends: "./tsconfig.json",
+          compilerOptions: {
+            rootDir: "./",
+            outDir: version,
+          },
+          include: ["src/**/*.ts"],
         },
-        "include": [
-            "src/**/*.ts"
-        ],
-      }`,
+        null,
+        2
+      ),
       { encoding: "utf8", flag: "w+" }
     );
     console.log("FOOOOO");

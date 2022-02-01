@@ -24,7 +24,7 @@ export class OnceInstaller extends AbstractOnce {
 
     const eamdGitRepo = await GitRepository.start({
       baseDir: once.directory,
-      init:true
+      init: true,
     });
     once.addInitialFiles(eamdGitRepo);
 
@@ -37,9 +37,8 @@ export class OnceInstaller extends AbstractOnce {
     });
     const branchFolder = await once.copyFilesToDevFolder(onceTsRepository);
     await eamdGitRepo.addSubmodule(onceTsRepository, branchFolder);
-    await eamdGitRepo.commitAll("ONCE installed EAMD.ucp on your machine")
+    await eamdGitRepo.commitAll("ONCE installed EAMD.ucp on your machine");
     await eamdGitRepo.updateSubmodules();
-
 
     console.log("Installed");
 
@@ -51,20 +50,24 @@ export class OnceInstaller extends AbstractOnce {
   private addInitialFiles(eamdGitRepo: GitRepository) {
     fs.writeFileSync(
       path.join(this.directory, "package.json"),
-      `{
-        "name": "eamd.ucp",
-        "version": "0.0.1",
-        "scripts": {
-          "start":"npm --prefix Components/tla/EAM/Once/dist/current run start"
-        }
-      }`,
+      JSON.stringify(
+        {
+          name: "eamd.ucp",
+          version: "0.0.1",
+          scripts: {
+            start:
+              "npm --prefix Components/tla/EAM/Once/dist/current run start",
+          },
+        },
+        null,
+        2
+      ),
       { encoding: "utf8", flag: "w+" }
     );
-    fs.writeFileSync(
-      path.join(this.directory, ".gitignore"),
-      `dist`,
-      { encoding: "utf8", flag: "w+" }
-    );
+    fs.writeFileSync(path.join(this.directory, ".gitignore"), `dist`, {
+      encoding: "utf8",
+      flag: "w+",
+    });
     const currentDirectory = process.cwd();
     fs.cpSync(
       path.join(currentDirectory, ".vscode"),
