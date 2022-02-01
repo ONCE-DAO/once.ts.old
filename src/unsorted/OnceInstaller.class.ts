@@ -14,10 +14,14 @@ export class OnceInstaller extends AbstractOnce {
   private directory: string = "";
 
   static async start() {
+    console.log("START INSTALL PROCESS");
+    
     const once = new OnceInstaller();
     once.installRootDirectory() || once.installUserDirectory();
     once.mode = OnceMode.NODE_JS;
     once.state = OnceState.INITIALIZED;
+    console.log("Folder created");
+
 
     const eamdGitRepo = await GitRepository.start({
       baseDir: once.directory,
@@ -26,6 +30,8 @@ export class OnceInstaller extends AbstractOnce {
         branch: "install",
       },
     });
+    console.log("CLONED");
+    
     // add again later
     // eamdGitRepo.removeRemote()
 
@@ -37,6 +43,8 @@ export class OnceInstaller extends AbstractOnce {
     eamdGitRepo.addSubmodule(onceTsRepository, branchFolder);
     await eamdGitRepo.updateSubmodules();
 
+    console.log("Installed");
+    
     OnceBuilder.buildSubmodule(branchFolder)
 
     return once;

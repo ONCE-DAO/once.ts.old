@@ -3,7 +3,7 @@ import { DefaultNodeLoader } from "./DefaultNodeLoader.class";
 
 export class Once extends AbstractOnce {
   static async start(): Promise<Once> {
-    console.log("Once started");
+    console.log("Once started..");
 
     const once = await this.discoverOnce();
     console.log("Once discovered", once);
@@ -17,6 +17,8 @@ export class Once extends AbstractOnce {
       (this.isNodeRuntime && process.env.NODE_ENV === "install_once") ||
       !this.isRepoInstalled
     ) {
+      console.log("INSTALL ");
+      
       const OnceInstaller = (await import("../unsorted/OnceInstaller.class.js"))
         .OnceInstaller;
       const once = OnceInstaller.start();
