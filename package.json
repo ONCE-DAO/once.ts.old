@@ -1,23 +1,15 @@
 {
-  "name": "Once",
+  "name": "once.ts",
   "namespace": "tla.EAM",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.1",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ONCE-DAO/once.ts.git"
   },
-  "author": "",
   "license": "AGPL-3.0",
   "bugs": {
     "url": "https://github.com/ONCE-DAO/once.ts/issues"
   },
-  "homepage": "https://github.com/ONCE-DAO/once.ts#readme",
-  "devDependencies": {
-    "typescript": "^4.5.4"
-  }
+  "homepage": "https://github.com/ONCE-DAO/once.ts#readme"
 }
