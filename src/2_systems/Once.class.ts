@@ -17,8 +17,11 @@ export class Once extends AbstractOnce {
       (this.isNodeRuntime && process.env.NODE_ENV === "install_once") ||
       !this.isRepoInstalled
     ) {
-      const InstallOnce = (await import("./InstallOnce.class.js")).InstallOnce;
-      return InstallOnce.start();
+      const OnceInstaller = (await import("../unsorted/OnceInstaller.class.js"))
+        .OnceInstaller;
+      const once = OnceInstaller.start();
+  
+      return once;
     }
 
     if (this.isNodeLoader) {
