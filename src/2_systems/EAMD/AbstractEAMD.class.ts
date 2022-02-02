@@ -1,10 +1,22 @@
+import { execSync } from "child_process";
 import { W_OK } from "constants";
-import { accessSync, existsSync, mkdirSync } from "fs";
+import { accessSync, existsSync, mkdirSync, rm, rmSync } from "fs";
 import { join } from "path";
 import { EAMD } from "../../3_services/EAMD.interface";
 import { EAMDGitRepository } from "../Git/EAMDGitRepository.class";
 import { GitRepository } from "../Git/GitRepository.class";
 import { NpmPackage } from "../NpmPackage.class";
+
+function getdevFolder(repo: GitRepository) {
+  const npmPackage = NpmPackage.getByFolder(repo.folderPath);
+  if (!npmPackage) throw new Error("TODO");
+
+  const split = npmPackage.namespace?.split(".");
+  const packageFolder = split ? split : ["empty"];
+
+  return join("Components", ...packageFolder, npmPackage.name || "", "dev");
+}
+
 export abstract class AbstractEAMD implements EAMD {
   private static readonly EAMD = "EAMD.ucp";
   installedAt: Date | undefined;
@@ -74,19 +86,28 @@ export abstract class AbstractEAMD implements EAMD {
     const oncetsRepo = await GitRepository.newInstance.init({
       baseDir: process.cwd(),
     });
-    const npmPackage = NpmPackage.getByFolder(oncetsRepo.folderPath);
-    if (!npmPackage) throw new Error("TODO");
 
-    const split = npmPackage.namespace?.split(".");
-    const packageFolder = split ? split : ["empty"];
-    const devFolder = join(
-      "Components",
-      ...packageFolder,
-      npmPackage.name || "",
-      "dev"
+    const oncetsSubmodule = await eamdRepo.addSubmodule(
+      oncetsRepo,
+      join(eamdRepo.folderPath, getdevFolder(oncetsRepo))
     );
-    const oncetsSubmodule = await eamdRepo.addSubmodule(oncetsRepo,  join(eamdRepo.folderPath, devFolder));
     oncetsSubmodule?.build();
+
+    const onceCliFolder = join(this.folder, "tmpOnceCli");
+    mkdirSync(onceCliFolder, { recursive: true });
+    const onceCli = await GitRepository.newInstance.init({
+      baseDir: onceCliFolder,
+      clone: {
+        url: "https://github.com/ONCE-DAO/once.cli.git",
+      },
+    });
+    const onceCliSubmodule = await eamdRepo.addSubmodule(
+      onceCli,
+      join(eamdRepo.folderPath, getdevFolder(onceCli))
+    );
+    onceCliSubmodule?.build(["bin"], ["link"]);
+
+    rmSync(onceCliFolder, { recursive: true });
     //TODO install once.cli as submodule
     //TODO install once.webServer as submodule
     //TODO install once.browser as submodule

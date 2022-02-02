@@ -6,7 +6,7 @@ export abstract class BaseOnce implements OnceInterface {
   private creationDate: Date;
   public mode: OnceMode = OnceMode.BOOTING;
   protected state: OnceState = OnceState.DISCOVER;
-  protected eamdRepository: AbstractEAMD | undefined;
+  eamdRepository: AbstractEAMD | undefined;
 
   protected constructor(global: typeof globalThis) {
     this.creationDate = new Date();
