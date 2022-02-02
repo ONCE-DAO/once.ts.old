@@ -15,7 +15,11 @@ export class EAMDGitRepository extends GitRepository {
     this.copy(process.cwd(), ".npmrc");
     return this;
   }
-  
+
+  async rebuildAllSubmodules() {
+    (await this.getSubmodules()).forEach((submodule) => submodule.build());
+  }
+
   private copy(currentFolder: string, folder: string) {
     if (!this.gitRepo) throw new Error("not init ...");
 
