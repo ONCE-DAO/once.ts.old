@@ -18,7 +18,7 @@
     "prepare:patch": "ts-patch install",
     "prepare:run": "node --loader ts-node/esm ./src/2_systems/Once.class.ts",
     "build:version": "tsc -p tsconfig.build.json",
-    "start": "node --loader ./src/2_systems/Once.class.js src/2_systems/Once.class.js",
+    "start": "node --experimental-loader ./src/onceloader.js --loader ./src/2_systems/Once.class.js src/2_systems/Once.class.js",
     "start:no-loader": "node src/2_systems/Once.class.js",
     "rebuild:ts": "node --loader ts-node/esm ./src/Rebuild.ts",
     "rebuild": "node src/Rebuild.js"
