@@ -18,10 +18,14 @@ import { GitRepository } from "./GitRepository.class";
 export class Submodule {
   path: string | undefined;
 
-  static async start(path: string): Promise<Submodule> {
+  static getInstance() {
     const instance = new Submodule();
-    instance.path = path;
     return instance;
+  }
+
+  async init(path: string): Promise<Submodule> {
+    this.path = path;
+    return this;
   }
 
   build(copyFolder?: string[], npmCommands?: string[]) {
@@ -71,6 +75,7 @@ export class Submodule {
       join(this.path, version, "package.json"),
       { recursive: true }
     );
+
     writeFileSync(
       join(
         this.path,
@@ -81,6 +86,7 @@ export class Submodule {
       ),
       ""
     );
+
     copyFolder &&
       copyFolder.forEach((f) => {
         existsSync(join(this.path || "", f)) &&

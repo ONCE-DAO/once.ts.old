@@ -31,6 +31,7 @@ export class GitRepository {
     if (!this.gitRepo) throw new Error("TODO");
     return this.gitRepo?.[1];
   }
+
   async init({ baseDir, clone, init }: GitRepositoryParameter) {
     if (baseDir) {
       this.gitRepo = [simpleGit({ baseDir: baseDir, binary: "git" }), baseDir];
@@ -38,6 +39,28 @@ export class GitRepository {
       init && this.gitRepo[0].init(["-b", "main"]);
     }
     return this;
+  }
+
+  async getSubmodules(): Promise<Submodule[]> {
+    if (this.gitRepo) {
+      const submodulePaths = (
+        await this.gitRepo[0].raw(
+          "config",
+          "--file",
+          ".gitmodules",
+          "--get-regexp",
+          "path"
+        )
+      )
+        .split("\n")
+        .map((x) => x.split(" ")[1])
+        .filter((x) => x);
+
+      return Promise.all(
+        submodulePaths.map((path) => Submodule.getInstance().init(path))
+      );
+    }
+    return [];
   }
 
   private async clone({ url, branch }: GitCloneParameter): Promise<Result> {
@@ -124,6 +147,6 @@ export class GitRepository {
       (await repoToAdd.remoteUrl) || "",
       relativeFolderPath,
     ]);
-    return Submodule.start(submoduleFolder);
+    return await Submodule.getInstance().init(submoduleFolder);
   }
 }
