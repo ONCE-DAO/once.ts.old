@@ -18,11 +18,13 @@ export abstract class BaseOnce implements OnceInterface {
   abstract start(): Promise<BaseOnce>;
   abstract getEAMD(): Promise<EAMD | undefined>;
 
+  // ONCE ENTRY POINT
   static async start(): Promise<BaseOnce> {
     console.log("Once.class static start");
     const once = await this.discover();
     once.eamd = await once.getEAMD();
     await once.start();
+    
     console.log(
       `ONCE
        created [${once.creationDate.toISOString()}] 
