@@ -1,11 +1,12 @@
-import { BaseOnce } from "./BaseOnce.class";
+import { OnceKernel } from "./OnceKernel.class";
+import { Once as OnceInterface } from "../../3_services/Once.interface"
 
 declare global {
-  var ONCE: BaseOnce | undefined;
+  var ONCE: OnceInterface | undefined;
 }
 
-export abstract class Once extends BaseOnce {
-  static async discover(): Promise<BaseOnce> {
+export abstract class Once extends OnceKernel {
+  static async discover(): Promise<OnceInterface> {
     console.log("Start discovering once by runtime");
 
     if (this.isNode) {
