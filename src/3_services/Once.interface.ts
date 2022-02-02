@@ -1,5 +1,5 @@
 import { Thing } from "./Thing.interface";
-import { DefaultEAMD as EAMD } from "../2_systems/EAMD/DefaultEAMD.class";
+import { EAMD } from "./EAMD.interface";
 
 /* eslint-disable no-unused-vars */
 export enum OnceState {

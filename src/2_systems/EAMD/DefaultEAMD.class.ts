@@ -22,10 +22,6 @@ function getdevFolder(repo: GitRepository) {
 }
 
 export abstract class DefaultEAMD implements EAMD {
-  // TODO@MD
-  // REFACTOR
-  // ISSUE put names to enums
-  private static readonly EAMD = EAMD_FOLDERS.ROOT
   installedAt: Date | undefined;
   preferredFolder: string[] = [];
   folder: string | undefined;
@@ -51,7 +47,7 @@ export abstract class DefaultEAMD implements EAMD {
 
   static isInstalled(): boolean {
     return this.getInstance().preferredFolder.some((folder) =>
-      existsSync(join(folder, this.EAMD))
+      existsSync(join(folder, EAMD_FOLDERS.ROOT))
     );
   }
   static hasWriteAccess(): boolean {
