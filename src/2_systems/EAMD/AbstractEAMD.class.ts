@@ -2,8 +2,10 @@ import { W_OK } from "constants";
 import { accessSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import { EAMD } from "../../3_services/EAMD.interface";
+import { EAMDGitRepository } from "../Git/EAMDGitRepository.class";
+import { GitRepository } from "../Git/GitRepository.class";
+import { NpmPackage } from "../NpmPackage.class";
 export abstract class AbstractEAMD implements EAMD {
-
   private static readonly EAMD = "EAMD.ucp";
   installedAt: Date | undefined;
   preferredFolder: string[] = [];
@@ -58,9 +60,33 @@ export abstract class AbstractEAMD implements EAMD {
 
     if (!this.folder) throw new Error("path is not initialised");
     this.eamdPath = join(this.folder, AbstractEAMD.EAMD);
+    if (!this.eamdPath) throw new Error("eamdPath is not initialised");
+
     mkdirSync(this.eamdPath, { recursive: true });
-    //TODO init GitRepository
-    //TODO add current once.ts as submodule to eamd->gitrepo
+    mkdirSync(join(this.eamdPath, "Components"), { recursive: true });
+
+    // init new local repo
+    const eamdRepo = await EAMDGitRepository.newInstance.init({
+      baseDir: this.eamdPath,
+      init: true,
+    });
+    // get current repo
+    const oncetsRepo = await GitRepository.newInstance.init({
+      baseDir: process.cwd(),
+    });
+    const npmPackage = NpmPackage.getByFolder(oncetsRepo.folderPath);
+    if (!npmPackage) throw new Error("TODO");
+
+    const split = npmPackage.namespace?.split(".");
+    const packageFolder = split ? split : ["empty"];
+    const devFolder = join(
+      "Components",
+      ...packageFolder,
+      npmPackage.name || "",
+      "dev"
+    );
+    const oncetsSubmodule = await eamdRepo.addSubmodule(oncetsRepo,  join(eamdRepo.folderPath, devFolder));
+    oncetsSubmodule?.build();
     //TODO install once.cli as submodule
     //TODO install once.webServer as submodule
     //TODO install once.browser as submodule
@@ -74,7 +100,7 @@ export abstract class AbstractEAMD implements EAMD {
     //TODO recover installedAt
     this.eamdPath = path;
     this.folder = join(this.eamdPath, "..");
-    //TODO build all Submodules 
+    //TODO build all Submodules
     console.log("EAMD initialised with path", this.eamdPath);
     return this;
   }
