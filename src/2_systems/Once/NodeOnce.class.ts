@@ -1,6 +1,6 @@
-import { OnceMode, OnceState } from "../3_services/Once.interface";
+import { OnceMode, OnceState } from "../../3_services/Once.interface";
 import { BaseOnce } from "./BaseOnce.class";
-import { EAMDRepository } from "./EAMDRepository.class";
+import { EAMDRepository } from "../EAMDRepository.class";
 
 export class NodeOnce extends BaseOnce {
   public mode = OnceMode.NODE_JS;

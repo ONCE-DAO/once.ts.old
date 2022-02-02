@@ -1,4 +1,4 @@
-import { OnceMode, OnceState } from "../3_services/Once.interface";
+import { OnceMode, OnceState } from "../../3_services/Once.interface";
 import { BaseOnce } from "./BaseOnce.class";
 
 export class NotDiscovered extends BaseOnce {

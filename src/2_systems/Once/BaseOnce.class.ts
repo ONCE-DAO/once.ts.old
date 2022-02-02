@@ -1,6 +1,6 @@
-import { OnceMode, OnceState } from "../3_services/Once.interface";
-import { Once as OnceInterface } from "../3_services/Once.interface";
-import { EAMDRepository } from "./EAMDRepository.class";
+import { OnceMode, OnceState } from "../../3_services/Once.interface";
+import { Once as OnceInterface } from "../../3_services/Once.interface";
+import { EAMDRepository } from "../EAMDRepository.class";
 
 export abstract class BaseOnce implements OnceInterface {
   private creationDate: number;

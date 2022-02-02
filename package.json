@@ -14,7 +14,9 @@
   },
   "homepage": "https://github.com/ONCE-DAO/once.ts#readme",
   "scripts": {
-    "prepare": "ts-patch install"
+    "prepare": "npm-run-all prepare:patch prepare:run",
+    "prepare:patch": "ts-patch install",
+    "prepare:run": "node --loader ts-node/esm ./src/2_systems/Once.class.ts"
   },
   "devDependencies": {
     "@types/node": "^17.0.14",
