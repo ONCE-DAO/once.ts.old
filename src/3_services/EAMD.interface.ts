@@ -5,4 +5,6 @@ export interface EAMD {
   eamdPath: string | undefined;
   install(): Promise<EAMD>;
   init(path: string): EAMD;
+  update(): Promise<EAMD>;
+  test(): void;
 }

@@ -3,6 +3,7 @@ import { accessSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import { EAMD } from "../../3_services/EAMD.interface";
 export abstract class AbstractEAMD implements EAMD {
+
   private static readonly EAMD = "EAMD.ucp";
   installedAt: Date | undefined;
   preferredFolder: string[] = [];
@@ -58,10 +59,14 @@ export abstract class AbstractEAMD implements EAMD {
     if (!this.folder) throw new Error("path is not initialised");
     this.eamdPath = join(this.folder, AbstractEAMD.EAMD);
     mkdirSync(this.eamdPath, { recursive: true });
+    //TODO init GitRepository
+    //TODO add current once.ts as submodule to eamd->gitrepo
+    //TODO install once.cli as submodule
+    //TODO install once.webServer as submodule
+    //TODO install once.browser as submodule
     this.installedAt = new Date();
     //TODO store installedAt
     console.log("EAMD installed at path", this.eamdPath);
-
     return this.init(this.folder);
   }
 
@@ -69,8 +74,17 @@ export abstract class AbstractEAMD implements EAMD {
     //TODO recover installedAt
     this.eamdPath = path;
     this.folder = join(this.eamdPath, "..");
+    //TODO build all Submodules 
     console.log("EAMD initialised with path", this.eamdPath);
-
     return this;
+  }
+
+  update(): Promise<EAMD> {
+    //TODO implement
+    throw new Error("Method not implemented.");
+  }
+  test(): void {
+    //TODO implement
+    throw new Error("Method not implemented.");
   }
 }

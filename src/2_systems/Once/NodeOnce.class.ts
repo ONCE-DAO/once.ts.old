@@ -15,8 +15,7 @@ export class NodeOnce extends BaseOnce implements Environment {
   }
 
   async startAsync(): Promise<BaseOnce> {
-    //TODO install and start once.cli
-    //TODO install and start once.webServer
+    //TODO start once.webServer
     return this;
   }
 
