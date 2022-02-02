@@ -17,7 +17,12 @@ export class EAMDGitRepository extends GitRepository {
   }
 
   async rebuildAllSubmodules() {
-    (await this.getSubmodules()).forEach((submodule) => submodule.build());
+    (await this.getSubmodules()).forEach((submodule) => {
+      submodule.path = join(this.folderPath, submodule.path || "");
+      console.log("REBUILD:",submodule.path);
+      
+      submodule.build();
+    });
   }
 
   private copy(currentFolder: string, folder: string) {
