@@ -21,7 +21,8 @@
     "start": "node --loader ./src/2_systems/Once.class.js src/2_systems/Once.class.js",
     "start:no-loader": "node src/2_systems/Once.class.js",
     "rebuild:ts": "node --loader ts-node/esm ./src/Rebuild.ts",
-    "rebuild": "node src/Rebuild.js"
+    "rebuild": "node src/Rebuild.js",
+    "dev":"npm run prepare:run"
   },
   "devDependencies": {
     "@types/node": "^17.0.14",

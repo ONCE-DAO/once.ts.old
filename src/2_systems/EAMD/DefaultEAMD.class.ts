@@ -2,10 +2,11 @@ import { execSync } from "child_process";
 import { W_OK } from "constants";
 import { accessSync, existsSync, mkdirSync, rm, rmSync } from "fs";
 import { join } from "path";
-import { EAMD } from "../../3_services/EAMD.interface";
+import { EAMD, EamdFolders } from '../../3_services/EAMD.interface';
 import { EAMDGitRepository } from "../Git/EAMDGitRepository.class";
 import { GitRepository } from "../Git/GitRepository.class";
 import { NpmPackage } from "../NpmPackage.class";
+import { RootEAMD } from './RootEAMD.class';
 
 // HACK
 // TODO@PB
@@ -17,14 +18,14 @@ function getdevFolder(repo: GitRepository) {
   const split = npmPackage.namespace?.split(".");
   const packageFolder = split ? split : ["empty"];
 
-  return join("Components", ...packageFolder, npmPackage.name || "", "dev");
+  return join(EamdFolders.COMPONENTS, ...packageFolder, npmPackage.name || "", EamdFolders.DEV);
 }
 
 export abstract class DefaultEAMD implements EAMD {
   // TODO@MD
   // REFACTOR
   // ISSUE put names to enums
-  private static readonly EAMD = "EAMD.ucp";
+  private static readonly EAMD = EamdFolders.ROOT
   installedAt: Date | undefined;
   preferredFolder: string[] = [];
   folder: string | undefined;
@@ -43,6 +44,7 @@ export abstract class DefaultEAMD implements EAMD {
 
     instance.eamdPath = join(instance.folder, DefaultEAMD.EAMD);
     if (!instance.eamdPath) throw new Error("repository is not installed");
+
     console.log("EAMD returned with path", instance.eamdPath);
     return this.getInstance().init(instance.eamdPath);
   }
@@ -81,7 +83,8 @@ export abstract class DefaultEAMD implements EAMD {
     if (!this.eamdPath) throw new Error("eamdPath is not initialised");
 
     mkdirSync(this.eamdPath, { recursive: true });
-    mkdirSync(join(this.eamdPath, "Components"), { recursive: true });
+    mkdirSync(join(this.eamdPath, EamdFolders.COMPONENTS), { recursive: true });
+    mkdirSync(join(this.eamdPath, EamdFolders.SCENARIOS), { recursive: true });
 
     // init new local repo
     const eamdRepo = await EAMDGitRepository.getInstance.init({

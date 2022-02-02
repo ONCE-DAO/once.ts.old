@@ -1,11 +1,11 @@
 import { OnceMode, OnceState } from "../../3_services/Once.interface";
-import { Once as OnceInterface } from "../../3_services/Once.interface";
+import { Once } from "../../3_services/Once.interface";
 import { DefaultEAMD as EAMD } from "../EAMD/DefaultEAMD.class";
 
-export abstract class BaseOnce implements OnceInterface {
-  private creationDate: Date;
+export abstract class OnceKernel implements Once {
+  creationDate: Date;
   public mode: OnceMode = OnceMode.BOOTING;
-  protected state: OnceState = OnceState.DISCOVER;
+  state: OnceState = OnceState.DISCOVER;
   eamd: EAMD | undefined;
 
   protected constructor(global: typeof globalThis) {
@@ -14,12 +14,13 @@ export abstract class BaseOnce implements OnceInterface {
     // global.ONCE = this
   }
 
+
   // TODO @PB&MD extract in interface
-  abstract start(): Promise<BaseOnce>;
+  abstract start(): Promise<Once>;
   abstract getEAMD(): Promise<EAMD | undefined>;
 
   // ONCE ENTRY POINT
-  static async start(): Promise<BaseOnce> {
+  static async start(): Promise<Once> {
     console.log("Once.class static start");
     const once = await this.discover();
     once.eamd = await once.getEAMD();
@@ -31,7 +32,11 @@ export abstract class BaseOnce implements OnceInterface {
        installed [${
          once.eamd === undefined
            ? false
-           : once.eamd.installedAt?.toISOString()
+           : (once.eamd.installedAt
+              ? once.eamd.installedAt?.toISOString()
+              : "existed already" 
+              )
+       
        }]
        mode [${once.mode}]
        state [${once.state}]`
@@ -39,7 +44,7 @@ export abstract class BaseOnce implements OnceInterface {
     return once;
   }
 
-  static async discover(): Promise<BaseOnce> {
+  static async discover(): Promise<Once> {
     throw new Error("Not implemented in BaseClass");
   }
 

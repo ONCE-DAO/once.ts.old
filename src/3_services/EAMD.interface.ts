@@ -1,3 +1,15 @@
+
+export enum EamdFolders {
+  ROOT = "EAMD.ucp",
+  COMPONENTS = "Components",
+  SCENARIOS = "Scenarios",
+  DEV = "dev",
+  DIST = "dist",
+  LATEST = "latest",
+  CURRENT = "current"
+}
+
+
 export interface EAMD {
   installedAt: Date | undefined;
   preferredFolder: string[];

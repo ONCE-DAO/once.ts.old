@@ -27,3 +27,31 @@ As a result Once will be
 - discover that it is not installed
 - intsall the EAMD.ucp repository in your users folder ```cd ~/EAMD.ucp```
 - then you can open a new VS Code Window in with Open Folder ```~/EAMD.ucp```
+
+## running Once
+
+```
+cd ~/EAMD.ucp
+npm run prepare:run
+```
+prepare:run
+## rebuilding Once
+
+```
+cd ~/EAMD.ucp
+npm run dev
+```
+
+
+## running Once
+
+```
+cd ~/EAMD.ucp
+npm start
+```
+
+## Updatting
+
+```
+git pull --recurse-submodules
+```

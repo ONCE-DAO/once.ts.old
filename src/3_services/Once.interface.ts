@@ -1,4 +1,5 @@
 import { Thing } from "./Thing.interface";
+import { DefaultEAMD as EAMD } from "../2_systems/EAMD/DefaultEAMD.class";
 
 /* eslint-disable no-unused-vars */
 export enum OnceState {
@@ -21,4 +22,10 @@ export enum OnceMode {
   NOT_DISCOVERED="NOT_DISCOVERED"
 }
 
-export interface Once extends Thing {}
+export interface Once extends Thing {
+  eamd: EAMD | undefined;
+  creationDate: Date
+  mode: OnceMode;
+  state: OnceState;
+  getEAMD(): Promise<EAMD | undefined>;
+}
