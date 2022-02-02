@@ -10,7 +10,7 @@ import {
   writeFileSync,
 } from "fs";
 import { basename, join } from "path";
-import { EamdFolders } from "../../3_services/EAMD.interface";
+import { EAMD_FOLDERS } from "../../3_services/EAMD.interface";
 import { NpmPackage } from "../NpmPackage.class";
 import { Once } from "../Once.class";
 import { GitRepository } from "./GitRepository.class";
@@ -95,9 +95,9 @@ export class Submodule {
             recursive: true,
           });
       });
-    const dist = join(this.path, "..", "..", EamdFolders.DIST, version);
+    const dist = join(this.path, "..", "..", EAMD_FOLDERS.DIST, version);
 
-    const current = join(dist, "..", EamdFolders.CURRENT);
+    const current = join(dist, "..", EAMD_FOLDERS.CURRENT);
     if (existsSync(dist)) {
       console.log("DIST", dist);
       rmSync(dist, { recursive: true });

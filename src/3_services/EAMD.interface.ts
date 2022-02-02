@@ -1,5 +1,5 @@
 
-export enum EamdFolders {
+export enum EAMD_FOLDERS {
   ROOT = "EAMD.ucp",
   COMPONENTS = "Components",
   SCENARIOS = "Scenarios",

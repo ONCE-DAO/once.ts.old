@@ -2,7 +2,7 @@ import { execSync } from "child_process";
 import { W_OK } from "constants";
 import { accessSync, existsSync, mkdirSync, rm, rmSync } from "fs";
 import { join } from "path";
-import { EAMD, EamdFolders } from '../../3_services/EAMD.interface';
+import { EAMD, EAMD_FOLDERS } from '../../3_services/EAMD.interface';
 import { EAMDGitRepository } from "../Git/EAMDGitRepository.class";
 import { GitRepository } from "../Git/GitRepository.class";
 import { NpmPackage } from "../NpmPackage.class";
@@ -18,14 +18,14 @@ function getdevFolder(repo: GitRepository) {
   const split = npmPackage.namespace?.split(".");
   const packageFolder = split ? split : ["empty"];
 
-  return join(EamdFolders.COMPONENTS, ...packageFolder, npmPackage.name || "", EamdFolders.DEV);
+  return join(EAMD_FOLDERS.COMPONENTS, ...packageFolder, npmPackage.name || "", EAMD_FOLDERS.DEV);
 }
 
 export abstract class DefaultEAMD implements EAMD {
   // TODO@MD
   // REFACTOR
   // ISSUE put names to enums
-  private static readonly EAMD = EamdFolders.ROOT
+  private static readonly EAMD = EAMD_FOLDERS.ROOT
   installedAt: Date | undefined;
   preferredFolder: string[] = [];
   folder: string | undefined;
@@ -38,11 +38,11 @@ export abstract class DefaultEAMD implements EAMD {
   static getInstalled(): EAMD {
     const instance = this.getInstance();
     instance.folder = instance.preferredFolder.find((folder) =>
-      existsSync(join(folder, DefaultEAMD.EAMD))
+      existsSync(join(folder, EAMD_FOLDERS.ROOT))
     );
     if (!instance.folder) throw new Error("can't find installed eamd");
 
-    instance.eamdPath = join(instance.folder, DefaultEAMD.EAMD);
+    instance.eamdPath = join(instance.folder, EAMD_FOLDERS.ROOT);
     if (!instance.eamdPath) throw new Error("repository is not installed");
 
     console.log("EAMD returned with path", instance.eamdPath);
@@ -79,12 +79,12 @@ export abstract class DefaultEAMD implements EAMD {
       );
 
     if (!this.folder) throw new Error("path is not initialised");
-    this.eamdPath = join(this.folder, DefaultEAMD.EAMD);
+    this.eamdPath = join(this.folder, EAMD_FOLDERS.ROOT);
     if (!this.eamdPath) throw new Error("eamdPath is not initialised");
 
     mkdirSync(this.eamdPath, { recursive: true });
-    mkdirSync(join(this.eamdPath, EamdFolders.COMPONENTS), { recursive: true });
-    mkdirSync(join(this.eamdPath, EamdFolders.SCENARIOS), { recursive: true });
+    mkdirSync(join(this.eamdPath, EAMD_FOLDERS.COMPONENTS), { recursive: true });
+    mkdirSync(join(this.eamdPath, EAMD_FOLDERS.SCENARIOS), { recursive: true });
 
     // init new local repo
     const eamdRepo = await EAMDGitRepository.getInstance.init({
