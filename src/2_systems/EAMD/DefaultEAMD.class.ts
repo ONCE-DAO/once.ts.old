@@ -98,21 +98,21 @@ export abstract class DefaultEAMD implements EAMD {
     );
     oncetsSubmodule?.build();
 
-    // HACK refactor to loader
-    const onceCliFolder = join(this.folder, "tmpOnceCli");
-    mkdirSync(onceCliFolder, { recursive: true });
-    const onceCli = await GitRepository.getInstance.init({
-      baseDir: onceCliFolder,
-      clone: {
-        url: "https://github.com/ONCE-DAO/once.cli.git",
-      },
-    });
-    const onceCliSubmodule = await eamdRepo.addSubmodule(
-      onceCli,
-      join(eamdRepo.folderPath, getdevFolder(onceCli))
-    );
-    onceCliSubmodule?.build(["bin"], ["link"]);
-    rmSync(onceCliFolder, { recursive: true });
+    // // HACK refactor to loader
+    // const onceCliFolder = join(this.folder, "tmpOnceCli");
+    // mkdirSync(onceCliFolder, { recursive: true });
+    // const onceCli = await GitRepository.getInstance.init({
+    //   baseDir: onceCliFolder,
+    //   clone: {
+    //     url: "https://github.com/ONCE-DAO/once.cli.git",
+    //   },
+    // });
+    // const onceCliSubmodule = await eamdRepo.addSubmodule(
+    //   onceCli,
+    //   join(eamdRepo.folderPath, getdevFolder(onceCli))
+    // );
+    // onceCliSubmodule?.build(["bin"], ["link"]);
+    // rmSync(onceCliFolder, { recursive: true });
 
     //TODO install once.webServer as submodule
     //TODO install once.browser as submodule

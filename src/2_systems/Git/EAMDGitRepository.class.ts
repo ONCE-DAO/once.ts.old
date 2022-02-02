@@ -19,8 +19,8 @@ export class EAMDGitRepository extends GitRepository {
   async rebuildAllSubmodules() {
     (await this.getSubmodules()).forEach((submodule) => {
       submodule.path = join(this.folderPath, submodule.path || "");
-      console.log("REBUILD:",submodule.path);
-      
+      console.log("REBUILD:", submodule.path);
+
       submodule.build();
     });
   }
@@ -52,6 +52,8 @@ export class EAMDGitRepository extends GitRepository {
           name: "eamd.ucp",
           version: "0.0.1",
           scripts: {
+            rebuild:
+              "npm --prefix Components/tla/EAM/once.ts/dist/current run rebuild",
             start:
               "npm --prefix Components/tla/EAM/once.ts/dist/current run start",
             "start:no-loader":

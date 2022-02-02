@@ -12,7 +12,7 @@ import {
 import { basename, join } from "path";
 import { EAMD_FOLDERS } from "../../3_services/EAMD.interface";
 import { NpmPackage } from "../NpmPackage.class";
-import { Once } from "../Once.class";
+import { Once } from "../Once/Once";
 import { GitRepository } from "./GitRepository.class";
 
 //TODO @PB Refactor code
