@@ -11,8 +11,8 @@ export class EAMDGitRepository extends GitRepository {
     const repository = super.init({ baseDir, clone, init });
     this.addPackageJson();
     this.addGitIgnore();
-    this.copy(process.cwd(), ".vscode");
-    this.copy(process.cwd(), ".npmrc");
+    // this.copy(process.cwd(), ".vscode");
+    // this.copy(process.cwd(), ".npmrc");
     return this;
   }
 
