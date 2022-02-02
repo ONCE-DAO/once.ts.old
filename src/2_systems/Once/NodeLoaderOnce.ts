@@ -1,7 +1,9 @@
+import { Environment } from "../../3_services/Enviroment.interface";
 import { OnceMode, OnceState } from "../../3_services/Once.interface";
 import { BaseOnce } from "./BaseOnce.class";
 
-export class NodeLoaderOnce extends BaseOnce {
+export class NodeLoaderOnce extends BaseOnce implements Environment {
+  ENV = process.env;
   public mode = OnceMode.NODE_LOADER;
   protected state = OnceState.DISCOVER_SUCESS;
   private static instance: any;
