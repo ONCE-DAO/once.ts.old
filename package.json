@@ -19,7 +19,8 @@
     "prepare:run": "node --loader ts-node/esm ./src/2_systems/Once.class.ts",
     "build:version": "tsc -p tsconfig.build.json",
     "start":"node --loader ./src/2_systems/Once.class.js src/2_systems/Once.class.js",
-    "start:no-loader":"node src/2_systems/Once.class.js"
+    "start:no-loader":"node src/2_systems/Once.class.js",
+    "dev":"npm run prepare:run"
   },
   "devDependencies": {
     "@types/node": "^17.0.14",

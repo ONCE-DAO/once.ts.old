@@ -1,8 +1,8 @@
-import { OnceMode, OnceState } from "../../3_services/Once.interface";
+import { Once, OnceMode, OnceState } from "../../3_services/Once.interface";
 import { DefaultEAMD } from "../EAMD/DefaultEAMD.class";
-import { BaseOnce as Once } from "./BaseOnce.class";
+import { OnceKernel } from "./OnceKernel.class";
 
-export class NotDiscovered extends Once {
+export class NotDiscovered extends OnceKernel {
   state = OnceState.DISCOVER_FAILED;
   mode = OnceMode.NOT_DISCOVERED;
 

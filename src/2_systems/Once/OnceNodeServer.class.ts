@@ -1,20 +1,21 @@
-import { OnceMode, OnceState } from "../../3_services/Once.interface";
-import { BaseOnce } from "./BaseOnce.class";
+import { Once, OnceMode, OnceState } from "../../3_services/Once.interface";
+import { OnceKernel } from "./OnceKernel.class";
 import { DefaultEAMD } from "../EAMD/DefaultEAMD.class";
 import { Environment } from "../../3_services/Enviroment.interface";
 import { RootEAMD } from "../EAMD/RootEAMD.class";
 import { UserEAMD } from "../EAMD/UserEAMD.class";
 
-export class OnceNodeServer extends BaseOnce implements Environment {
+export class OnceNodeServer extends OnceKernel implements Environment {
   ENV = process.env;
   public mode = OnceMode.NODE_JS;
-  protected state = OnceState.DISCOVER_SUCESS;
+  state = OnceState.DISCOVER_SUCESS;
 
   static get getInstance() {
     return new OnceNodeServer(global);
   }
 
-  async start(): Promise<BaseOnce> {
+  async start(): Promise<Once> {
+    console.log("\nStarting OnceNodeServer")
     //TODO start once.webServer
     return this;
   }
@@ -30,6 +31,6 @@ export class OnceNodeServer extends BaseOnce implements Environment {
         return await UserEAMD.getInstalled();
       else return await UserEAMD.install();
 
-    throw new Error("User has no access to either root or user repository");
+    throw new Error("User has no access to either root nor user repository");
   }
 }

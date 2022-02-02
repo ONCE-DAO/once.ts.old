@@ -1,12 +1,13 @@
 import { Environment } from "../../3_services/Enviroment.interface";
-import { OnceMode, OnceState } from "../../3_services/Once.interface";
-import { BaseOnce as Once } from "./BaseOnce.class";
+import { Once, OnceMode, OnceState } from "../../3_services/Once.interface";
+import { OnceKernel } from "./OnceKernel.class";
 
-export class OnceNodeImportLoader extends Once implements Environment {
+export class OnceNodeImportLoader extends OnceKernel implements Environment {
+
   ENV = process.env;
 
   public mode = OnceMode.NODE_LOADER;
-  protected state = OnceState.DISCOVER_SUCESS;
+  state = OnceState.DISCOVER_SUCESS;
   private static instance: any;
 
   static get Instance() {
@@ -16,8 +17,8 @@ export class OnceNodeImportLoader extends Once implements Environment {
     return this.instance;
   }
 
-  async start() {
-    return this;
+  start(): Promise<Once> {
+    throw new Error("Method not implemented.");
   }
 
   async getEAMD() {
