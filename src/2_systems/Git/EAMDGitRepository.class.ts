@@ -43,7 +43,9 @@ export class EAMDGitRepository extends GitRepository {
           version: "0.0.1",
           scripts: {
             start:
-              "npm --prefix Components/tla/EAM/Once/dist/current run start",
+              "npm --prefix Components/tla/EAM/once.ts/dist/current run start",
+            "start:no-loader":
+              "npm --prefix Components/tla/EAM/once.ts/dist/current run start:no-loader",
           },
         },
         null,

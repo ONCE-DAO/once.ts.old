@@ -17,7 +17,9 @@
     "prepare": "npm-run-all prepare:patch prepare:run",
     "prepare:patch": "ts-patch install",
     "prepare:run": "node --loader ts-node/esm ./src/2_systems/Once.class.ts",
-    "build:version": "tsc -p tsconfig.build.json"
+    "build:version": "tsc -p tsconfig.build.json",
+    "start":"node --loader Components/tla/EAM/once.ts/dist/current/src/2_systems/Once.class.js Components/tla/EAM/once.ts/dist/current/src/2_systems/Once.class.js",
+    "start:no-loader":"node Components/tla/EAM/once.ts/dist/current/src/2_systems/Once.class.js"
   },
   "devDependencies": {
     "@types/node": "^17.0.14",
