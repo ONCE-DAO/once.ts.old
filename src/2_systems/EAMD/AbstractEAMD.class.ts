@@ -108,7 +108,6 @@ export abstract class AbstractEAMD implements EAMD {
     onceCliSubmodule?.build(["bin"], ["link"]);
 
     rmSync(onceCliFolder, { recursive: true });
-    //TODO install once.cli as submodule
     //TODO install once.webServer as submodule
     //TODO install once.browser as submodule
     this.installedAt = new Date();

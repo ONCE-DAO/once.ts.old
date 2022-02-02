@@ -1,3 +1,3 @@
 export interface Thing {
-  startAsync(): Promise<Thing>;
+  start(): Promise<Thing>;
 }

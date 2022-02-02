@@ -5,21 +5,21 @@ import { Environment } from "../../3_services/Enviroment.interface";
 import { RootEAMD } from "../EAMD/RootEAMD.class";
 import { UserEAMD } from "../EAMD/UserEAMD.class";
 
-export class NodeOnce extends BaseOnce implements Environment {
+export class OnceNodeServer extends BaseOnce implements Environment {
   ENV = process.env;
   public mode = OnceMode.NODE_JS;
   protected state = OnceState.DISCOVER_SUCESS;
 
   static get newInstance() {
-    return new NodeOnce(global);
+    return new OnceNodeServer(global);
   }
 
-  async startAsync(): Promise<BaseOnce> {
+  async start(): Promise<BaseOnce> {
     //TODO start once.webServer
     return this;
   }
 
-  async getEAMDRepository(): Promise<AbstractEAMD | undefined> {
+  async getEAMD(): Promise<AbstractEAMD | undefined> {
     if (await RootEAMD.hasWriteAccess())
       if (await RootEAMD.isInstalled())
         return await RootEAMD.getInstalled();

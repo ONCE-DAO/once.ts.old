@@ -10,7 +10,10 @@ export abstract class Once extends BaseOnce {
 
     if (this.isNode) {
       if ((await this.isNodeLoader()) && global.ONCE) return global.ONCE;
-      return (await import("./Once/NodeOnce.class.js")).NodeOnce.newInstance;
+      return (await import("./Once/OnceNodeServer.class.js")).OnceNodeServer.newInstance;
+    }
+    if (this.isBrowser){
+
     }
     return (await import("./Once/NotDiscovered.js")).NotDiscovered.instance;
   }
@@ -19,5 +22,5 @@ export abstract class Once extends BaseOnce {
 Once.start();
 
 // nodeLoader hooks
-import { load, resolve } from "./Once/NodeLoaderOnce";
+import { load, resolve } from "./Once/OnceNodeImportLoader";
 export { load, resolve };

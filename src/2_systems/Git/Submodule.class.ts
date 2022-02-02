@@ -116,7 +116,7 @@ export class Submodule {
     copyFolder,
   }: AddSubmoduleArgs): Promise<Submodule> {
     if (!global.ONCE) global.ONCE = await Once.start();
-    const root = ONCE?.eamdRepository?.eamdPath;
+    const root = ONCE?.eamd?.eamdPath;
     if (!root) throw new Error("EAMD.ucp not defined");
 
     const tmpFolder = join(root, "tmp");

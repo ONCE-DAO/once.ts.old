@@ -1,37 +1,36 @@
 import { Environment } from "../../3_services/Enviroment.interface";
 import { OnceMode, OnceState } from "../../3_services/Once.interface";
-import { BaseOnce } from "./BaseOnce.class";
+import { BaseOnce as Once } from "./BaseOnce.class";
 
-export class NodeLoaderOnce extends BaseOnce implements Environment {
+export class OnceNodeImportLoader extends Once implements Environment {
   ENV = process.env;
+
   public mode = OnceMode.NODE_LOADER;
   protected state = OnceState.DISCOVER_SUCESS;
   private static instance: any;
 
   static get Instance() {
     if (!this.instance) {
-      this.instance = new NodeLoaderOnce(global);
+      this.instance = new OnceNodeImportLoader(global);
     }
     return this.instance;
   }
 
-  startAsync = async () => this;
-  getEAMDRepository = async () => undefined;
-  foo() {
-    let f = {
-      conditions: [],
-      importAssertions: {},
-      parentURL: "",
-    };
-    this.resolve("", f, () => {});
+  async start() {
+    return this;
   }
+
+  async getEAMD() {
+    return undefined;
+  }
+
   resolve(
     specifier: string,
     context: resolveContext,
     defaultResolve: Function
   ): Promise<{ url: string }> {
-    if (global.ONCE === undefined) global.ONCE = NodeLoaderOnce.Instance;
-    // TODO hook it
+    if (global.ONCE === undefined) global.ONCE = OnceNodeImportLoader.Instance;
+    // TODO hook it resolve/discover IOR
     return defaultResolve(specifier, context, defaultResolve);
   }
 
@@ -43,13 +42,13 @@ export class NodeLoaderOnce extends BaseOnce implements Environment {
     format: "builtin" | "commonjs" | "json" | "module" | "wasm";
     source: string | ArrayBuffer | Int8Array;
   } {
-    // TODO hook it
+    // TODO hook it load via IOR
     return defaultLoad(url, context, defaultLoad);
   }
 }
 
-const load = NodeLoaderOnce.Instance.load;
-const resolve = NodeLoaderOnce.Instance.resolve;
+const load = OnceNodeImportLoader.Instance.load;
+const resolve = OnceNodeImportLoader.Instance.resolve;
 export { load, resolve };
 
 type resolveContext = {
