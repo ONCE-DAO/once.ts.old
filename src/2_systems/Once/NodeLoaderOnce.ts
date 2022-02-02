@@ -16,7 +16,7 @@ export class NodeLoaderOnce extends BaseOnce implements Environment {
   }
 
   startAsync = async () => this;
-  installRepository = async () => undefined;
+  getEAMDRepository = async () => undefined;
   foo() {
     let f = {
       conditions: [],

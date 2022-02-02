@@ -1,29 +1,35 @@
 import { OnceMode, OnceState } from "../../3_services/Once.interface";
 import { Once as OnceInterface } from "../../3_services/Once.interface";
-import { EAMDRepository } from "../EAMDRepository.class";
+import { AbstractEAMD } from "../EAMD/AbstractEAMD.class";
 
 export abstract class BaseOnce implements OnceInterface {
-  private creationDate: number;
+  private creationDate: Date;
   public mode: OnceMode = OnceMode.BOOTING;
   protected state: OnceState = OnceState.DISCOVER;
-  protected eamdRepository: EAMDRepository | undefined;
+  protected eamdRepository: AbstractEAMD | undefined;
 
   protected constructor(global: typeof globalThis) {
-    this.creationDate = Date.now();
+    this.creationDate = new Date();
   }
 
   abstract startAsync(): Promise<BaseOnce>;
-  abstract installRepository(): Promise<EAMDRepository | undefined>;
+  abstract getEAMDRepository(): Promise<AbstractEAMD | undefined>;
 
   static async start(): Promise<BaseOnce> {
     console.log("Once.class static start");
     const once = await this.discover();
-    const discovered = Date.now();
-    once.eamdRepository = await once.installRepository();
-    const repoInstalled = Date.now();
+    once.eamdRepository = await once.getEAMDRepository();
     await once.startAsync();
     console.log(
-      `ONCE created [${once.creationDate}] discovered [${discovered}] installed [${repoInstalled}] mode [${once.mode}] state [${once.state}]`
+      `ONCE
+       created [${once.creationDate.toISOString()}] 
+       installed [${
+         once.eamdRepository === undefined
+           ? false
+           : once.eamdRepository.installedAt?.toISOString()
+       }]
+       mode [${once.mode}]
+       state [${once.state}]`
     );
     return once;
   }
@@ -31,7 +37,6 @@ export abstract class BaseOnce implements OnceInterface {
   static async discover(): Promise<BaseOnce> {
     throw new Error("Not implemented in BaseClass");
   }
-
 
   protected static get isBrowser() {
     return (

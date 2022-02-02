@@ -17,5 +17,5 @@ constructor() {
   
 }
   startAsync = async () => this;
-  installRepository = async () => undefined;
+  getEAMDRepository = async () => undefined;
 }

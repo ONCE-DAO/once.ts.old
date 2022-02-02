@@ -1,7 +1,9 @@
 import { OnceMode, OnceState } from "../../3_services/Once.interface";
 import { BaseOnce } from "./BaseOnce.class";
-import { EAMDRepository } from "../EAMDRepository.class";
+import { AbstractEAMD } from "../EAMD/AbstractEAMD.class";
 import { Environment } from "../../3_services/Enviroment.interface";
+import { RootEAMD } from "../EAMD/RootEAMD.class";
+import { UserEAMD } from "../EAMD/UserEAMD.class";
 
 export class NodeOnce extends BaseOnce implements Environment {
   ENV = process.env;
@@ -18,8 +20,17 @@ export class NodeOnce extends BaseOnce implements Environment {
     return this;
   }
 
-  async installRepository(): Promise<EAMDRepository | undefined> {
-    //TODO install Repo
-    return undefined;
+  async getEAMDRepository(): Promise<AbstractEAMD | undefined> {
+    if (await RootEAMD.hasWriteAccess())
+      if (await RootEAMD.isInstalled())
+        return await RootEAMD.getInstalled();
+      else return await RootEAMD.install();
+
+    if (await UserEAMD.hasWriteAccess())
+      if (await UserEAMD.isInstalled())
+        return await UserEAMD.getInstalled();
+      else return await UserEAMD.install();
+
+    throw new Error("User has no access to either root or user repository");
   }
 }
