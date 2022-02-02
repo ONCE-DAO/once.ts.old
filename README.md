@@ -19,3 +19,11 @@ git clone git@github.com:ONCE-DAO/once.ts.git
 cd ~/tmp/dev/once.ts
 npm i
 ```
+
+
+
+As a result Once will be 
+- started
+- discover that it is not installed
+- intsall the EAMD.ucp repository in your users folder ```cd ~/EAMD.ucp```
+- then you can open a new VS Code Window in with Open Folder ```~/EAMD.ucp```
