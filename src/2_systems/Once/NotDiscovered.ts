@@ -1,5 +1,5 @@
 import { OnceMode, OnceState } from "../../3_services/Once.interface";
-import { AbstractEAMD } from "../EAMD/AbstractEAMD.class";
+import { DefaultEAMD } from "../EAMD/DefaultEAMD.class";
 import { BaseOnce as Once } from "./BaseOnce.class";
 
 export class NotDiscovered extends Once {
@@ -17,7 +17,7 @@ export class NotDiscovered extends Once {
   async start(): Promise<Once> {
     return this;
   }
-  async getEAMD(): Promise<AbstractEAMD | undefined> {
+  async getEAMD(): Promise<DefaultEAMD | undefined> {
     return undefined;
   }
 }

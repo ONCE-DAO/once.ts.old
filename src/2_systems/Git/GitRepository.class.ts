@@ -23,7 +23,7 @@ type Result = {
 export class GitRepository {
   protected gitRepo?: [SimpleGit, string];
 
-  static get newInstance() {
+  static get getInstance() {
     return new GitRepository();
   }
 

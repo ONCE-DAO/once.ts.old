@@ -3,7 +3,7 @@ import { join } from "path";
 import { GitRepository, GitRepositoryParameter } from "./GitRepository.class";
 
 export class EAMDGitRepository extends GitRepository {
-  static get newInstance() {
+  static get getInstance() {
     return new EAMDGitRepository();
   }
 
@@ -15,6 +15,7 @@ export class EAMDGitRepository extends GitRepository {
     this.copy(process.cwd(), ".npmrc");
     return this;
   }
+  
   private copy(currentFolder: string, folder: string) {
     if (!this.gitRepo) throw new Error("not init ...");
 

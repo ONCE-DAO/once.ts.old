@@ -10,7 +10,7 @@ export abstract class Once extends BaseOnce {
 
     if (this.isNode) {
       if ((await this.isNodeLoader()) && global.ONCE) return global.ONCE;
-      return (await import("./Once/OnceNodeServer.class.js")).OnceNodeServer.newInstance;
+      return (await import("./Once/OnceNodeServer.class.js")).OnceNodeServer.getInstance;
     }
     if (this.isBrowser){
 

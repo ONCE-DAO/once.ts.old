@@ -1,9 +1,9 @@
 import { EAMD } from "../../3_services/EAMD.interface";
-import { AbstractEAMD } from "./AbstractEAMD.class";
+import { DefaultEAMD } from "./DefaultEAMD.class";
 import os from "os";
 import path from "path";
 
-export class UserEAMD extends AbstractEAMD {
+export class UserEAMD extends DefaultEAMD {
   preferredFolder = [os.userInfo().homedir];
 
   static getInstance(): EAMD {

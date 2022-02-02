@@ -1,6 +1,6 @@
 import { OnceMode, OnceState } from "../../3_services/Once.interface";
 import { BaseOnce } from "./BaseOnce.class";
-import { AbstractEAMD } from "../EAMD/AbstractEAMD.class";
+import { DefaultEAMD } from "../EAMD/DefaultEAMD.class";
 import { Environment } from "../../3_services/Enviroment.interface";
 import { RootEAMD } from "../EAMD/RootEAMD.class";
 import { UserEAMD } from "../EAMD/UserEAMD.class";
@@ -10,7 +10,7 @@ export class OnceNodeServer extends BaseOnce implements Environment {
   public mode = OnceMode.NODE_JS;
   protected state = OnceState.DISCOVER_SUCESS;
 
-  static get newInstance() {
+  static get getInstance() {
     return new OnceNodeServer(global);
   }
 
@@ -19,7 +19,7 @@ export class OnceNodeServer extends BaseOnce implements Environment {
     return this;
   }
 
-  async getEAMD(): Promise<AbstractEAMD | undefined> {
+  async getEAMD(): Promise<DefaultEAMD | undefined> {
     if (await RootEAMD.hasWriteAccess())
       if (await RootEAMD.isInstalled())
         return await RootEAMD.getInstalled();

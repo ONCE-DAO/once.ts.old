@@ -7,6 +7,9 @@ import { EAMDGitRepository } from "../Git/EAMDGitRepository.class";
 import { GitRepository } from "../Git/GitRepository.class";
 import { NpmPackage } from "../NpmPackage.class";
 
+// HACK
+// TODO@PB
+// REFACTOR
 function getdevFolder(repo: GitRepository) {
   const npmPackage = NpmPackage.getByFolder(repo.folderPath);
   if (!npmPackage) throw new Error("TODO");
@@ -17,7 +20,10 @@ function getdevFolder(repo: GitRepository) {
   return join("Components", ...packageFolder, npmPackage.name || "", "dev");
 }
 
-export abstract class AbstractEAMD implements EAMD {
+export abstract class DefaultEAMD implements EAMD {
+  // TODO@MD
+  // REFACTOR
+  // ISSUE put names to enums
   private static readonly EAMD = "EAMD.ucp";
   installedAt: Date | undefined;
   preferredFolder: string[] = [];
@@ -31,11 +37,11 @@ export abstract class AbstractEAMD implements EAMD {
   static getInstalled(): EAMD {
     const instance = this.getInstance();
     instance.folder = instance.preferredFolder.find((folder) =>
-      existsSync(join(folder, AbstractEAMD.EAMD))
+      existsSync(join(folder, DefaultEAMD.EAMD))
     );
     if (!instance.folder) throw new Error("can't find installed eamd");
 
-    instance.eamdPath = join(instance.folder, AbstractEAMD.EAMD);
+    instance.eamdPath = join(instance.folder, DefaultEAMD.EAMD);
     if (!instance.eamdPath) throw new Error("repository is not installed");
     console.log("EAMD returned with path", instance.eamdPath);
     return this.getInstance().init(instance.eamdPath);
@@ -67,23 +73,23 @@ export abstract class AbstractEAMD implements EAMD {
   async install(): Promise<EAMD> {
     if (!this.folder)
       this.folder = this.preferredFolder.find((folder) =>
-        AbstractEAMD.hasWriteAccessFor(folder)
+        DefaultEAMD.hasWriteAccessFor(folder)
       );
 
     if (!this.folder) throw new Error("path is not initialised");
-    this.eamdPath = join(this.folder, AbstractEAMD.EAMD);
+    this.eamdPath = join(this.folder, DefaultEAMD.EAMD);
     if (!this.eamdPath) throw new Error("eamdPath is not initialised");
 
     mkdirSync(this.eamdPath, { recursive: true });
     mkdirSync(join(this.eamdPath, "Components"), { recursive: true });
 
     // init new local repo
-    const eamdRepo = await EAMDGitRepository.newInstance.init({
+    const eamdRepo = await EAMDGitRepository.getInstance.init({
       baseDir: this.eamdPath,
       init: true,
     });
     // get current repo
-    const oncetsRepo = await GitRepository.newInstance.init({
+    const oncetsRepo = await GitRepository.getInstance.init({
       baseDir: process.cwd(),
     });
 
@@ -93,9 +99,10 @@ export abstract class AbstractEAMD implements EAMD {
     );
     oncetsSubmodule?.build();
 
+    // HACK refactor to loader
     const onceCliFolder = join(this.folder, "tmpOnceCli");
     mkdirSync(onceCliFolder, { recursive: true });
-    const onceCli = await GitRepository.newInstance.init({
+    const onceCli = await GitRepository.getInstance.init({
       baseDir: onceCliFolder,
       clone: {
         url: "https://github.com/ONCE-DAO/once.cli.git",
@@ -106,27 +113,29 @@ export abstract class AbstractEAMD implements EAMD {
       join(eamdRepo.folderPath, getdevFolder(onceCli))
     );
     onceCliSubmodule?.build(["bin"], ["link"]);
-
     rmSync(onceCliFolder, { recursive: true });
+
     //TODO install once.webServer as submodule
     //TODO install once.browser as submodule
     this.installedAt = new Date();
-    //TODO store installedAt
+    //TODO@PB store installedAt
     console.log("EAMD installed at path", this.eamdPath);
     return this.init(this.folder);
   }
 
   init(path: string): EAMD {
-    //TODO recover installedAt
+    //TODO@PB recover installedAt
     this.eamdPath = path;
     this.folder = join(this.eamdPath, "..");
-    //TODO build all Submodules
+    //TODO@PB build all Submodules
+    // await this.update()
+
     console.log("EAMD initialised with path", this.eamdPath);
     return this;
   }
 
   update(): Promise<EAMD> {
-    //TODO implement
+    //TODO@PB implement
     throw new Error("Method not implemented.");
   }
   test(): void {

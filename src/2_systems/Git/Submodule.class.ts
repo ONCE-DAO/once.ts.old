@@ -14,6 +14,7 @@ import { NpmPackage } from "../NpmPackage.class";
 import { Once } from "../Once.class";
 import { GitRepository } from "./GitRepository.class";
 
+//TODO @PB Refactor code
 export class Submodule {
   path: string | undefined;
 
@@ -122,7 +123,7 @@ export class Submodule {
     const tmpFolder = join(root, "tmp");
     !existsSync(tmpFolder) && mkdirSync(tmpFolder);
 
-    const repo = await GitRepository.newInstance.init({
+    const repo = await GitRepository.getInstance.init({
       baseDir: join(root, "tmp"),
       clone: { url, branch },
     });
@@ -140,7 +141,7 @@ export class Submodule {
       );
     }
 
-    const eamdRepo = await GitRepository.newInstance.init({ baseDir: root });
+    const eamdRepo = await GitRepository.getInstance.init({ baseDir: root });
     const sub = await eamdRepo.addSubmodule(
       repo,
       join(eamdRepo.folderPath, getdevFolder(repo))
@@ -158,6 +159,7 @@ type AddSubmoduleArgs = {
   copyFolder?: string[];
 };
 
+// TODO refactor
 function getdevFolder(repo: GitRepository) {
   const npmPackage = NpmPackage.getByFolder(repo.folderPath);
   if (!npmPackage) throw new Error("TODO");
