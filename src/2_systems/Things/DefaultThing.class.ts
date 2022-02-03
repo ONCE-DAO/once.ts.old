@@ -1,6 +1,6 @@
 import { Thing } from "../../3_services/Thing.interface";
 
-class DefaultThing implements Thing {
+abstract class DefaultThing implements Thing {
     private _id: string | undefined;
     get id() {
         if (!this._id) {
@@ -14,6 +14,8 @@ class DefaultThing implements Thing {
         throw new Error("Method not implemented.");
     }
     static getInstance() {
+        // HACK
+        // @ts-ignore
         return new this();
     }
 }

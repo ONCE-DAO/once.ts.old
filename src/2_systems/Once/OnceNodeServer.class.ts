@@ -10,9 +10,9 @@ export class OnceNodeServer extends OnceKernel implements Environment {
   public mode = OnceMode.NODE_JS;
   state = OnceState.DISCOVER_SUCESS;
 
-  static get getInstance() {
-    return new OnceNodeServer(global);
-  }
+  // static get getInstance() {
+  //   return new OnceNodeServer(global);
+  // }
 
   async start(): Promise<Once> {
     console.log("\nStarting OnceNodeServer")

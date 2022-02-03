@@ -1,5 +1,6 @@
 import DefaultThing from "./DefaultThing.class";
 import { Once as OnceInterface } from "../../3_services/Once.interface";
+import UrlInterface, { urlProtocol } from "../../3_services/Url.interface";
 
 declare global {
     var ONCE: OnceInterface | undefined;
@@ -7,12 +8,13 @@ declare global {
 
 enum formatType { "normal", "origin", "originPath" }
 
-export default class Url extends DefaultThing {
+
+export default class Url extends DefaultThing implements UrlInterface {
 
 
     private _searchParameters: { [index: string]: any } = {};
 
-    private _protocol: string[] = [];
+    private _protocol: urlProtocol[] = [];
     private _hostName: string | undefined = undefined;
     private _port: number | undefined = undefined;
     private _pathName: string | undefined = undefined;
@@ -28,14 +30,16 @@ export default class Url extends DefaultThing {
     get href() { return this._formatUrl() }
     set href(url) { this._parseUrl(url) }
 
-    get url() { return this._formatUrl() }
-    set url(url) { this.href = url }
-
     private _parseUrl(url: string) {
         url = url || '';
         let urlParsed = url.match(/^(([^\/]+):(\/\/)?)?([^:\/]+)?(:(\d+))?(\/[^?#]*)?(\?([^#]+))?(#(.*))?$/);
         if (!urlParsed) throw new Error("Url string parse failed " + url);
-        this.protocol = (urlParsed[2] ? urlParsed[2].split(':') : []);
+        for (const protocol of (urlParsed[2] ? urlParsed[2].split(':') : [])) {
+            // @ts-ignore
+            if (typeof urlProtocol[protocol] === undefined) throw new Error("Unknown Protocol " + protocol);
+            // @ts-ignore
+            this.protocol.push(protocol);
+        }
 
         if (!urlParsed[4]) {
             if (global?.ONCE?.mode !== 'BROWSER') {
@@ -46,6 +50,7 @@ export default class Url extends DefaultThing {
                 //     this.port = serverConfig[6];
                 // }
             } else {
+                // @ts-ignore
                 this.protocol.push(document.location.protocol.replace(':', ''));
                 this.hostName = document.location.hostname;
                 this._port = +document.location.port;
@@ -63,14 +68,15 @@ export default class Url extends DefaultThing {
         return formatType;
     }
 
-    _formatUrl(protocolFilter: string[] = [], type: formatType = formatType.normal) {
+    private _formatUrl(protocolFilter: string[] = [], type: formatType = formatType.normal) {
         let url = '';
         let protocol;
         let hostName = this.hostName;
         let port = this.port;
 
         if (protocolFilter.length > 0) {
-            protocol = this.protocol.filter(p => { return protocolFilter.indexOf(p) >= 0 })
+            // @ts-ignore
+            protocol = this.protocol.filter(p => { return protocolFilter.includes(p) })
         } else {
             protocol = this.protocol
         }
@@ -88,7 +94,7 @@ export default class Url extends DefaultThing {
         return url;
     }
 
-    get protocol() { return this._protocol }
+    get protocol(): urlProtocol[] { return this._protocol }
     get hostName(): string | undefined { return this._hostName }
     get port() { return this._port }
     get pathName() { return this._pathName }
@@ -108,7 +114,7 @@ export default class Url extends DefaultThing {
     get host() { return this._hostName + (this._port ? ':' + this._port : '') }
     get origin() { return this._formatUrl(['https', 'http', 'ws', 'wss'], formatType.origin) }
 
-    get isOwnOrigin() {
+    get isOwnOrigin(): boolean {
         throw new Error("Not implemented yet");
         /*
          if (!this.hostName) {
@@ -123,11 +129,11 @@ export default class Url extends DefaultThing {
 
     //get defaultOrigin() { return "https://" + ONCE.ENV.ONCE_DOCKER_HOST + ":" + ONCE.httpsPort }
     //get localFileOrigin() { return ONCE.mode == Once.MODE_NODE_SERVER ? "file://" + ONCE.repositoryRootPath : ONCE.repositoryRootPath }
-    get searchParameters(): { [index: string]: any } { return this._searchParameters }
+    get searchParameters(): { [index: string]: string } { return this._searchParameters }
 
 
 
-    set protocol(value: string[]) {
+    set protocol(value: urlProtocol[]) {
         value = value || [];
 
         // TODO@BE Make it unique
@@ -180,7 +186,7 @@ export default class Url extends DefaultThing {
     }
 
     get isIOR(): boolean {
-        return (this.protocol && this.protocol[0] == 'ior' ? true : false);
+        return (this.protocol && this.protocol.includes(urlProtocol.ior) ? true : false);
     }
 
     clone() {

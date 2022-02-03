@@ -4,6 +4,7 @@ import Url from "./Url.class"
 import { Once as OnceInterface } from "../../3_services/Once.interface";
 import Loader, { loadingConfig } from "../../3_services/Loader.interface";
 import IorInterface from "../../3_services/IOR.interface";
+import { urlProtocol } from "../../3_services/Url.interface";
 
 
 declare global {
@@ -58,8 +59,8 @@ export class IOR extends Url implements IorInterface {
     // Extra setter to add ior Protocol 
     set href(value) {
         super.href = value;
-        if (!this.protocol.includes('ior')) {
-            this.protocol.unshift('ior');
+        if (!this.protocol.includes(urlProtocol.ior)) {
+            this.protocol.unshift(urlProtocol.ior);
         }
     }
 
@@ -73,7 +74,7 @@ export class IOR extends Url implements IorInterface {
     get id() {
         if (this.searchParameters?.id) return this.searchParameters.id
 
-        if (this.protocol.includes('ude')) {
+        if (this.protocol.includes(urlProtocol.ude)) {
             const id = this.pathName?.split('/').pop();
             if (id) return id;
         }
@@ -81,7 +82,7 @@ export class IOR extends Url implements IorInterface {
     }
 
     set id(newId) {
-        if (this.protocol.includes('ude')) {
+        if (this.protocol.includes(urlProtocol.ude)) {
             let path = this.pathName?.split('/')
             if (!path) throw new Error('Wron ude Format')
             path.splice(-1)
@@ -107,9 +108,10 @@ export class IOR extends Url implements IorInterface {
     get iorUniquePath() {
         let result = 'ior:';
 
-        if (!this.protocol.includes('ude')) {
-            //@ts-nocheck
-            result += this.origin || global.ONCE?.ENV.ONCE_DEFAULT_URL;
+        if (!this.protocol.includes(urlProtocol.ude)) {
+            //TODO@BE hack
+            //@ts-ignore
+            result += this.origin || global.ONCE?.ENV?.ONCE_DEFAULT_URL;
         }
         result += this.pathName;
         return result;

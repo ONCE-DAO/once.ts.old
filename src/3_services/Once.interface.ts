@@ -1,5 +1,6 @@
 import { Thing } from "./Thing.interface";
 import { EAMD } from "./EAMD.interface";
+import { Environment } from "./Enviroment.interface";
 
 /* eslint-disable no-unused-vars */
 export enum OnceState {
@@ -23,7 +24,6 @@ export enum OnceMode {
 }
 
 export interface Once extends Thing {
-  ENV: { [index: string]: string };
   eamd: EAMD | undefined;
   creationDate: Date
   mode: OnceMode;

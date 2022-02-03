@@ -1,16 +1,17 @@
+import { Environment } from "../../3_services/Enviroment.interface";
 import { OnceMode, OnceState } from "../../3_services/Once.interface";
 import { Once } from "../../3_services/Once.interface";
 import { DefaultEAMD as EAMD } from "../EAMD/DefaultEAMD.class";
+import DefaultThing from "../Things/DefaultThing.class";
 
-export abstract class OnceKernel implements Once {
+export abstract class OnceKernel extends DefaultThing implements Once {
   creationDate: Date;
   public mode: OnceMode = OnceMode.BOOTING;
   state: OnceState = OnceState.DISCOVER;
   eamd: EAMD | undefined;
 
-  ENV = {};
-
   protected constructor(global: typeof globalThis) {
+    super();
     this.creationDate = new Date();
     // TODO @ PB check node loader sequence side effects
     // global.ONCE = this
