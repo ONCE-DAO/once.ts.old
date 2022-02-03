@@ -23,7 +23,7 @@ export enum OnceMode {
 }
 
 export interface Once extends Thing {
-  ENV: object;
+  ENV: { [index: string]: string };
   eamd: EAMD | undefined;
   creationDate: Date
   mode: OnceMode;
