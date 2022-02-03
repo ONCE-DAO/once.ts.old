@@ -7,3 +7,4 @@ export class DefaultThing implements Thing {
     }
 
 }
+export default DefaultThing;

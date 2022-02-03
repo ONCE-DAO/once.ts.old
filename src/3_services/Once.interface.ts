@@ -19,10 +19,11 @@ export enum OnceMode {
   WEB_WORKER = "WEB_WORKER",
   SERVICE_WORKER = "SERVICE_WORKER",
   I_FRAME = "I_FRAME",
-  NOT_DISCOVERED="NOT_DISCOVERED"
+  NOT_DISCOVERED = "NOT_DISCOVERED"
 }
 
 export interface Once extends Thing {
+  ENV: object;
   eamd: EAMD | undefined;
   creationDate: Date
   mode: OnceMode;
