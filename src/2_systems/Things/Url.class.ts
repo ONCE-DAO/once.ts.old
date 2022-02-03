@@ -8,7 +8,6 @@ declare global {
 
 enum formatType { "normal", "origin", "originPath" }
 
-
 export default class Url extends DefaultThing implements UrlInterface {
 
 

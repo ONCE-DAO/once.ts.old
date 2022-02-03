@@ -11,6 +11,7 @@ export interface Loader {
 
 export interface LoaderStatic {
   canHandle(ior: IorInterface): number
+  factory(ior: IorInterface): Loader
 }
 
 export default Loader;

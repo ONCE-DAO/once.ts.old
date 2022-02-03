@@ -15,7 +15,6 @@ declare global {
 export class IOR extends Url implements IorInterface {
 
     private _referencedObject: any;
-    private _objectID: string = "";
     private _loader: Loader | undefined;
 
     // static async load<T extends Thing>(url: string, name: string): Promise<{ new(): T } | undefined> {
