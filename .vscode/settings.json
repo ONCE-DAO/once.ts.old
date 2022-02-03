@@ -21,5 +21,6 @@
     "WARN",
     "REFACTOR",
     "ISSUE"
-  ]
+  ],
+  "jest.jestCommandLine": "npm run test --"
 }

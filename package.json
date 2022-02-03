@@ -22,10 +22,13 @@
     "start:no-loader": "node src/2_systems/Once.class.js",
     "rebuild:ts": "node --loader ts-node/esm ./src/Rebuild.ts",
     "rebuild": "node src/Rebuild.js",
-    "dev":"npm run prepare:run"
+    "dev": "npm run prepare:run",
+    "test": "ts-node  node_modules/jest/bin/jest.js --config jest.config.mjs" 
   },
   "devDependencies": {
+    "@types/jest": "^27.4.0",
     "@types/node": "^17.0.14",
+    "jest": "^27.4.7",
     "npm-run-all": "^4.1.5",
     "thinglish-transformer": "github:ONCE-DAO/thinglish.transformer",
     "ts-node": "^10.4.0",
