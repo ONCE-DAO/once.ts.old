@@ -2,4 +2,3 @@ node_modules
 dist
 tsconfig.build.json
 coverage
-test

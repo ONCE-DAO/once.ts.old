@@ -1,4 +1,4 @@
-//import DefaultThing from "./DefaultThing.class";
+import DefaultThing from "./DefaultThing.class";
 import { Once as OnceInterface } from "../../3_services/Once.interface";
 
 declare global {
@@ -7,7 +7,7 @@ declare global {
 
 enum formatType { "normal", "origin", "originPath" }
 
-export default class Url {
+export default class Url extends DefaultThing {
 
 
     private _searchParameters: { [index: string]: any } = {};
