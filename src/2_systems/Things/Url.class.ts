@@ -10,7 +10,7 @@ enum formatType { "normal", "origin", "originPath" }
 export class Url extends DefaultThing {
 
 
-    private _searchParameters: object = {};
+    private _searchParameters: { [index: string]: any } = {};
 
     private _protocol: string[] = [];
     private _hostName: string | undefined = undefined;
@@ -89,7 +89,7 @@ export class Url extends DefaultThing {
     }
 
     get protocol() { return this._protocol }
-    get hostName() { return this._hostName }
+    get hostName(): string | undefined { return this._hostName }
     get port() { return this._port }
     get pathName() { return this._pathName }
 
@@ -109,67 +109,40 @@ export class Url extends DefaultThing {
     get origin() { return this._formatUrl(['https', 'http', 'ws', 'wss'], formatType.origin) }
 
     get isOwnOrigin() {
-        if (!this.hostName) {
-            return true
-        } else if (this.origin === global?.ONCE?.ENV?.ONCE_DEFAULT_URL) {
-            return true;
-        }
+        throw new Error("Not implemented yet");
+        /*
+         if (!this.hostName) {
+             return true
+         } else if (this.origin === global?.ONCE?.ENV?.['ONCE_DEFAULT_URL']) {
+             return true;
+         }
+         */
     }
 
-    get originPath() { return this._formatUrl(['https', 'http', 'ws', 'wss'], 'originPath') }
+    get originPath() { return this._formatUrl(['https', 'http', 'ws', 'wss'], formatType.originPath) }
 
-    get defaultOrigin() { return "https://" + ONCE.ENV.ONCE_DOCKER_HOST + ":" + ONCE.httpsPort }
-    get localFileOrigin() { return ONCE.mode == Once.MODE_NODE_SERVER ? "file://" + ONCE.repositoryRootPath : ONCE.repositoryRootPath }
-    get searchParameters() { return this._private.searchParameters }
+    //get defaultOrigin() { return "https://" + ONCE.ENV.ONCE_DOCKER_HOST + ":" + ONCE.httpsPort }
+    //get localFileOrigin() { return ONCE.mode == Once.MODE_NODE_SERVER ? "file://" + ONCE.repositoryRootPath : ONCE.repositoryRootPath }
+    get searchParameters(): { [index: string]: any } { return this._searchParameters }
 
 
 
-    set protocol(value) {
+    set protocol(value: string[]) {
         value = value || [];
-        if (!Array.isArray(value)) {
-            throw Error("Only arrays are allowed in the Protocol parameter");
-        }
-        if (!(value instanceof ArraySet)) {
-            this._private.protocol = new ArraySet();
-            value.forEach(x => this._private.protocol.push(x))
-        } else {
-            this._private.protocol = value;
-        }
-        if (!this._private.protocol.hasProtocol) {
-            this._private.protocol.hasProtocol = function hasProtocol(p) {
-                if (p instanceof RegExp) {
-                    for (let i in this) {
-                        if (!isNaN(i) && this[i].match(p)) return true;
-                    }
-                    return false;
-                } else {
-                    return this.indexOf(p) !== -1;
-                }
-            };
-        }
-        //if (!this._private.protocol.remove) {
-        this._private.protocol.remove = function remove(r) {
-            if (r instanceof RegExp) {
-                for (let i in this) {
-                    if (!isNaN(i) && this[i].match(r)) this.splice(i, 1);
-                }
-                //this.protocol = this.filter( x => { return (x.match(r) ? false : true)})
-            } else {
-                const id = this.indexOf(r);
-                if (id >= 0) this.splice(id, 1);
-            }
-        };
-        //}
+
+        // TODO@BE Make it unique
+        this._protocol = value;
+
     }
-    set hostName(value) { this._private.hostName = value }
-    set port(value) { this._private.port = value }
-    set pathName(value) { this._private.pathName = value }
-    set search(value) {
+    set hostName(value: string | undefined) { this._hostName = value }
+    set port(value: number | undefined) { this._port = value }
+    set pathName(value: string | undefined) { this._pathName = value }
+    set search(value: string | undefined) {
         if (!value) {
-            this._private.searchParameters = {};
+            this._searchParameters = {};
             return;
         }
-        let parameters = {};
+        let parameters: { [index: string]: any } = {};
         value = value.replace(/^\?/, '');
         value = decodeURIComponent(value);
         value.split('&').forEach(x => {
@@ -180,10 +153,10 @@ export class Url extends DefaultThing {
             let value = (typeof param[1] == 'string' && (param[1].startsWith('{') || param[1].startsWith('[')) ? JSON.parse(param[1]) : param[1]);
             parameters[param[0]] = value;
         })
-        this._private.searchParameters = parameters;
+        this._searchParameters = parameters;
     }
-    set hash(value) { this._private.hash = value }
-    set searchParameters(value) { this._private.searchParameters = value }
+    set hash(value) { this.hash = value }
+    set searchParameters(value: { [index: string]: any }) { this._searchParameters = value }
 
     get fileType() {
         if (!this.pathName) return null;
@@ -206,19 +179,22 @@ export class Url extends DefaultThing {
         return this._formatUrl(['https', 'http', 'ws', 'wss']);
     }
 
-    get isIOR() {
+    get isIOR(): boolean {
         return (this.protocol && this.protocol[0] == 'ior' ? true : false);
     }
 
     clone() {
-        let clone = this.type.class.getInstance();
-        Object.keys(this._private).forEach(key => {
-            clone._private[key] = this._private[key];
-        })
-        clone.protocol = [...this.protocol];
-        clone.searchParameters = { ...clone.searchParameters };
 
-        return clone;
+        throw new Error("Not implemented yet");
+
+        // let clone = this.type.class.getInstance();
+        // Object.keys(this._private).forEach(key => {
+        //     clone._private[key] = this._private[key];
+        // })
+        // clone.protocol = [...this.protocol];
+        // clone.searchParameters = { ...clone.searchParameters };
+
+        // return clone;
     }
 
 }
