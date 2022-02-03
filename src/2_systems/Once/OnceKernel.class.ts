@@ -8,6 +8,8 @@ export abstract class OnceKernel implements Once {
   state: OnceState = OnceState.DISCOVER;
   eamd: EAMD | undefined;
 
+  ENV = {};
+
   protected constructor(global: typeof globalThis) {
     this.creationDate = new Date();
     // TODO @ PB check node loader sequence side effects
@@ -25,19 +27,18 @@ export abstract class OnceKernel implements Once {
     const once = await this.discover();
     once.eamd = await once.getEAMD();
     await once.start();
-    
+
     console.log(
       `ONCE
        created [${once.creationDate.toISOString()}] 
-       installed [${
-         once.eamd === undefined
-           ? false
-           : (once.eamd.installedAt
-              ? once.eamd.installedAt?.toISOString()
-              : "existed already" 
-              )
-       
-       }]
+       installed [${once.eamd === undefined
+        ? false
+        : (once.eamd.installedAt
+          ? once.eamd.installedAt?.toISOString()
+          : "existed already"
+        )
+
+      }]
        mode [${once.mode}]
        state [${once.state}]`
     );

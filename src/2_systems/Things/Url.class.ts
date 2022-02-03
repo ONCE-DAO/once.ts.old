@@ -1,4 +1,4 @@
-import DefaultThing from "./DefaultThing.class";
+//import DefaultThing from "./DefaultThing.class";
 import { Once as OnceInterface } from "../../3_services/Once.interface";
 
 declare global {
@@ -7,7 +7,7 @@ declare global {
 
 enum formatType { "normal", "origin", "originPath" }
 
-export class Url extends DefaultThing {
+export default class Url {
 
 
     private _searchParameters: { [index: string]: any } = {};
@@ -142,7 +142,7 @@ export class Url extends DefaultThing {
             this._searchParameters = {};
             return;
         }
-        let parameters: { [index: string]: any } = {};
+        let parameters: { [index: string]: string } = {};
         value = value.replace(/^\?/, '');
         value = decodeURIComponent(value);
         value.split('&').forEach(x => {
@@ -198,3 +198,4 @@ export class Url extends DefaultThing {
     }
 
 }
+

@@ -16,12 +16,13 @@
         "--inspect-brk",
         "--experimental-modules",
         "--experimental-loader",
-        "${workspaceFolder}/dist/2_systems/Once/OnceNodeImportLoader.js"
+        "${workspaceFolder}/dist/src/2_systems/Once/OnceNodeImportLoader.js"
       ],
       "preLaunchTask": "tsc: build - tsconfig.json",
       "outFiles": [
         "${workspaceFolder}/dist/**/*.js"
-      ]
+      ],
+      "console": "integratedTerminal"
     }
   ]
 }

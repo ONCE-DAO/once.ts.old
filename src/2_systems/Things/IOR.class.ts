@@ -1,9 +1,7 @@
-// @ts-nocheck
 import { Thing } from "../../exports";
-import { DefaultThing } from "../../exports";
 
 
-export class IOR extends DefaultThing {
+export class IOR {
     static async load<T extends Thing>(url: string, name: string): Promise<{ new(): T } | undefined> {
         try {
             const imported: any = await import(url)

@@ -1,6 +1,8 @@
 // import { load, resolve } from "./Once/OnceNodeImportLoader";
 // export { load, resolve };
 
+
+
 import { Once } from "./Once/Once";
 
 
@@ -13,7 +15,7 @@ console.log("foo");
 // export { load, resolve };
 
 // @ts-ignore
-import { IOR } from "ior:esm:git:tla.EAM.Once";
+let IOR = await import("ior:esm:git:tla.EAM.Once");
 IOR;
 
 

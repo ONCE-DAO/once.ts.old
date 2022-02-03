@@ -42,7 +42,7 @@ export class OnceNodeImportLoader extends OnceKernel implements Environment {
         return defaultResolve("../exports.js", context, defaultResolve);
       } else {
         // @ts-ignore
-        IOR.getInstance().init(specifier);
+        //IOR.getInstance().init(specifier);
 
       }
       specifier

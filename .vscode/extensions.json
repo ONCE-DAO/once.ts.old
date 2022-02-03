@@ -3,6 +3,7 @@
 		"dbaeumer.vscode-eslint",
 		"cancerberosgx.vscode-typescript-refactors",
 		"gruntfuggly.todo-tree",
-		"eamodio.gitlens"
+		"eamodio.gitlens",
+		"orta.vscode-jest"
 	]
 }

@@ -6,6 +6,8 @@ export class NotDiscovered extends OnceKernel {
   state = OnceState.DISCOVER_FAILED;
   mode = OnceMode.NOT_DISCOVERED;
 
+  ENV = {};
+
   static get instance() {
     return new NotDiscovered();
   }
