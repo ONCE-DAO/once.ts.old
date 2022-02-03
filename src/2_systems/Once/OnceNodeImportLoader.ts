@@ -2,6 +2,9 @@ import { Environment } from "../../3_services/Enviroment.interface";
 import { Once, OnceMode, OnceState } from "../../3_services/Once.interface";
 import { OnceKernel } from "./OnceKernel.class";
 
+import { IOR } from "../../exports";
+
+
 export class OnceNodeImportLoader extends OnceKernel implements Environment {
 
   ENV = process.env;
@@ -32,6 +35,19 @@ export class OnceNodeImportLoader extends OnceKernel implements Environment {
   ): Promise<{ url: string }> {
     if (global.ONCE === undefined) global.ONCE = OnceNodeImportLoader.Instance;
     // TODO hook it resolve/discover IOR
+    if (specifier.startsWith('ior:')) {
+
+      // Once Unit shortcut
+      if (specifier.startsWith('ior:esm:git:tla.EAM.Once')) {
+        return defaultResolve("../exports.js", context, defaultResolve);
+      } else {
+        // @ts-ignore
+        IOR.getInstance().init(specifier);
+
+      }
+      specifier
+
+    }
     return defaultResolve(specifier, context, defaultResolve);
   }
 
@@ -44,6 +60,7 @@ export class OnceNodeImportLoader extends OnceKernel implements Environment {
     source: string | ArrayBuffer | Int8Array;
   } {
     // TODO hook it load via IOR
+    console.log(`Import: ${url}`)
     return defaultLoad(url, context, defaultLoad);
   }
 }

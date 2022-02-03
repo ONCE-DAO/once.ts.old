@@ -8,11 +8,20 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Once debugger",
-      "skipFiles": ["<node_internals>/**"],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
       "program": "${workspaceFolder}/src/2_systems/Once.class.ts",
-      "runtimeArgs": ["--inspect-brk","--experimental-modules","--experimental-loader","${workspaceFolder}/dist/2_systems/Once.class.js"],
+      "runtimeArgs": [
+        "--inspect-brk",
+        "--experimental-modules",
+        "--experimental-loader",
+        "${workspaceFolder}/dist/2_systems/Once/OnceNodeImportLoader.js"
+      ],
       "preLaunchTask": "tsc: build - tsconfig.json",
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js"
+      ]
     }
   ]
 }
