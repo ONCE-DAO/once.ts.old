@@ -1,36 +1,39 @@
-import { Once, OnceMode, OnceState } from "../../3_services/Once.interface";
-import { OnceKernel } from "./OnceKernel.class";
-import { DefaultEAMD } from "../EAMD/DefaultEAMD.class";
-import { Environment } from "../../3_services/Enviroment.interface";
+import EAMD from "../../3_services/EAMD.interface";
+import Once, { OnceMode, OnceState } from "../../3_services/Once.interface";
 import { RootEAMD } from "../EAMD/RootEAMD.class";
 import { UserEAMD } from "../EAMD/UserEAMD.class";
+import DefaultThing from "../Things/DefaultThing.class";
 
-export class OnceNodeServer extends OnceKernel implements Environment {
-  ENV = process.env;
-  public mode = OnceMode.NODE_JS;
-  state = OnceState.DISCOVER_SUCESS;
+export default class OnceNodeServer extends DefaultThing<Once> implements Once {
+  mode = OnceMode.NODE_JS;
+  state = OnceState.DISCOVER_SUCCESS;
+  eamd: EAMD;
+  creationDate: Date;
 
-  static get getInstance() {
-    return new OnceNodeServer(global);
+  private constructor(eamd: EAMD) {
+    super();
+    this.creationDate = new Date();
+    this.eamd = eamd;
   }
 
   async start(): Promise<Once> {
-    console.log("\nStarting OnceNodeServer")
-    //TODO start once.webServer
-    return this;
+    return await OnceNodeServer.start();
   }
 
-  async getEAMD(): Promise<DefaultEAMD | undefined> {
-    if (await RootEAMD.hasWriteAccess())
-      if (await RootEAMD.isInstalled())
-        return await RootEAMD.getInstalled();
-      else return await RootEAMD.install();
+  static async start(): Promise<Once> {
+    return new OnceNodeServer(await this.initEAMD());
+  }
 
-    if (await UserEAMD.hasWriteAccess())
-      if (await UserEAMD.isInstalled())
-        return await UserEAMD.getInstalled();
-      else return await UserEAMD.install();
+  static async initEAMD(): Promise<EAMD> {
+    // const rootEAMD = RootEAMD.getInstance().init();
+    // if (rootEAMD.hasWriteAccess())
+    //   if (rootEAMD.isInstalled()) return await rootEAMD.getInstalled();
+    //   else return await rootEAMD.install();
 
+    const userEAMD = UserEAMD.getInstance().init();
+    if (userEAMD.hasWriteAccess())
+      if (userEAMD.isInstalled()) return await userEAMD.getInstalled();
+      else return await userEAMD.install();
     throw new Error("User has no access to either root nor user repository");
   }
 }

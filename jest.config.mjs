@@ -4,7 +4,14 @@
  */
 
 export default {
-  // All imported modules in your tests should be mocked automatically
+  preset: "ts-jest",
+  testEnvironment: "node",
+
+  transform: {
+    ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js",
+  },
+  testRegex: "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+  moduleFileExtensions: ["ts", "js"], // All imported modules in your tests should be mocked automatically
   // automock: false,
 
   // Stop running tests after `n` failures
@@ -190,10 +197,7 @@ export default {
   // Whether to use watchman for file crawling
   // watchman: true,
 
-  collectCoverageFrom: [
-    "src/**/*.{ts,tsx}",
-    "!src/Rebuild.ts"
-  ],
+  collectCoverageFrom: ["src/**/*.{ts,tsx}", "!src/Rebuild.ts"],
   coverageThreshold: {
     global: {
       statements: 75,

@@ -1,62 +1,66 @@
-import { execSync } from "child_process";
 import { W_OK } from "constants";
-import { accessSync, existsSync, mkdirSync, rm, rmSync } from "fs";
-import { join } from "path";
-import { EAMD, EAMD_FOLDERS } from '../../3_services/EAMD.interface';
-import { EAMDGitRepository } from "../Git/EAMDGitRepository.class";
-import { GitRepository } from "../Git/GitRepository.class";
+import { accessSync, existsSync, mkdirSync, rmSync, symlinkSync } from "fs";
+import { basename, join, relative } from "path";
+import EAMD, { EAMD_FOLDERS } from "../../3_services/EAMD.interface";
+import GitRepositoryInterface from "../../3_services/GitRepository.interface";
+import DefaultGitRepository from "../Git/GitRepository.class";
 import { NpmPackage } from "../NpmPackage.class";
-import { RootEAMD } from './RootEAMD.class';
 
 // HACK
 // TODO@PB
 // REFACTOR
-function getdevFolder(repo: GitRepository) {
+function getdevFolder(repo: GitRepositoryInterface) {
   const npmPackage = NpmPackage.getByFolder(repo.folderPath);
   if (!npmPackage) throw new Error("TODO");
 
   const split = npmPackage.namespace?.split(".");
   const packageFolder = split ? split : [EAMD_FOLDERS.MISSING_NAMESPACE];
 
-  return join(EAMD_FOLDERS.COMPONENTS, ...packageFolder, npmPackage.name || "", EAMD_FOLDERS.DEV);
+  return join(
+    EAMD_FOLDERS.COMPONENTS,
+    ...packageFolder,
+    npmPackage.name || "",
+    EAMD_FOLDERS.DEV
+  );
 }
 
 export abstract class DefaultEAMD implements EAMD {
+  hasWriteAccess(): boolean {
+    if (this.installationDirectory)
+      return DefaultEAMD.hasWriteAccessFor(this.installationDirectory);
+    return false;
+  }
+  isInstalled(): boolean {
+    if (this.eamdDirectory) return existsSync(this.eamdDirectory);
+    return false;
+  }
+  async getInstalled() {
+    const eamdDirectory = this.eamdDirectory;
+    if (!eamdDirectory) throw new Error("no eamd directory");
+    if (!existsSync(eamdDirectory))
+      throw new Error("can't find installed eamd");
+    console.log("EAMD returned with path", eamdDirectory);
+    const eamdRepository = await DefaultGitRepository.getInstance().init({
+      baseDir: this.eamdDirectory,
+    });
+
+    (await eamdRepository.getSubmodules()).forEach((submodule) => {
+      submodule.installDependencies(eamdDirectory);
+      submodule.build(eamdDirectory);
+      //TODO@MD ENUMs for static constant
+      process.env.node_env === "development" && submodule?.watch(eamdDirectory);
+    });
+    return this;
+  }
+
   installedAt: Date | undefined;
   preferredFolder: string[] = [];
-  folder: string | undefined;
-  eamdPath: string | undefined;
+  installationDirectory: string | undefined;
+  eamdDirectory: string | undefined;
+  eamdRepository: GitRepositoryInterface | undefined;
 
-  static getInstance(): EAMD {
+  static getInstance(): DefaultEAMD {
     throw new Error("Not implemented in abstract class");
-  }
-
-  static getInstalled(): EAMD {
-    const instance = this.getInstance();
-    instance.folder = instance.preferredFolder.find((folder) =>
-      existsSync(join(folder, EAMD_FOLDERS.ROOT))
-    );
-    if (!instance.folder) throw new Error("can't find installed eamd");
-
-    instance.eamdPath = join(instance.folder, EAMD_FOLDERS.ROOT);
-    if (!instance.eamdPath) throw new Error("repository is not installed");
-
-    console.log("EAMD returned with path", instance.eamdPath);
-    return this.getInstance().init(instance.eamdPath);
-  }
-
-  static isInstalled(): boolean {
-    return this.getInstance().preferredFolder.some((folder) =>
-      existsSync(join(folder, EAMD_FOLDERS.ROOT))
-    );
-  }
-  static hasWriteAccess(): boolean {
-    return this.getInstance().preferredFolder.some((folder) =>
-      this.hasWriteAccessFor(folder)
-    );
-  }
-  static async install(): Promise<EAMD> {
-    return this.getInstance().install();
   }
 
   private static hasWriteAccessFor(path: string): boolean {
@@ -68,35 +72,53 @@ export abstract class DefaultEAMD implements EAMD {
     }
   }
 
+  getInstallDirectory(): string | undefined {
+    return this.preferredFolder.find((folder) =>
+      DefaultEAMD.hasWriteAccessFor(folder)
+    );
+  }
+
   async install(): Promise<EAMD> {
-    if (!this.folder)
-      this.folder = this.preferredFolder.find((folder) =>
-        DefaultEAMD.hasWriteAccessFor(folder)
-      );
-
-    if (!this.folder) throw new Error("path is not initialised");
-    this.eamdPath = join(this.folder, EAMD_FOLDERS.ROOT);
-    if (!this.eamdPath) throw new Error("eamdPath is not initialised");
-
-    mkdirSync(this.eamdPath, { recursive: true });
-    mkdirSync(join(this.eamdPath, EAMD_FOLDERS.COMPONENTS), { recursive: true });
-    mkdirSync(join(this.eamdPath, EAMD_FOLDERS.SCENARIOS), { recursive: true });
-
-    // init new local repo
-    const eamdRepo = await EAMDGitRepository.getInstance.init({
-      baseDir: this.eamdPath,
-      init: true,
+    if (!this.eamdDirectory)
+      throw new Error("cant install if directory not exists");
+    mkdirSync(this.eamdDirectory, { recursive: true });
+    this.eamdRepository = await DefaultGitRepository.getInstance().init({
+      baseDir: this.eamdDirectory,
+      clone: { url: "https://github.com/ONCE-DAO/EAMD.ucp.git" },
     });
+    //TODO@PB remove origin ;)
+    mkdirSync(join(this.eamdDirectory, EAMD_FOLDERS.COMPONENTS), {
+      recursive: true,
+    });
+    mkdirSync(join(this.eamdDirectory, EAMD_FOLDERS.SCENARIOS), {
+      recursive: true,
+    });
+    // const sym = join(process.cwd(), "..", Date.now().toString());
+    // symlinkSync(sym, process.cwd());
     // get current repo
-    const oncetsRepo = await GitRepository.getInstance.init({
+    const oncetsRepo = await DefaultGitRepository.getInstance().init({
       baseDir: process.cwd(),
     });
 
-    const oncetsSubmodule = await eamdRepo.addSubmodule(
-      oncetsRepo,
-      join(eamdRepo.folderPath, getdevFolder(oncetsRepo))
+    if (!this.eamdRepository || !oncetsRepo) throw new Error("TODO");
+
+    const devFolder = join(
+      this.eamdRepository.folderPath,
+      getdevFolder(oncetsRepo)
     );
-    oncetsSubmodule?.build();
+
+    const oncetsSubmodule = await this.eamdRepository?.addSubmodule(
+      oncetsRepo,
+      devFolder
+    );
+
+    if (oncetsSubmodule.path) {
+      oncetsSubmodule.path = relative(this.eamdDirectory, oncetsSubmodule.path);
+      oncetsSubmodule?.installDependencies(this.eamdDirectory);
+      oncetsSubmodule?.build(this.eamdDirectory);
+      process.env.node_env === "development" &&
+        oncetsSubmodule?.watch(this.eamdDirectory);
+    }
 
     // // HACK refactor to loader
     // const onceCliFolder = join(this.folder, "tmpOnceCli");
@@ -118,18 +140,27 @@ export abstract class DefaultEAMD implements EAMD {
     //TODO install once.browser as submodule
     this.installedAt = new Date();
     //TODO@PB store installedAt
-    console.log("EAMD installed at path", this.eamdPath);
-    return this.init(this.folder);
+    console.log("EAMD installed at path", this.eamdDirectory);
+
+    // const thisFolderName = basename(process.cwd());
+    // const parent =join(process.cwd(),"..")
+
+    // TODO incomment later
+    // if (oncetsSubmodule.path && devFolder) {
+    //   rmSync(process.cwd(), { recursive: true });
+    //   symlinkSync(
+    //     join(this.eamdDirectory,oncetsSubmodule.path ),
+    //     join(process.cwd())
+    //     // process.kill(process.pid)
+    //   );
+    // }
+    return this;
   }
 
-  init(path: string): EAMD {
-    //TODO@PB recover installedAt
-    this.eamdPath = path;
-    this.folder = join(this.eamdPath, "..");
-    //TODO@PB build all Submodules
-    // await this.update()
-
-    console.log("EAMD initialised with path", this.eamdPath);
+  init(): EAMD {
+    this.installationDirectory = this.getInstallDirectory();
+    if (this.installationDirectory)
+      this.eamdDirectory = join(this.installationDirectory, EAMD_FOLDERS.ROOT);
     return this;
   }
 
@@ -140,5 +171,12 @@ export abstract class DefaultEAMD implements EAMD {
   test(): void {
     //TODO implement
     throw new Error("Method not implemented.");
+  }
+
+  async discover(): Promise<object> {
+    return {
+      "tla.EAM.Once.ts": "github.com/ONCE-DAO/EAMD.ucp.git",
+      "tla.EAM.Once.cli": "github.com/ONCE-DAO/once.cli.git",
+    };
   }
 }

@@ -18,6 +18,9 @@
     "HACK",
     "FIXME",
     "TODO",
+    "TODO@BE",
+    "TODO@MD",
+    "TODO@PB",
     "WARN",
     "REFACTOR",
     "ISSUE"

@@ -1,93 +1,53 @@
-import { OnceMode, OnceState } from "../../3_services/Once.interface";
-import { Once } from "../../3_services/Once.interface";
-import { DefaultEAMD as EAMD } from "../EAMD/DefaultEAMD.class";
+import Once, { OnceRuntimeResolver } from "../../3_services/Once.interface";
 
-export abstract class OnceKernel implements Once {
-  creationDate: Date;
-  public mode: OnceMode = OnceMode.BOOTING;
-  state: OnceState = OnceState.DISCOVER;
-  eamd: EAMD | undefined;
-
-  protected constructor(global: typeof globalThis) {
-    this.creationDate = new Date();
-    // TODO @ PB check node loader sequence side effects
-    // global.ONCE = this
-  }
-
-
-  // TODO @PB&MD extract in interface
-  abstract start(): Promise<Once>;
-  abstract getEAMD(): Promise<EAMD | undefined>;
-
-  // ONCE ENTRY POINT
+export abstract class OnceKernel {
   static async start(): Promise<Once> {
-    console.log("Once.class static start");
-    const once = await this.discover();
-    once.eamd = await once.getEAMD();
-    await once.start();
-    
-    console.log(
-      `ONCE
-       created [${once.creationDate.toISOString()}] 
-       installed [${
-         once.eamd === undefined
-           ? false
-           : (once.eamd.installedAt
-              ? once.eamd.installedAt?.toISOString()
-              : "existed already" 
-              )
-       
-       }]
-       mode [${once.mode}]
-       state [${once.state}]`
-    );
-    return once;
+    const once: Once = await this.discover();
+    return await once.start();
   }
 
   static async discover(): Promise<Once> {
-    throw new Error("Not implemented in BaseClass");
-  }
+    console.log("START DISCOVER");
 
-  protected static get isBrowser() {
-    return (
-      typeof window !== "undefined" && typeof window.document !== "undefined"
-    );
-  }
-
-  protected static get isNode() {
-    return (
-      typeof process !== "undefined" &&
-      process.versions != null &&
-      process.versions.node != null
-    );
-  }
-
-  protected static async isNodeLoader(): Promise<boolean> {
-    if (global.ONCE === undefined) {
-      // any import would be hooked and set global.ONCE to NodeImportLoaderOnceInstance
-      await import("./OnceNodeImportLoader.js");
-      if (global.ONCE !== undefined) return true;
+    if (this.RuntimeIs.NODE_LOADER()) {
+      return (await import("./OnceNodeImportLoader.class.js")).default
+        .getInstance();
     }
-    return false;
+    if (this.RuntimeIs.NODE_JS()) {
+      return (await import("./OnceNodeServer.class.js")).default.start();
+    }
+    if (this.RuntimeIs.BROWSER()) {
+    }
+    if (this.RuntimeIs.SERVICE_WORKER()) {
+    }
+    if (this.RuntimeIs.WEB_WORKER()) {
+    }
+    throw "not discovered";
   }
 
-  protected static get isWebWorker() {
-    return (
-      typeof self === "object" &&
-      self.constructor &&
-      self.constructor.name === "DedicatedWorkerGlobalScope"
-    );
-  }
-
-  protected static get isServiceWorker() {
-    return (
-      typeof self === "object" &&
-      self.constructor &&
-      self.constructor.name === "ServiceWorkerGlobalScope"
-    );
-  }
-
-  protected static get isServiceWorkerSupported() {
-    return navigator && "serviceWorker" in navigator;
+  static get RuntimeIs(): OnceRuntimeResolver {
+    return {
+      BROWSER: () =>
+        typeof window !== "undefined" && typeof window.document !== "undefined",
+      NODE_JS: () =>
+        typeof process !== "undefined" &&
+        process.versions != null &&
+        process.versions.node != null &&
+        global.NODE_JS !== undefined &&
+        global.NODE_JS === true,
+      NODE_LOADER: () =>
+        typeof process !== "undefined" &&
+        process.versions != null &&
+        process.versions.node != null &&
+        global.NODE_JS === undefined,
+      SERVICE_WORKER: () =>
+        typeof self === "object" &&
+        self.constructor &&
+        self.constructor.name === "ServiceWorkerGlobalScope",
+      WEB_WORKER: () =>
+        typeof self === "object" &&
+        self.constructor &&
+        self.constructor.name === "DedicatedWorkerGlobalScope",
+    };
   }
 }

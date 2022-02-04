@@ -1,3 +1,4 @@
-export interface Thing {
-  start(): Promise<Thing>;
+export default interface Thing<T> {
+  id: string;
+  start(): Promise<T>;
 }
