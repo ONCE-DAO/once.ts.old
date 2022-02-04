@@ -1,6 +1,6 @@
 import IOR from "./IOR.interface";
 
-export type loadingConfig = { usedByClass: any }
+export type loadingConfig = { usedByClass: any } | undefined;
 
 export interface Loader {
 

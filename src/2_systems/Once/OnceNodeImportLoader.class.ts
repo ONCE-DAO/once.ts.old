@@ -2,6 +2,7 @@ import Once, { OnceMode, OnceState } from "../../3_services/Once.interface";
 
 import EAMDInterface from "../../3_services/EAMD.interface";
 import DefaultThing from "../../1_infrastructure/BaseThing.class";
+import DefaultIOR from "../Things/DefaultIOR.class";
 
 export default class OnceNodeImportLoader extends DefaultThing<Once> implements Once {
   creationDate: Date;
@@ -38,33 +39,21 @@ export default class OnceNodeImportLoader extends DefaultThing<Once> implements 
     context: resolveContext,
     defaultResolve: Function
   ): Promise<{ url: string }> {
-    if (global.ONCE === undefined)
-      global.ONCE = OnceNodeImportLoader.getInstance();
-    // TODO hook it resolve/discover IOR
-    if (specifier.startsWith("ior:")) {
-      // Once Unit shortcut
-      if (specifier.startsWith("ior:esm:git:tla.EAM.Once")) {
-        return defaultResolve("../exports.js", context, defaultResolve);
-      } else {
-        // @ts-ignore
-        //IOR.getInstance().init(specifier);
-      }
-      specifier;
-    }
+    if (global.ONCE === undefined) global.ONCE = OnceNodeImportLoader.getInstance();
 
     return defaultResolve(specifier, context, defaultResolve);
   }
 
-  load(
+  async load(
     url: string,
     context: loadContext,
     defaultLoad: Function
-  ): {
-    format: "builtin" | "commonjs" | "json" | "module" | "wasm";
-    source: string | ArrayBuffer | Int8Array;
-  } {
+  ): Promise<{ format: "builtin" | "commonjs" | "json" | "module" | "wasm"; source: string | ArrayBuffer | Int8Array; }> {
     // TODO hook it load via IOR
     // console.log(`Import: ${url}`);
+    if (url.startsWith("ior:")) {
+      return await DefaultIOR.load(url);
+    }
     return defaultLoad(url, context, defaultLoad);
   }
 
