@@ -30,12 +30,15 @@ export default class OnceNodeServer implements Once {
   }
 
   static async initEAMD(): Promise<EAMD> {
-    if (await RootEAMD.hasWriteAccess())
-      if (await RootEAMD.isInstalled()) return await RootEAMD.getInstalled();
-      else return await RootEAMD.install();
-    if (await UserEAMD.hasWriteAccess())
-      if (await UserEAMD.isInstalled()) return await UserEAMD.getInstalled();
-      else return await UserEAMD.install();
+    const rootEAMD = RootEAMD.getInstance().init()
+    if (await rootEAMD.hasWriteAccess())
+      if (await rootEAMD.isInstalled()) return await rootEAMD.getInstalled();
+      else return await rootEAMD.install();
+    const userEAMD = UserEAMD.getInstance().init()
+
+    if (await userEAMD.hasWriteAccess())
+      if (await userEAMD.isInstalled()) return await userEAMD.getInstalled();
+      else return await userEAMD.install();
     throw new Error("User has no access to either root nor user repository");
   }
 }

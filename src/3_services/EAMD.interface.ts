@@ -3,16 +3,19 @@ import GitRepository from "./NewOnce/GitRepository.interface";
 export default interface EAMD {
   installedAt: Date | undefined;
   preferredFolder: string[];
-  installationDirectory: string;
-  eamdDirectory: string;
-  eamdRepository: GitRepository | undefined
+  installationDirectory: string | undefined;
+  eamdDirectory: string | undefined;
+  eamdRepository: GitRepository | undefined;
 
   install(): Promise<EAMD>;
+  hasWriteAccess(): boolean;
+  isInstalled(): boolean;
+  getInstalled(): Promise<EAMD>;
   init(path: string): EAMD;
   update(): Promise<EAMD>;
   test(): void;
   discover(): Promise<Object>;
-  getInstallDirectory():string
+  getInstallDirectory(): string | undefined;
 }
 
 export enum EAMD_FOLDERS {

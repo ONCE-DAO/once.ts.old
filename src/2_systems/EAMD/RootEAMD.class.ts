@@ -13,8 +13,8 @@ export class RootEAMD extends DefaultEAMD {
     return eamd;
   }
 
-  init(path: string) {
-    const eamd = super.init(path);
+  init() {
+    const eamd = super.init();
     return eamd;
   }
 }

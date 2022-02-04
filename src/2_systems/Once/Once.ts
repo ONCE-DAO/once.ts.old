@@ -21,7 +21,8 @@ export abstract class Once extends OnceKernel {
     }
     if (this.isWebWorker) {
     }
-    return (await import("./NotDiscovered.js")).NotDiscovered.instance;
+    throw "this class"
+    // return (await import("./NotDiscovered.js")).NotDiscovered.instance;
   }
 
 

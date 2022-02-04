@@ -5,10 +5,12 @@ export default interface GitRepository {
   folderPath: string;
   currentBranch: Promise<string>;
   remoteUrl: Promise<string>;
+
   addSubmodule(
     repoToAdd: GitRepository,
     folderPath: string
   ): Promise<Submodule>;
+  getSubmodules(): Promise<Submodule[]>;
   init({
     baseDir,
     clone,
@@ -17,7 +19,7 @@ export default interface GitRepository {
 }
 
 export class GitRepositoryConstants {
-  static readonly NOTINITIALIZED = "GitRepository wasn't iniitalized";
+  static readonly NOTINITIALIZED = "GitRepository wasn't initalized";
 }
 export class GitRepositoryNotInitialisedError extends Error {
   constructor() {

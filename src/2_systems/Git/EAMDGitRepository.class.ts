@@ -22,7 +22,7 @@ export class EAMDGitRepository extends DefaultGitRepository {
       submodule.path = join(this.folderPath, submodule.path || "");
       console.log("REBUILD:", submodule.path);
 
-      submodule.build();
+      // submodule.build();
     });
   }
 

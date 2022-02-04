@@ -1,7 +1,7 @@
 import EAMD from "../../3_services/EAMD.interface";
 import { DefaultEAMD } from "./DefaultEAMD.class";
 import os from "os";
-import path from "path";
+import path, { join } from "path";
 
 export class UserEAMD extends DefaultEAMD {
   preferredFolder = [os.userInfo().homedir];
@@ -9,14 +9,17 @@ export class UserEAMD extends DefaultEAMD {
   static getInstance(): UserEAMD {
     return new UserEAMD();
   }
+  getInstallDirectory(): string | undefined {
+    return super.getInstallDirectory() || join(process.cwd(), "..");
+  }
 
   async install() {
     const eamd = super.install();
     return eamd;
   }
 
-  init(path: string) {
-    const eamd = super.init(path);
+  init() {
+    const eamd = super.init();
     return eamd;
   }
 }

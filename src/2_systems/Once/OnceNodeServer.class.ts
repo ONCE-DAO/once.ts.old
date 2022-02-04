@@ -21,13 +21,13 @@ export class OnceNodeServer extends OnceKernel implements Environment {
   }
 
   async getEAMD(): Promise<DefaultEAMD | undefined> {
-    if (RootEAMD.hasWriteAccess())
-      if (RootEAMD.isInstalled()) return RootEAMD.getInstalled();
-      else return await RootEAMD.install();
+    // if (RootEAMD.hasWriteAccess())
+    //   if (RootEAMD.isInstalled()) return RootEAMD.getInstalled();
+    //   else return await RootEAMD.install();
 
-    if (UserEAMD.hasWriteAccess())
-      if (UserEAMD.isInstalled()) return UserEAMD.getInstalled();
-      else return await UserEAMD.install();
+    // if (UserEAMD.hasWriteAccess())
+    //   if (UserEAMD.isInstalled()) return UserEAMD.getInstalled();
+    //   else return await UserEAMD.install();
 
     throw new Error("User has no access to either root nor user repository");
   }
