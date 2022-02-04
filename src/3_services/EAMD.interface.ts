@@ -18,6 +18,7 @@ export default interface EAMD {
   getInstallDirectory(): string | undefined;
 }
 
+
 export enum EAMD_FOLDERS {
   ROOT = "EAMD.ucp",
   COMPONENTS = "Components",
@@ -25,5 +26,7 @@ export enum EAMD_FOLDERS {
   DEV = "dev",
   DIST = "dist",
   LATEST = "latest",
-  CURRENT = "current"
+  CURRENT = "current",
+  //TODO@MD merge conflict
+  MISSING_NAMESPACE = "MISSING_NAMESPACE"
 }
