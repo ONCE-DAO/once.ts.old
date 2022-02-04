@@ -1,12 +1,10 @@
-// import { load, resolve } from "./Once/OnceNodeImportLoader";
-// export { load, resolve };
-
-
 import { OnceKernel } from "./NewOnce/OnceKernel.class";
+export { load, resolve, globalPreload } from "./NewOnce/OnceNodeImportLoader";
+
 await OnceKernel.start();
 
 
-// TODO@PB talk with Bene why it was removed
-// nodeLoader hooks
-// import { load, resolve } from "./Once/OnceNodeImportLoader";
-// export { load, resolve };
+
+declare global{
+    var NODE_JS:boolean
+}

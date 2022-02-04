@@ -9,16 +9,13 @@ import {
   unlinkSync,
   writeFileSync,
 } from "fs";
-import { basename, join } from "path";
+import { join } from "path";
 import { EAMD_FOLDERS } from "../../3_services/EAMD.interface";
-import GitRepository from "../../3_services/NewOnce/GitRepository.interface";
 import Submodule, {
   AddSubmoduleArgs,
 } from "../../3_services/NewOnce/Submodule.interface";
 import { NpmPackage } from "../NpmPackage.class";
-import { Once } from "../Once/Once";
 import UcpComponentDescriptor from "../UcpComponentDescriptor.class";
-import DefaultGitRepository from "./GitRepository.class";
 
 //TODO @PB Refactor code
 export default class DefaultSubmodule implements Submodule {

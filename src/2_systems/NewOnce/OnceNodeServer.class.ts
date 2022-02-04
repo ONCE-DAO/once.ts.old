@@ -21,6 +21,7 @@ export default class OnceNodeServer implements Once {
   }
 
   start() {
+    console.log("ONCE STARTED AS NODE_JS")
     return OnceNodeServer.start();
   }
 

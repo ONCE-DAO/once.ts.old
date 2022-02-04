@@ -1,81 +1,81 @@
-import { Environment } from "../../3_services/Enviroment.interface";
-import { Once, OnceMode, OnceState } from "../../3_services/Once.interface";
-import { OnceKernel } from "./OnceKernel.class";
+// import { Environment } from "../../3_services/Enviroment.interface";
+// import { Once, OnceMode, OnceState } from "../../3_services/Once.interface";
+// import { OnceKernel } from "./OnceKernel.class";
 
-import { IOR } from "../../exports";
+// import { IOR } from "../../exports";
 
 
-export class OnceNodeImportLoader extends OnceKernel implements Environment {
+// export class OnceNodeImportLoader extends OnceKernel implements Environment {
 
-  ENV = process.env;
+//   ENV = process.env;
 
-  public mode = OnceMode.NODE_LOADER;
-  state = OnceState.DISCOVER_SUCESS;
-  private static instance: any;
+//   public mode = OnceMode.NODE_LOADER;
+//   state = OnceState.DISCOVER_SUCESS;
+//   private static instance: any;
 
-  static get Instance() {
-    if (!this.instance) {
-      this.instance = new OnceNodeImportLoader(global);
-    }
-    return this.instance;
-  }
+//   static get Instance() {
+//     if (!this.instance) {
+//       this.instance = new OnceNodeImportLoader(global);
+//     }
+//     return this.instance;
+//   }
 
-  start(): Promise<Once> {
-    throw new Error("Method not implemented.");
-  }
+//   start(): Promise<Once> {
+//     throw new Error("Method not implemented.");
+//   }
 
-  async getEAMD() {
-    return undefined;
-  }
+//   async getEAMD() {
+//     return undefined;
+//   }
 
-  resolve(
-    specifier: string,
-    context: resolveContext,
-    defaultResolve: Function
-  ): Promise<{ url: string }> {
-    if (global.ONCE === undefined) global.ONCE = OnceNodeImportLoader.Instance;
-    // TODO hook it resolve/discover IOR
-    if (specifier.startsWith('ior:')) {
+//   resolve(
+//     specifier: string,
+//     context: resolveContext,
+//     defaultResolve: Function
+//   ): Promise<{ url: string }> {
+//     if (global.ONCE === undefined) global.ONCE = OnceNodeImportLoader.Instance;
+//     // TODO hook it resolve/discover IOR
+//     if (specifier.startsWith('ior:')) {
 
-      // Once Unit shortcut
-      if (specifier.startsWith('ior:esm:git:tla.EAM.Once')) {
-        return defaultResolve("../exports.js", context, defaultResolve);
-      } else {
-        // @ts-ignore
-        //IOR.getInstance().init(specifier);
+//       // Once Unit shortcut
+//       if (specifier.startsWith('ior:esm:git:tla.EAM.Once')) {
+//         return defaultResolve("../exports.js", context, defaultResolve);
+//       } else {
+//         // @ts-ignore
+//         //IOR.getInstance().init(specifier);
 
-      }
-      specifier
+//       }
+//       specifier
 
-    }
-    return defaultResolve(specifier, context, defaultResolve);
-  }
+//     }
+//     return defaultResolve(specifier, context, defaultResolve);
+//   }
 
-  load(
-    url: string,
-    context: loadContext,
-    defaultLoad: Function
-  ): {
-    format: "builtin" | "commonjs" | "json" | "module" | "wasm";
-    source: string | ArrayBuffer | Int8Array;
-  } {
-    // TODO hook it load via IOR
-    console.log(`Import: ${url}`)
-    return defaultLoad(url, context, defaultLoad);
-  }
-}
+//   load(
+//     url: string,
+//     context: loadContext,
+//     defaultLoad: Function
+//   ): {
+//     format: "builtin" | "commonjs" | "json" | "module" | "wasm";
+//     source: string | ArrayBuffer | Int8Array;
+//   } {
+//     // TODO hook it load via IOR
+//     console.log(`Import: ${url}`)
+//     return defaultLoad(url, context, defaultLoad);
+//   }
+// }
 
-const load = OnceNodeImportLoader.Instance.load;
-const resolve = OnceNodeImportLoader.Instance.resolve;
-export { load, resolve };
+// const load = OnceNodeImportLoader.Instance.load;
+// const resolve = OnceNodeImportLoader.Instance.resolve;
+// export { load, resolve };
 
-type resolveContext = {
-  conditions: string[];
-  importAssertions: object;
-  parentURL: string | undefined;
-};
+// type resolveContext = {
+//   conditions: string[];
+//   importAssertions: object;
+//   parentURL: string | undefined;
+// };
 
-type loadContext = {
-  format: string | null | undefined;
-  importAssertions: any;
-};
+// type loadContext = {
+//   format: string | null | undefined;
+//   importAssertions: any;
+// };

@@ -1,6 +1,5 @@
 import { Thing } from "./Thing.interface";
 import EAMD from "./EAMD.interface";
-import { Environment } from "./Enviroment.interface";
 
 /* eslint-disable no-unused-vars */
 export enum OnceState {
@@ -23,10 +22,11 @@ export enum OnceMode {
   NOT_DISCOVERED = "NOT_DISCOVERED",
 }
 
-export interface Once extends Thing {
+export interface Once extends Thing   {
   eamd: EAMD | undefined;
   creationDate: Date;
   mode: OnceMode;
   state: OnceState;
+  ENV: NodeJS.ProcessEnv;
   getEAMD(): Promise<EAMD | undefined>;
 }

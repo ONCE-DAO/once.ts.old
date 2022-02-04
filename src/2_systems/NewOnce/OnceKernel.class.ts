@@ -9,9 +9,15 @@ export abstract class OnceKernel {
   }
 
   static async discover(): Promise<Once> {
+    console.log("START DISCOVER");
+
     if (this.RuntimeIs.NODE_LOADER()) {
+      return (await import("../NewOnce/OnceNodeImportLoader.js"))
+        .OnceNodeImportLoader.Instance;
     }
     if (this.RuntimeIs.NODE_JS()) {
+      console.log("START NODE");
+
       return (
         await import("../NewOnce/OnceNodeServer.class.js")
       ).default.start();
@@ -32,16 +38,14 @@ export abstract class OnceKernel {
       NODE_JS: () =>
         typeof process !== "undefined" &&
         process.versions != null &&
-        process.versions.node != null,
-      NODE_LOADER: () => {
-        if (global.NEWONCE === undefined) {
-          // any import would be hooked and set global.ONCE to NodeImportLoaderOnceInstance
-          // TODO implement again
-          // await import("./OnceNodeImportLoader.js");
-          if (global.NEWONCE !== undefined) return true;
-        }
-        return false;
-      },
+        process.versions.node != null &&
+        global.NODE_JS !== undefined &&
+        global.NODE_JS === true,
+      NODE_LOADER: () =>
+        typeof process !== "undefined" &&
+        process.versions != null &&
+        process.versions.node != null &&
+        global.NODE_JS === undefined,
       SERVICE_WORKER: () =>
         typeof self === "object" &&
         self.constructor &&
