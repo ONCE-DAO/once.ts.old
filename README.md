@@ -43,14 +43,26 @@ npm run dev
 ```
 
 
-## running Once
+## debugging Once
 
+
+in launch.json
 ```
-cd ~/EAMD.ucp
-npm start
+...
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Once debugger",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/src/2_systems/Once.class.ts",
+      "runtimeArgs": ["--inspect-brk","--experimental-modules","--experimental-loader","${workspaceFolder}/dist/2_systems/Once.class.js"],
+      "preLaunchTask": "tsc: build - tsconfig.json",
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
+    }
+...
 ```
 
-## Updatting
+## Updating
 
 ```
 git pull --recurse-submodules

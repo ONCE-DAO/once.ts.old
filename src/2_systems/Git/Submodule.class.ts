@@ -167,4 +167,5 @@ export default class DefaultSubmodule implements Submodule {
   //   const packageFolder = split ? split : ["empty"];
 
   //   return join("Components", ...packageFolder, npmPackage.name || "", "dev");
+
 }

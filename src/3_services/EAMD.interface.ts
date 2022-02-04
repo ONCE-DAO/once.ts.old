@@ -25,5 +25,5 @@ export enum EAMD_FOLDERS {
   DEV = "dev",
   DIST = "dist",
   LATEST = "latest",
-  CURRENT = "current",
+  CURRENT = "current"
 }
