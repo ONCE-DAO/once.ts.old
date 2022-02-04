@@ -11,11 +11,12 @@ declare global {
     var ONCE: OnceInterface | undefined;
 }
 
-// TODO@BE Need to add Class as type
 export class IOR extends Url implements IorInterface {
 
     private _referencedObject: any;
     private _loader: Loader | undefined;
+    public namespace: string | undefined;
+    public namespaceVersion: string | undefined;
 
     // static async load<T extends Thing>(url: string, name: string): Promise<{ new(): T } | undefined> {
     //     try {
@@ -56,18 +57,43 @@ export class IOR extends Url implements IorInterface {
     }
 
     // Extra setter to add ior Protocol 
-    set href(value) {
+    set href(value: string) {
+
         super.href = value;
         if (!this.protocol.includes(urlProtocol.ior)) {
             this.protocol.unshift(urlProtocol.ior);
         }
+
     }
+
+    protected _parseUrl(url: string): void {
+        let urlParsed = url.match(/^(([^\/]+):(\/\/)?)?([^:\/]+)?(:(\d+))?(\/[^?#]*)?(\?([^#]+))?(#(.*))?$/);
+        if (!urlParsed) throw new Error("Url string parse failed " + url);
+        let rawProtocolList: string[] = urlParsed[2] ? urlParsed[2].split(':') : [];
+
+        if (!rawProtocolList.includes("esm")) {
+            super._parseUrl(url);
+            return;
+        }
+        let protocolList: urlProtocol[] = [];
+        for (const protocol of rawProtocolList) {
+            // @ts-ignore
+            if (typeof urlProtocol[protocol] === undefined) throw new Error("Unknown Protocol " + protocol);
+            // @ts-ignore
+            protocolList.push(protocol);
+        }
+        this.protocol = protocolList;
+
+        this.namespace = urlParsed[4];
+
+    }
+
 
     get isLoaded() {
         // if (!this._referencedObject && this.class) {
         //     this._referencedObject = this.class;
         // }
-        return this._referencedObject != null;
+        return this._referencedObject !== undefined;
     }
 
     get id() {
@@ -104,7 +130,7 @@ export class IOR extends Url implements IorInterface {
         return this.origin + a.join('/');
     }
 
-    get iorUniquePath() {
+    get udeUniquePath() {
         let result = 'ior:';
 
         if (!this.protocol.includes(urlProtocol.ude)) {
@@ -189,3 +215,5 @@ export class IOR extends Url implements IorInterface {
         return loadingPromiseOrObject;
     }
 }
+
+export default IOR;

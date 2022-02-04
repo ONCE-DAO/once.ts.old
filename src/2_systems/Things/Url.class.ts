@@ -29,15 +29,16 @@ export default class Url extends DefaultThing implements UrlInterface {
     get href() { return this._formatUrl() }
     set href(url) { this._parseUrl(url) }
 
-    private _parseUrl(url: string) {
+    protected _parseUrl(url: string) {
         url = url || '';
         let urlParsed = url.match(/^(([^\/]+):(\/\/)?)?([^:\/]+)?(:(\d+))?(\/[^?#]*)?(\?([^#]+))?(#(.*))?$/);
         if (!urlParsed) throw new Error("Url string parse failed " + url);
+        let protocolList: urlProtocol[] = [];
         for (const protocol of (urlParsed[2] ? urlParsed[2].split(':') : [])) {
             // @ts-ignore
             if (typeof urlProtocol[protocol] === undefined) throw new Error("Unknown Protocol " + protocol);
             // @ts-ignore
-            this.protocol.push(protocol);
+            protocolList.push(protocol);
         }
 
         if (!urlParsed[4]) {
@@ -50,22 +51,20 @@ export default class Url extends DefaultThing implements UrlInterface {
                 // }
             } else {
                 // @ts-ignore
-                this.protocol.push(document.location.protocol.replace(':', ''));
+                protocolList.push(document.location.protocol.replace(':', ''));
                 this.hostName = document.location.hostname;
-                this._port = +document.location.port;
+                this.port = +document.location.port;
             }
         } else {
             this.hostName = urlParsed[4];
-            this._port = +urlParsed[6];
+            this.port = +urlParsed[6];
         }
+        this.protocol = protocolList;
         this.pathName = urlParsed[7];
         this.search = urlParsed[9];
         this.hash = urlParsed[11];
     }
 
-    get formatType() {
-        return formatType;
-    }
 
     private _formatUrl(protocolFilter: string[] = [], type: formatType = formatType.normal) {
         let url = '';
@@ -109,9 +108,9 @@ export default class Url extends DefaultThing implements UrlInterface {
         }).join('&');
         return result;
     }
-    get hash() { return this._hash }
-    get host() { return this._hostName + (this._port ? ':' + this._port : '') }
-    get origin() { return this._formatUrl(['https', 'http', 'ws', 'wss'], formatType.origin) }
+    get hash(): string | undefined { return this._hash }
+    get host(): string | undefined { return (this._hostName + (this._port ? ':' + this._port : '')) || undefined; }
+    get origin(): string | undefined { return this._formatUrl(['https', 'http', 'ws', 'wss'], formatType.origin) || undefined }
 
     get isOwnOrigin(): boolean {
         throw new Error("Not implemented yet");
@@ -144,7 +143,7 @@ export default class Url extends DefaultThing implements UrlInterface {
     set pathName(value: string | undefined) { this._pathName = value }
     set search(value: string | undefined) {
         if (!value) {
-            this._searchParameters = {};
+            this.searchParameters = {};
             return;
         }
         let parameters: { [index: string]: string } = {};
@@ -158,9 +157,10 @@ export default class Url extends DefaultThing implements UrlInterface {
             let value = (typeof param[1] == 'string' && (param[1].startsWith('{') || param[1].startsWith('[')) ? JSON.parse(param[1]) : param[1]);
             parameters[param[0]] = value;
         })
-        this._searchParameters = parameters;
+        this.searchParameters = parameters;
+
     }
-    set hash(value) { this.hash = value }
+    set hash(value) { this._hash = value }
     set searchParameters(value: { [index: string]: any }) { this._searchParameters = value }
 
     get fileType() {

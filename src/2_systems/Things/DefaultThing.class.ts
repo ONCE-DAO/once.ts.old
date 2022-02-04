@@ -13,6 +13,7 @@ abstract class DefaultThing implements Thing {
     start(): Promise<Thing> {
         throw new Error("Method not implemented.");
     }
+    
     static getInstance() {
         // HACK
         // @ts-ignore
