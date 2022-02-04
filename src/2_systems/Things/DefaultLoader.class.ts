@@ -4,7 +4,7 @@ import Loader, { LoaderStatic, loadingConfig } from "../../3_services/Loader.int
 import EAMDLoader from "../EAMD/EAMDLoader.class";
 import DefaultThing from "./DefaultThing.class";
 
-abstract class DefaultLoader extends DefaultThing implements Loader {
+abstract class DefaultLoader extends DefaultThing<DefaultLoader> implements Loader {
     protected static _instance: Loader | undefined;
 
     load(ior: IorInterface, config: loadingConfig): Promise<any> {
