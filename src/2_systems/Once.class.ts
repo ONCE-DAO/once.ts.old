@@ -5,10 +5,4 @@ export {
   globalPreload,
 } from "./Once/OnceNodeImportLoader.class";
 
-if (global.started !== undefined && !global.started) {
-  global.started = true;
-  await BaseOnce.start();
-}
-else {
-  console.log("sdsd")
-}
+await BaseOnce.start();
