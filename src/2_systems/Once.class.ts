@@ -1,4 +1,4 @@
-import { OnceKernel } from "./Once/OnceKernel.class";
+import OnceKernel  from "./Once/OnceKernel.class";
 export {
   load,
   resolve,
