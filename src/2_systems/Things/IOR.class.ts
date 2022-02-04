@@ -70,7 +70,7 @@ export default class IOR extends Url implements IorInterface {
             return;
         }
 
-        let urlParsed = url.match(/^([^\/]+):([^:\[]+)(\[([\^\.\dlatest]+)\])?$/);
+        let urlParsed = url.match(/^([^\/]+):([^:\[]+)(\[([\^\.\da-zA-Z#]+)\])?$/);
         if (!urlParsed) throw new Error("Url string parse failed " + url);
         let rawProtocolList: string[] = urlParsed[1] ? urlParsed[1].split(':') : [];
 

@@ -1,4 +1,4 @@
-import Thing from "../../3_services/Thing.interface";
+import Thing from "../3_services/Thing.interface";
 
 abstract class DefaultThing<T> implements Thing<T> {
   private _id: string | undefined;

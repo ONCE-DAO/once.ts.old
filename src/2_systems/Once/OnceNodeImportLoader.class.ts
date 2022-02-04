@@ -1,7 +1,7 @@
 import Once, { OnceMode, OnceState } from "../../3_services/Once.interface";
 
 import EAMDInterface from "../../3_services/EAMD.interface";
-import DefaultThing from "../Things/DefaultThing.class";
+import DefaultThing from "../../1_infrastructure/BaseThing.class";
 
 export default class OnceNodeImportLoader extends DefaultThing<Once> implements Once {
   creationDate: Date;

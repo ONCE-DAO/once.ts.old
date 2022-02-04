@@ -1,10 +1,10 @@
-import IORInterface from "../../3_services/IOR.interface";
-import IorInterface from "../../3_services/IOR.interface";
-import Loader, { LoaderStatic, loadingConfig } from "../../3_services/Loader.interface";
-import EAMDLoader from "../EAMD/EAMDLoader.class";
-import DefaultThing from "./DefaultThing.class";
+import IORInterface from "../3_services/IOR.interface";
+import IorInterface from "../3_services/IOR.interface";
+import Loader, { LoaderStatic, loadingConfig } from "../3_services/Loader.interface";
+import EAMDLoader from "../2_systems/EAMD/EAMDLoader.class";
+import BaseThing from "./BaseThing.class";
 
-abstract class DefaultLoader extends DefaultThing<DefaultLoader> implements Loader {
+abstract class BaseLoader extends BaseThing<BaseLoader> implements Loader {
     protected static _instance: Loader | undefined;
 
     load(ior: IorInterface, config: loadingConfig): Promise<any> {
@@ -55,4 +55,4 @@ abstract class DefaultLoader extends DefaultThing<DefaultLoader> implements Load
         return new this();
     }
 }
-export default DefaultLoader;
+export default BaseLoader;

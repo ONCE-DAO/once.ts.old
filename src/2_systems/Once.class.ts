@@ -1,4 +1,4 @@
-import { OnceKernel } from "./Once/OnceKernel.class";
+import { BaseOnce } from "../1_infrastructure/BaseOnce.class";
 export {
   load,
   resolve,
@@ -7,8 +7,8 @@ export {
 
 if (global.started !== undefined && !global.started) {
   global.started = true;
-  await OnceKernel.start();
+  await BaseOnce.start();
 }
-else {
-    console.log("sdsd")
+else {
+  console.log("sdsd")
 }

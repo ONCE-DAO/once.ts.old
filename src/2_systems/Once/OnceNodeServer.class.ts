@@ -2,7 +2,7 @@ import EAMD from "../../3_services/EAMD.interface";
 import Once, { OnceMode, OnceState } from "../../3_services/Once.interface";
 import { RootEAMD } from "../EAMD/RootEAMD.class";
 import { UserEAMD } from "../EAMD/UserEAMD.class";
-import DefaultThing from "../Things/DefaultThing.class";
+import DefaultThing from "../../1_infrastructure/BaseThing.class";
 
 export default class OnceNodeServer extends DefaultThing<Once> implements Once {
   mode = OnceMode.NODE_JS;

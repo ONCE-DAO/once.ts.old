@@ -1,5 +1,5 @@
-import DefaultThing from "./DefaultThing.class";
-import OnceInterface  from "../../3_services/Once.interface";
+import DefaultThing from "../../1_infrastructure/BaseThing.class";
+import OnceInterface from "../../3_services/Once.interface";
 import UrlInterface, { urlProtocol } from "../../3_services/Url.interface";
 
 
