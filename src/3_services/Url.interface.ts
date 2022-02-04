@@ -2,7 +2,7 @@
 export enum urlProtocol { "http" = "http", "https" = "https", "ws" = "ws", "wss" = "wss", "ior" = "ior", "ude" = "ude", "git" = "git", "esm" = "esm" }
 
 
-export interface UrlInterface {
+export interface Url {
 
   href: string;
   protocol: urlProtocol[];
@@ -20,4 +20,4 @@ export interface UrlInterface {
 
 
 
-export default UrlInterface;
+export default Url;

@@ -1,4 +1,4 @@
-import DefaultIOR from "../../../src/2_systems/Things/IOR.class";
+import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class";
 
 describe("IOR Class", () => {
   let validate = [];

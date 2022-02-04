@@ -1,12 +1,14 @@
-import Url, { formatType } from "./Url.class"
+import DefaultUrl, { formatType } from "./Url.class"
 import Loader, { loadingConfig } from "../../3_services/Loader.interface";
 import IOR from "../../3_services/IOR.interface";
 import { urlProtocol } from "../../3_services/Url.interface";
+import BaseLoader from "../../1_infrastructure/BaseLoader.class";
+import DefaultLoader from "./DefaultLoader.class";
 
 
 
 
-export default class DefaultIOR extends Url implements IOR {
+export default class DefaultIOR extends DefaultUrl implements IOR {
 
     private _referencedObject: any;
     private _loader: Loader | undefined;
@@ -163,7 +165,7 @@ export default class DefaultIOR extends Url implements IOR {
     get loader(): Loader {
 
         if (!this._loader) {
-            this._loader = this.findLoader();
+            this._loader = DefaultLoader.findLoader(this);
         }
         if (!this._loader) throw new Error("No loader found")
         return this._loader;
@@ -174,52 +176,6 @@ export default class DefaultIOR extends Url implements IOR {
     }
 
 
-    findLoader(): Loader | undefined {
-        /*if (!ONCE.global.Loader) {
-            logger.log(this.href);
-            this.loader = (ONCE.global.EAMDucpLoader.canLoad(this) > 0) ? ONCE.global.EAMDucpLoader.getInstance(this).init() : Namespaces.loader;
-            return this.loader;
-        }
-        const loaders = ONCE.global.Loader.discover().map(l => {
-            if (!(l.canLoad instanceof Function)) {
-                logger.warn(l.name, 'does not have canLoad method');
-                return [-1, l];
-            }
-            return [l.canLoad(this), l];
-        }
-        ).sort((a, b) => b[0] - a[0]);
-        let [[matchPriority, mostSuitable]] = loaders;
-        if (!mostSuitable) {
-            // not found
-            this.loader = Namespaces.loader;
-            return null; //this.loader;
-        }
-        //logger.info(`trying to find loader for ${this.href}`);
-        // loaders.forEach(l => {
-        //     const loadProbability = l.canLoad(this);
-        //     logger.debug(`${l.name} returns ${loadProbability}`);
-        //     if (loadProbability > mostSuitable.canLoad(this)) {
-        //         mostSuitable = l;
-        //         logger.debug(`found better loader ${l.name}`);
-        //     }
-        // }
-        // );
-        logger.debug(`==== the most suitable loader for ${this.href} is ${mostSuitable.name} initialized with ${this.href} === `);
-
-        if (mostSuitable.instanceStore) {
-            this.loader = mostSuitable.factory(this); //@ToDo remove url parameter later on
-            return this.loader;
-        }
-
-        this.loader = mostSuitable.getInstance();  //new mostSuitable();
-        if (this.loader.init instanceof Function) {
-            this.loader.init(this.href);
-        }
-
-        return this.loader;*/
-
-        return undefined;
-    }
 
 
     async load(config: loadingConfig) {

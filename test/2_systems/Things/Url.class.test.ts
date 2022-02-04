@@ -1,17 +1,17 @@
-import Url from "../../../src/2_systems/Things/Url.class";
+import DefaultUrl from "../../../src/2_systems/Things/Url.class";
 
 
 describe("Url Class", () => {
   test("default Init", async () => {
 
-    let url = new Url().init("google.de");
+    let url = new DefaultUrl().init("google.de");
 
     expect(url.hostName).toEqual("google.de");
   });
 
   test("set href", async () => {
 
-    let url = new Url().init("google.de");
+    let url = new DefaultUrl().init("google.de");
     url.href = "test.wo-da.de";
 
     expect(url.hostName).toEqual("test.wo-da.de");
@@ -112,7 +112,7 @@ describe("Url Class", () => {
 
   for (let testConfig of validate) {
     describe("Test Parser URL: " + testConfig.url, () => {
-      let url = new Url().init(testConfig.url);
+      let url = new DefaultUrl().init(testConfig.url);
       for (const [key, value] of Object.entries(testConfig.result)) {
         test(`Teste ${key} = ${value}`, () => {
           // @ts-ignore

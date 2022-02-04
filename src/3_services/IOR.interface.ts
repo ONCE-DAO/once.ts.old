@@ -1,9 +1,10 @@
 import { loadingConfig } from "./Loader.interface";
-import UrlInterface from "./Url.interface";
+import Url from "./Url.interface";
 
-export interface IOR extends UrlInterface {
+export interface IOR extends Url {
 
   load(config: loadingConfig): Promise<any>
+
 }
 
 export default IOR;
