@@ -1,7 +1,7 @@
 import EAMD from "../../3_services/EAMD.interface";
-import { DefaultEAMD } from "./DefaultEAMD.class";
+import { BaseEAMD } from "../../1_infrastructure/BaseEAMD.class";
 
-export class RootEAMD extends DefaultEAMD {
+export class RootEAMD extends BaseEAMD {
   preferredFolder = ["/", "/var"];
 
   static getInstance() {

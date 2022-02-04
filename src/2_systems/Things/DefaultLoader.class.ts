@@ -1,34 +1,13 @@
+import BaseLoader from "../../1_infrastructure/BaseLoader.class";
 import IORInterface from "../../3_services/IOR.interface";
-import IorInterface from "../../3_services/IOR.interface";
-import Loader, { LoaderStatic, loadingConfig } from "../../3_services/Loader.interface";
+import { LoaderStatic } from "../../3_services/Loader.interface";
 import EAMDLoader from "../EAMD/EAMDLoader.class";
-import DefaultThing from "./DefaultThing.class";
 
-abstract class DefaultLoader extends DefaultThing<DefaultLoader> implements Loader {
-    protected static _instance: Loader | undefined;
 
-    load(ior: IorInterface, config: loadingConfig): Promise<any> {
-        throw new Error("Method not implemented.");
-    }
-
-    static canHandle(ior: IorInterface): number {
-        return 0;
-    }
-    canHandle(ior: IorInterface): number {
-        return 0;
-    }
-
-    static factory(ior: IorInterface): Loader {
-        if (this._instance === undefined) {
-            // @ts-ignore 
-            this._instance = new this();
-        }
-        // @ts-ignore 
-        return this._instance;
-    }
-
+export default class DefaultLoader extends BaseLoader {
     static discover(): LoaderStatic[] {
         // TODO Discover Loader over interface interface
+
         return [EAMDLoader];
     }
 
@@ -46,13 +25,4 @@ abstract class DefaultLoader extends DefaultThing<DefaultLoader> implements Load
         }
 
     }
-
-
-
-    static getInstance() {
-        // HACK
-        // @ts-ignore
-        return new this();
-    }
 }
-export default DefaultLoader;

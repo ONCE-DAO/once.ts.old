@@ -1,8 +1,8 @@
-import OnceKernel  from "./Once/OnceKernel.class";
+import { BaseOnce } from "../1_infrastructure/BaseOnce.class";
 export {
   load,
   resolve,
   globalPreload,
 } from "./Once/OnceNodeImportLoader.class";
 
-await OnceKernel.start();
+await BaseOnce.start();

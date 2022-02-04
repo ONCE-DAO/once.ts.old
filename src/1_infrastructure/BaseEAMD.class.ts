@@ -1,10 +1,10 @@
 import { W_OK } from "constants";
-import { accessSync, existsSync, mkdirSync } from "fs";
-import { join, relative } from "path";
-import EAMD, { EAMD_FOLDERS } from "../../3_services/EAMD.interface";
-import GitRepositoryInterface from "../../3_services/GitRepository.interface";
-import DefaultGitRepository from "../Git/GitRepository.class";
-import { NpmPackage } from "../NpmPackage.class";
+import { accessSync, existsSync, mkdirSync, rmSync, symlinkSync } from "fs";
+import { basename, join, relative } from "path";
+import EAMD, { EAMD_FOLDERS } from "../3_services/EAMD.interface";
+import GitRepositoryInterface from "../3_services/GitRepository.interface";
+import DefaultGitRepository from "../2_systems/Git/GitRepository.class";
+import { NpmPackage } from "../2_systems/NpmPackage.class";
 
 // HACK
 // TODO@PB
@@ -24,10 +24,10 @@ function getdevFolder(repo: GitRepositoryInterface) {
   );
 }
 
-export abstract class DefaultEAMD implements EAMD {
+export abstract class BaseEAMD implements EAMD {
   hasWriteAccess(): boolean {
     if (this.installationDirectory)
-      return DefaultEAMD.hasWriteAccessFor(this.installationDirectory);
+      return BaseEAMD.hasWriteAccessFor(this.installationDirectory);
     return false;
   }
   isInstalled(): boolean {
@@ -59,7 +59,7 @@ export abstract class DefaultEAMD implements EAMD {
   eamdDirectory: string | undefined;
   eamdRepository: GitRepositoryInterface | undefined;
 
-  static getInstance(): DefaultEAMD {
+  static getInstance(): BaseEAMD {
     throw new Error("Not implemented in abstract class");
   }
 
@@ -74,7 +74,7 @@ export abstract class DefaultEAMD implements EAMD {
 
   getInstallDirectory(): string | undefined {
     return this.preferredFolder.find((folder) =>
-      DefaultEAMD.hasWriteAccessFor(folder)
+      BaseEAMD.hasWriteAccessFor(folder)
     );
   }
 

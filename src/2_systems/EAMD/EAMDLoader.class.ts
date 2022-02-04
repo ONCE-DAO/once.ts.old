@@ -1,10 +1,10 @@
 import IorInterface from "../../3_services/IOR.interface";
 import Loader, { LoaderStatic, loadingConfig } from "../../3_services/Loader.interface";
 import { urlProtocol } from "../../3_services/Url.interface";
-import DefaultLoader from "../Things/DefaultLoader.class";
+import BaseLoader from "../../1_infrastructure/BaseLoader.class";
 
 
-export const EAMDLoader: LoaderStatic = class EAMDLoader extends DefaultLoader implements Loader {
+export const EAMDLoader: LoaderStatic = class EAMDLoader extends BaseLoader implements Loader {
 
   load(ior: IorInterface, config: loadingConfig): Promise<any> {
     throw new Error("Method not implemented.");

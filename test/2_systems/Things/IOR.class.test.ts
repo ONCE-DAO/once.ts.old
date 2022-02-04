@@ -1,4 +1,4 @@
-import IOR from "../../../src/2_systems/Things/IOR.class";
+import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class";
 
 describe("IOR Class", () => {
   let validate = [];
@@ -89,11 +89,27 @@ describe("IOR Class", () => {
   });
 
 
+
+  validate.push({
+    url: "ior:esm:git:tla.EAM.Namespace[#sdsgzudhsudhusidh]",
+    result: {
+      protocol: ["ior", "esm", "git"],
+      hostName: undefined,
+      pathName: undefined,
+      origin: undefined,
+      isLoaded: false,
+      namespace: "tla.EAM.Namespace",
+      namespaceVersion: "#sdsgzudhsudhusidh",
+      href: "ior:esm:git:tla.EAM.Namespace[#sdsgzudhsudhusidh]"
+    },
+  });
+
   for (let testConfig of validate) {
     describe("Test Parser URL: " + testConfig.url, () => {
-      let url = new IOR().init(testConfig.url);
+      let url = new DefaultIOR().init(testConfig.url);
       for (const [key, value] of Object.entries(testConfig.result)) {
-        test(`Teste ${key} = ${value}`, () => {
+        // @ts-ignore
+        test(`Teste ${key} : ${value}  =  ${url[key]}`, () => {
           // @ts-ignore
           expect(url[key]).toEqual(value);
         });
