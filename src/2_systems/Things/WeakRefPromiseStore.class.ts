@@ -8,7 +8,7 @@ type storedObject = { ref?: any, promise?: any };
 export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> implements Store {
     discover(): any[] {
         let result = [];
-        for (const objectRef of Object.values(this.registry)) {
+        for (const [key, objectRef] of Object.entries(this.registry)) {
             if (objectRef === undefined) continue;
             if (typeof objectRef.promise !== 'undefined') {
                 result.push(objectRef.promise);
@@ -20,11 +20,24 @@ export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> 
                     //     // @ToDo need cleanup
                     //     continue;
                     // }
-                    result.push(object);
+                    result.push({ key, value: object });
                 }
             }
 
         }
+        for (const [key, objectRef] of this.mapRegistry) {
+            if (objectRef === undefined) continue;
+            if (typeof objectRef.promise !== 'undefined') {
+                result.push(objectRef.promise);
+            } else {
+                const object = (this.weakRefAvailable ? objectRef.ref.deref() : objectRef.ref);
+                if (object) {
+                    result.push({ key, value: object });
+                }
+            }
+
+        }
+
         return result;
     }
     eventSupport: EventServiceInterface | undefined;
