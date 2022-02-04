@@ -93,21 +93,25 @@ export abstract class DefaultEAMD implements EAMD {
     mkdirSync(join(this.eamdDirectory, EAMD_FOLDERS.SCENARIOS), {
       recursive: true,
     });
-
+    // const sym = join(process.cwd(), "..", Date.now().toString());
+    // symlinkSync(sym, process.cwd());
     // get current repo
     const oncetsRepo = await DefaultGitRepository.getInstance().init({
       baseDir: process.cwd(),
     });
 
     if (!this.eamdRepository || !oncetsRepo) throw new Error("TODO");
-    
+
     const devFolder = join(
       this.eamdRepository.folderPath,
       getdevFolder(oncetsRepo)
     );
 
-    const oncetsSubmodule = await this.eamdRepository?.addSubmodule(oncetsRepo,devFolder);
-    
+    const oncetsSubmodule = await this.eamdRepository?.addSubmodule(
+      oncetsRepo,
+      devFolder
+    );
+
     if (oncetsSubmodule.path) {
       oncetsSubmodule.path = relative(this.eamdDirectory, oncetsSubmodule.path);
       oncetsSubmodule?.installDependencies(this.eamdDirectory);

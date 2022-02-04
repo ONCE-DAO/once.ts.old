@@ -16,8 +16,6 @@
   "scripts": {
     "prepare": "npm-run-all prepare:patch",
     "prepare:patch": "ts-patch install",
-
-    
     "prepare:run": "node --loader ts-node/esm ./src/2_systems/Once.class.ts",
     "build:version": "tsc -p tsconfig.build.json",
     "build:version:after": "echo 'NOTHING'",

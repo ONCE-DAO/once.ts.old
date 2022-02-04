@@ -57,9 +57,9 @@ export default class DefaultSubmodule implements Submodule {
       });
   }
 
-  private copyFolder(path: string, version: string, name: string) {
+  private copy(path: string, version: string, name: string, destname?:string) {
     existsSync(join(path, name)) &&
-      cpSync(join(path, name), join(path, version, name), { recursive: true });
+      cpSync(join(path, name), join(path, version, destname? destname: name), { recursive: true });
   }
 
   build(eamdPath: string) {
@@ -69,9 +69,9 @@ export default class DefaultSubmodule implements Submodule {
     const snapshot = npmPackage?.name;
     const version = `${npmPackage?.version}-SNAPSHOT-${snapshot}`;
     this.npmBuild(fullPath, version);
-    this.copyFolder(fullPath, version, "ressources");
-    this.copyFolder(fullPath, version, "package.json");
-    this.copyFolder(fullPath, version, "bin");
+    this.copy(fullPath, version, "package.build.json","package.json");
+    this.copy(fullPath, version, "ressources");
+    this.copy(fullPath, version, "bin");
     UcpComponentDescriptor.getInstance()
       .init(fullPath)
       .writeToPath(fullPath, version);
