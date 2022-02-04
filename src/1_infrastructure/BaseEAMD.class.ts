@@ -93,8 +93,6 @@ export abstract class BaseEAMD implements EAMD {
     mkdirSync(join(this.eamdDirectory, EAMD_FOLDERS.SCENARIOS), {
       recursive: true,
     });
-    // const sym = join(process.cwd(), "..", Date.now().toString());
-    // symlinkSync(sym, process.cwd());
     // get current repo
     const oncetsRepo = await DefaultGitRepository.getInstance().init({
       baseDir: process.cwd(),
