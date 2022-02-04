@@ -1,5 +1,5 @@
 
-export enum urlProtocol { "http", "https", "ws", "wss", "ior", "ude", "git", "esm" }
+export enum urlProtocol { "http" = "http", "https" = "https", "ws" = "ws", "wss" = "wss", "ior" = "ior", "ude" = "ude", "git" = "git", "esm" = "esm" }
 
 
 export interface UrlInterface {

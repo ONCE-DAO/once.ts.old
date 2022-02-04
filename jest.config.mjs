@@ -11,7 +11,7 @@ export default {
     ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js",
   },
   testRegex: "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
-  moduleFileExtensions: ["ts","js"], // All imported modules in your tests should be mocked automatically
+  moduleFileExtensions: ["ts", "js"], // All imported modules in your tests should be mocked automatically
   // automock: false,
 
   // Stop running tests after `n` failures
