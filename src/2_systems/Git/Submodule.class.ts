@@ -13,7 +13,7 @@ import { basename, join } from "path";
 import { EAMD_FOLDERS } from "../../3_services/EAMD.interface";
 import { NpmPackage } from "../NpmPackage.class";
 import { Once } from "../Once/Once";
-import { GitRepository } from "./GitRepository.class";
+import GitRepository from "./GitRepository.class";
 
 //TODO @PB Refactor code
 export class Submodule {
@@ -130,7 +130,7 @@ export class Submodule {
     const tmpFolder = join(root, "tmp");
     !existsSync(tmpFolder) && mkdirSync(tmpFolder);
 
-    const repo = await GitRepository.getInstance.init({
+    const repo = await GitRepository.getInstance().init({
       baseDir: join(root, "tmp"),
       clone: { url, branch },
     });
@@ -148,7 +148,7 @@ export class Submodule {
       );
     }
 
-    const eamdRepo = await GitRepository.getInstance.init({ baseDir: root });
+    const eamdRepo = await GitRepository.getInstance().init({ baseDir: root });
     const sub = await eamdRepo.addSubmodule(
       repo,
       join(eamdRepo.folderPath, getdevFolder(repo))

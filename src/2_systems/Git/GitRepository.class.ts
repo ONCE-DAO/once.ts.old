@@ -2,33 +2,23 @@ import { cpSync, existsSync, mkdirSync, renameSync } from "fs";
 import { join, relative } from "path";
 import simpleGit, { Options, SimpleGit, TaskOptions } from "simple-git";
 import { NpmPackage } from "../NpmPackage.class";
+import {
+  GitCloneParameter,
+  GitRepositoryNotInitialisedError,
+  GitRepositoryParameter,
+  Result,
+} from "../../3_services/types/GitRepositoryTypes";
 import { Submodule } from "./Submodule.class";
 
-type GitCloneParameter = {
-  url: string;
-  branch?: string;
-};
-
-export type GitRepositoryParameter = {
-  baseDir?: string;
-  clone?: GitCloneParameter;
-  init?: boolean;
-};
-
-type Result = {
-  sucess: boolean;
-  errorMessage?: string;
-};
-
-export class GitRepository {
+export default class GitRepository {
   protected gitRepo?: [SimpleGit, string];
 
-  static get getInstance() {
+  static getInstance() {
     return new GitRepository();
   }
 
   get folderPath() {
-    if (!this.gitRepo) throw new Error("TODO");
+    if (!this.gitRepo) throw new GitRepositoryNotInitialisedError();
     return this.gitRepo?.[1];
   }
 

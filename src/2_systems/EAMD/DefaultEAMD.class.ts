@@ -2,11 +2,11 @@ import { execSync } from "child_process";
 import { W_OK } from "constants";
 import { accessSync, existsSync, mkdirSync, rm, rmSync } from "fs";
 import { join } from "path";
-import { EAMD, EAMD_FOLDERS } from '../../3_services/EAMD.interface';
+import { EAMD, EAMD_FOLDERS } from "../../3_services/EAMD.interface";
 import { EAMDGitRepository } from "../Git/EAMDGitRepository.class";
-import { GitRepository } from "../Git/GitRepository.class";
+import GitRepository from "../Git/GitRepository.class";
 import { NpmPackage } from "../NpmPackage.class";
-import { RootEAMD } from './RootEAMD.class';
+import { RootEAMD } from "./RootEAMD.class";
 
 // HACK
 // TODO@PB
@@ -18,7 +18,12 @@ function getdevFolder(repo: GitRepository) {
   const split = npmPackage.namespace?.split(".");
   const packageFolder = split ? split : ["empty"];
 
-  return join(EAMD_FOLDERS.COMPONENTS, ...packageFolder, npmPackage.name || "", EAMD_FOLDERS.DEV);
+  return join(
+    EAMD_FOLDERS.COMPONENTS,
+    ...packageFolder,
+    npmPackage.name || "",
+    EAMD_FOLDERS.DEV
+  );
 }
 
 export abstract class DefaultEAMD implements EAMD {
@@ -79,16 +84,18 @@ export abstract class DefaultEAMD implements EAMD {
     if (!this.eamdPath) throw new Error("eamdPath is not initialised");
 
     mkdirSync(this.eamdPath, { recursive: true });
-    mkdirSync(join(this.eamdPath, EAMD_FOLDERS.COMPONENTS), { recursive: true });
+    mkdirSync(join(this.eamdPath, EAMD_FOLDERS.COMPONENTS), {
+      recursive: true,
+    });
     mkdirSync(join(this.eamdPath, EAMD_FOLDERS.SCENARIOS), { recursive: true });
 
     // init new local repo
-    const eamdRepo = await EAMDGitRepository.getInstance.init({
+    const eamdRepo = await EAMDGitRepository.getInstance().init({
       baseDir: this.eamdPath,
       init: true,
     });
     // get current repo
-    const oncetsRepo = await GitRepository.getInstance.init({
+    const oncetsRepo = await GitRepository.getInstance().init({
       baseDir: process.cwd(),
     });
 
@@ -144,9 +151,8 @@ export abstract class DefaultEAMD implements EAMD {
 
   async discover(): Promise<object> {
     return {
-      'tla.EAM.Once.ts': 'github.com/ONCE-DAO/EAMD.ucp.git',
-      'tla.EAM.Once.cli': 'github.com/ONCE-DAO/once.cli.git'
+      "tla.EAM.Once.ts": "github.com/ONCE-DAO/EAMD.ucp.git",
+      "tla.EAM.Once.cli": "github.com/ONCE-DAO/once.cli.git",
     };
   }
-
 }
