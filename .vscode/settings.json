@@ -13,7 +13,7 @@
       "icon": "beaker"
     }
   },
-  "todo-tree.general.tags":[
+  "todo-tree.general.tags": [
     "BUG",
     "HACK",
     "FIXME",
@@ -25,5 +25,8 @@
     "REFACTOR",
     "ISSUE"
   ],
-  "jest.jestCommandLine": "npm run test --"
+  "jest.jestCommandLine": "npm run test --",
+  "cSpell.words": [
+    "deref"
+  ]
 }

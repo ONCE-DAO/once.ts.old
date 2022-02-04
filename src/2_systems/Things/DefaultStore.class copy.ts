@@ -1,0 +1,111 @@
+import EventServiceInterface from "../../3_services/EventService.interface";
+import Store from "../../3_services/Store.interface";
+import BaseThing from "../../1_infrastructure/BaseThing.class";
+import extendedPromise from "../JSExtensions/Promise";
+
+type storedObject = { ref?: any, promise?: any };
+
+export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> implements Store {
+    discover(): any[] {
+        let result = [];
+        for (const objectRef of Object.values(this.registry)) {
+            if (objectRef === undefined) continue;
+            if (typeof objectRef.promise !== 'undefined') {
+                result.push(objectRef.promise);
+            } else {
+                const object = (this.weakRefAvailable ? objectRef.ref.deref() : objectRef.ref);
+                if (object) {
+                    // TODO@BE Update wen UcpComponents
+                    // if (Thinglish.isInstanceOf(object, UcpComponent)) {
+                    //     // @ToDo need cleanup
+                    //     continue;
+                    // }
+                    result.push(object);
+                }
+            }
+
+        }
+        return result;
+    }
+    eventSupport: EventServiceInterface | undefined;
+    private registry: { [index: string]: storedObject } = {};
+    private mapRegistry: Map<any, storedObject> = new Map();
+    private eventService: EventServiceInterface | undefined;
+
+    private get weakRefAvailable() {
+        return typeof WeakRef !== 'undefined';
+    }
+
+    clear() {
+        this.mapRegistry = new Map();
+        this.registry = {}
+    }
+
+    register(key: any, value: any) {
+
+        let objectRef: storedObject;
+        const isPromise = extendedPromise.isPromise(value);
+        if (isPromise) {
+            objectRef = { promise: value };
+        } else {
+            objectRef = { ref: (this.weakRefAvailable ? new WeakRef(value) : value) }
+        }
+
+        if (typeof key === 'object') {
+            this.mapRegistry.set(key, objectRef);
+        } else {
+            this.registry[key] = objectRef;
+        }
+
+        if (isPromise) {
+            value.then((x: any) => {
+                if (x === undefined) {
+                    this.remove(key);
+                } else {
+                    objectRef.ref = (this.weakRefAvailable ? new WeakRef(x) : x);
+                    delete objectRef.promise;
+                }
+            })
+        }
+
+    }
+
+    lookup(key: any) {
+        let objectRef;
+        if (typeof key === 'object') {
+            objectRef = this.mapRegistry.get(key);
+        } else {
+            objectRef = this.registry[key];
+        }
+
+        if (objectRef === undefined) return undefined;
+
+        if (typeof objectRef.promise !== 'undefined') {
+            return objectRef.promise;
+        }
+        let object = (this.weakRefAvailable ? objectRef.ref.deref() : objectRef.ref);
+        // TODO@BE Update wenn ucp Components vorhanden
+        // if (Thinglish.isInstanceOf(object, UcpComponent)) {
+        //     if (object.componentState === UcpComponent.COMPONENT_STATES.DESTROYED) {
+        //         this.remove(key, { silent: true });
+        //         return undefined;
+        //     }
+        // }
+        return object;
+
+    }
+
+    remove(key: any, config?: { silent: boolean }) {
+        const value = !(config && config.silent === true) ? this.lookup(key) : '';
+        if (typeof key === 'object') {
+            this.mapRegistry.delete(key);
+        } else {
+            delete this.registry[key];
+        }
+
+    }
+
+}
+
+
+
