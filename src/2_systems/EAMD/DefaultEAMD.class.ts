@@ -16,7 +16,7 @@ function getdevFolder(repo: GitRepository) {
   if (!npmPackage) throw new Error("TODO");
 
   const split = npmPackage.namespace?.split(".");
-  const packageFolder = split ? split : ["empty"];
+  const packageFolder = split ? split : [EAMD_FOLDERS.MISSING_NAMESPACE];
 
   return join(EAMD_FOLDERS.COMPONENTS, ...packageFolder, npmPackage.name || "", EAMD_FOLDERS.DEV);
 }

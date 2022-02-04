@@ -10,7 +10,7 @@ import {
   writeFileSync,
 } from "fs";
 import { basename, join } from "path";
-import { EAMD_FOLDERS } from "../../3_services/EAMD.interface";
+import { EAMD_FOLDERS } from '../../3_services/EAMD.interface';
 import { NpmPackage } from "../NpmPackage.class";
 import { Once } from "../Once/Once";
 import { GitRepository } from "./GitRepository.class";
@@ -172,7 +172,7 @@ function getdevFolder(repo: GitRepository) {
   if (!npmPackage) throw new Error("TODO");
 
   const split = npmPackage.namespace?.split(".");
-  const packageFolder = split ? split : ["empty"];
+  const packageFolder = split ? split : [EAMD_FOLDERS.MISSING_NAMESPACE];
 
-  return join("Components", ...packageFolder, npmPackage.name || "", "dev");
+  return join(EAMD_FOLDERS.COMPONENTS, ...packageFolder, npmPackage.name || "", "dev");
 }

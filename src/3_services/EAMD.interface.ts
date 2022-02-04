@@ -6,7 +6,8 @@ export enum EAMD_FOLDERS {
   DEV = "dev",
   DIST = "dist",
   LATEST = "latest",
-  CURRENT = "current"
+  CURRENT = "current",
+  MISSING_NAMESPACE="namespace.missing"
 }
 
 
@@ -15,7 +16,7 @@ export interface EAMD {
   preferredFolder: string[];
   folder: string | undefined;
   eamdPath: string | undefined;
-  
+
   install(): Promise<EAMD>;
   init(path: string): EAMD;
   update(): Promise<EAMD>;
