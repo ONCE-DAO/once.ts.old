@@ -1,6 +1,5 @@
 import EAMDLoader from "../../../src/2_systems/EAMD/EAMDLoader.class";
 import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class";
-import Thing from "../../../src/3_services/Thing.interface";
 
 describe("EAMD Loader", () => {
 
@@ -15,6 +14,20 @@ describe("EAMD Loader", () => {
 
     let loadedDefaultIOR = (await (DefaultIOR.load("ior:esm:git:tla.EAM.Once"))).DefaultIOR;
     expect(loadedDefaultIOR).toEqual(DefaultIOR);
+  })
+
+  test(`CanHandler`, async () => {
+
+    let ior = new DefaultIOR().init("ior:esm:git:tla.EAM.Once");
+
+    expect(EAMDLoader.canHandle(ior)).toBe(1);
+    expect(ior.loader.canHandle(ior)).toBe(1);
+
+    let ior2 = new DefaultIOR().init("ior:google.de");
+
+    expect(EAMDLoader.canHandle(ior2)).toBe(0);
+
+
   })
 
   // test(`import load Thing from Namespace`, async () => {

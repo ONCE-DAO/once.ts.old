@@ -1,4 +1,4 @@
-import DefaultUrl, { formatType } from "./Url.class"
+import DefaultUrl, { formatType } from "./DefaultUrl.class"
 import Loader, { loadingConfig } from "../../3_services/Loader.interface";
 import IOR from "../../3_services/IOR.interface";
 import { urlProtocol } from "../../3_services/Url.interface";
