@@ -38,7 +38,7 @@ type OnceRuntime =
   | OnceMode.NODE_JS
   | OnceMode.NODE_LOADER
   | OnceMode.WEB_WORKER
-  | OnceMode.SERVICE_WORKER;
+  | OnceMode.SERVICE_WORKER
 
 export type OnceRuntimeResolver = {
   [key in OnceRuntime]: () => boolean;

@@ -47,10 +47,12 @@ export abstract class DefaultEAMD implements EAMD {
     (await eamdRepository.getSubmodules()).forEach((submodule) => {
       submodule.installDependencies(eamdDirectory);
       submodule.build(eamdDirectory);
+      //TODO@MD ENUMs for static constant
       process.env.node_env === "development" && submodule?.watch(eamdDirectory);
     });
     return this;
   }
+
   installedAt: Date | undefined;
   preferredFolder: string[] = [];
   installationDirectory: string | undefined;
@@ -98,11 +100,14 @@ export abstract class DefaultEAMD implements EAMD {
     });
 
     if (!this.eamdRepository || !oncetsRepo) throw new Error("TODO");
+    
     const devFolder = join(
       this.eamdRepository.folderPath,
       getdevFolder(oncetsRepo)
     );
+
     const oncetsSubmodule = await this.eamdRepository?.addSubmodule(oncetsRepo,devFolder);
+    
     if (oncetsSubmodule.path) {
       oncetsSubmodule.path = relative(this.eamdDirectory, oncetsSubmodule.path);
       oncetsSubmodule?.installDependencies(this.eamdDirectory);

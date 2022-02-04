@@ -1,6 +1,6 @@
 import Thing from "../../3_services/Thing.interface";
 
-abstract class DefaultThing implements Thing<DefaultThing> {
+abstract class DefaultThing<T> implements Thing<T> {
   private _id: string | undefined;
   get id() {
     if (!this._id) {
@@ -9,7 +9,7 @@ abstract class DefaultThing implements Thing<DefaultThing> {
     return this._id;
   }
 
-  start(): Promise<DefaultThing> {
+  start(): Promise<T> {
     throw new Error("Method not implemented.");
   }
 

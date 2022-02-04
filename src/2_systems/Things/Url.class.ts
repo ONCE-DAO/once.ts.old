@@ -5,7 +5,7 @@ import UrlInterface, { urlProtocol } from "../../3_services/Url.interface";
 
 export enum formatType { "normal", "origin", "originPath" }
 
-export default class Url extends DefaultThing implements UrlInterface {
+export default class Url extends DefaultThing<Url> implements UrlInterface {
 
 
     private _searchParameters: { [index: string]: any } = {};

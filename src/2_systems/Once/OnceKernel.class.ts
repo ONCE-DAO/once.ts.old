@@ -1,6 +1,4 @@
-import Once, {
-  OnceRuntimeResolver,
-} from "../../3_services/Once.interface";
+import Once, { OnceRuntimeResolver } from "../../3_services/Once.interface";
 
 export abstract class OnceKernel {
   static async start(): Promise<Once> {
@@ -12,15 +10,11 @@ export abstract class OnceKernel {
     console.log("START DISCOVER");
 
     if (this.RuntimeIs.NODE_LOADER()) {
-      return (await import("./OnceNodeImportLoader.js"))
-        .OnceNodeImportLoader.Instance;
+      return (await import("./OnceNodeImportLoader.class.js")).default
+        .getInstance();
     }
     if (this.RuntimeIs.NODE_JS()) {
-      console.log("START NODE");
-
-      return (
-        await import("./OnceNodeServer.class.js")
-      ).default.start();
+      return (await import("./OnceNodeServer.class.js")).default.start();
     }
     if (this.RuntimeIs.BROWSER()) {
     }

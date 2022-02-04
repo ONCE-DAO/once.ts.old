@@ -3,7 +3,7 @@ import Once, { OnceMode, OnceState } from "../../3_services/Once.interface";
 import EAMDInterface from "../../3_services/EAMD.interface";
 import DefaultThing from "../Things/DefaultThing.class";
 
-export class OnceNodeImportLoader extends DefaultThing implements Once {
+export default class OnceNodeImportLoader extends DefaultThing<Once> implements Once {
   creationDate: Date;
   ENV = process.env;
   eamd: EAMDInterface | undefined;
@@ -17,7 +17,7 @@ export class OnceNodeImportLoader extends DefaultThing implements Once {
     this.creationDate = new Date();
   }
 
-  static get Instance() {
+  static getInstance() {
     if (!this.instance) {
       this.instance = new OnceNodeImportLoader();
     }
@@ -38,7 +38,8 @@ export class OnceNodeImportLoader extends DefaultThing implements Once {
     context: resolveContext,
     defaultResolve: Function
   ): Promise<{ url: string }> {
-    if (global.ONCE === undefined) global.ONCE = OnceNodeImportLoader.Instance;
+    if (global.ONCE === undefined)
+      global.ONCE = OnceNodeImportLoader.getInstance();
     // TODO hook it resolve/discover IOR
     if (specifier.startsWith("ior:")) {
       // Once Unit shortcut
@@ -80,9 +81,9 @@ export class OnceNodeImportLoader extends DefaultThing implements Once {
   }
 }
 
-const load = OnceNodeImportLoader.Instance.load;
-const resolve = OnceNodeImportLoader.Instance.resolve;
-const globalPreload = OnceNodeImportLoader.Instance.globalPreload;
+const load = OnceNodeImportLoader.getInstance().load;
+const resolve = OnceNodeImportLoader.getInstance().resolve;
+const globalPreload = OnceNodeImportLoader.getInstance().globalPreload;
 export { load, resolve, globalPreload };
 
 type resolveContext = {
