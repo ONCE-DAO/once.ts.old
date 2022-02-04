@@ -1,4 +1,4 @@
-import IOR from "../../../src/2_systems/Things/IOR.class";
+import DefaultIOR from "../../../src/2_systems/Things/IOR.class";
 
 describe("IOR Class", () => {
   let validate = [];
@@ -106,7 +106,7 @@ describe("IOR Class", () => {
 
   for (let testConfig of validate) {
     describe("Test Parser URL: " + testConfig.url, () => {
-      let url = new IOR().init(testConfig.url);
+      let url = new DefaultIOR().init(testConfig.url);
       for (const [key, value] of Object.entries(testConfig.result)) {
         // @ts-ignore
         test(`Teste ${key} : ${value}  =  ${url[key]}`, () => {

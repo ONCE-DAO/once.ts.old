@@ -1,15 +1,12 @@
-import { Thing } from "../../exports";
-
 import Url, { formatType } from "./Url.class"
-import OnceInterface from "../../3_services/Once.interface";
 import Loader, { loadingConfig } from "../../3_services/Loader.interface";
-import IorInterface from "../../3_services/IOR.interface";
+import IOR from "../../3_services/IOR.interface";
 import { urlProtocol } from "../../3_services/Url.interface";
 
 
 
 
-export default class IOR extends Url implements IorInterface {
+export default class DefaultIOR extends Url implements IOR {
 
     private _referencedObject: any;
     private _loader: Loader | undefined;
@@ -32,8 +29,8 @@ export default class IOR extends Url implements IorInterface {
     }
 
 
-    static getIORType(urlObject: IOR | string) {
-        const href = (urlObject instanceof IOR ? urlObject.href : urlObject)
+    static getIORType(urlObject: DefaultIOR | string) {
+        const href = (urlObject instanceof DefaultIOR ? urlObject.href : urlObject)
 
         if (href.startsWith('ior')) {
             if (href.includes(':ude')) {

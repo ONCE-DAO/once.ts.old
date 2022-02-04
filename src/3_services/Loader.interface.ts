@@ -1,17 +1,17 @@
-import IorInterface from "./IOR.interface";
+import IOR from "./IOR.interface";
 
 export type loadingConfig = { usedByClass: any }
 
 export interface Loader {
 
-  load(ior: IorInterface, config: loadingConfig): Promise<any>
-  canHandle(ior: IorInterface): number
+  load(ior: IOR, config: loadingConfig): Promise<any>
+  canHandle(ior: IOR): number
 
 }
 
 export interface LoaderStatic {
-  canHandle(ior: IorInterface): number
-  factory(ior: IorInterface): Loader
+  canHandle(ior: IOR): number
+  factory(ior: IOR): Loader
 }
 
 export default Loader;
