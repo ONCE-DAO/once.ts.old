@@ -2,24 +2,6 @@ import IOR from "../../../src/2_systems/Things/IOR.class";
 
 describe("IOR Class", () => {
   let validate = [];
-  validate.push({
-    url: "https://shifter.staging.shiftphones.com:30484/",
-    result: {
-      protocol: ["ior", "https"],
-      pathName: "/",
-      fileName: null,
-      fileType: null,
-      search: "",
-      searchParameters: {},
-      hash: undefined,
-      host: "shifter.staging.shiftphones.com:30484",
-      port: 30484,
-      normalizeHref: "https://shifter.staging.shiftphones.com:30484/",
-      origin: "https://shifter.staging.shiftphones.com:30484",
-      hostName: "shifter.staging.shiftphones.com",
-      href: "ior:https://shifter.staging.shiftphones.com:30484/",
-    },
-  });
 
   validate.push({
     url: "https://shifter.staging.shiftphones.com:30484/",
@@ -64,6 +46,48 @@ describe("IOR Class", () => {
       namespace: "tla.EAM.Once",
     },
   });
+
+  validate.push({
+    url: "ior:esm:git:tla.EAM.Once[1.0.0]",
+    result: {
+      protocol: ["ior", "esm", "git"],
+      hostName: undefined,
+      pathName: undefined,
+      origin: undefined,
+      isLoaded: false,
+      namespace: "tla.EAM.Once",
+      namespaceVersion: "1.0.0",
+    },
+  });
+
+  validate.push({
+    url: "ior:esm:git:tla.EAM.Once[^1.0.0]",
+    result: {
+      protocol: ["ior", "esm", "git"],
+      hostName: undefined,
+      pathName: undefined,
+      origin: undefined,
+      isLoaded: false,
+      namespace: "tla.EAM.Once",
+      namespaceVersion: "^1.0.0",
+      href: "ior:esm:git:tla.EAM.Once[^1.0.0]"
+    },
+  });
+
+  validate.push({
+    url: "ior:esm:git:tla.EAM.Once[latest]",
+    result: {
+      protocol: ["ior", "esm", "git"],
+      hostName: undefined,
+      pathName: undefined,
+      origin: undefined,
+      isLoaded: false,
+      namespace: "tla.EAM.Once",
+      namespaceVersion: "latest",
+      href: "ior:esm:git:tla.EAM.Once[latest]"
+    },
+  });
+
 
   for (let testConfig of validate) {
     describe("Test Parser URL: " + testConfig.url, () => {

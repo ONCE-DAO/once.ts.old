@@ -1,6 +1,6 @@
 import { Thing } from "../../exports";
 
-import Url from "./Url.class"
+import Url, { formatType } from "./Url.class"
 import { Once as OnceInterface } from "../../3_services/Once.interface";
 import Loader, { loadingConfig } from "../../3_services/Loader.interface";
 import IorInterface from "../../3_services/IOR.interface";
@@ -67,14 +67,15 @@ export class IOR extends Url implements IorInterface {
     }
 
     protected _parseUrl(url: string): void {
-        let urlParsed = url.match(/^(([^\/]+):(\/\/)?)?([^:\/]+)?(:(\d+))?(\/[^?#]*)?(\?([^#]+))?(#(.*))?$/);
-        if (!urlParsed) throw new Error("Url string parse failed " + url);
-        let rawProtocolList: string[] = urlParsed[2] ? urlParsed[2].split(':') : [];
-
-        if (!rawProtocolList.includes("esm")) {
+        if (!url.includes("esm")) {
             super._parseUrl(url);
             return;
         }
+
+        let urlParsed = url.match(/^([^\/]+):([^:\[]+)(\[([\^\.\dlatest]+)\])?$/);
+        if (!urlParsed) throw new Error("Url string parse failed " + url);
+        let rawProtocolList: string[] = urlParsed[1] ? urlParsed[1].split(':') : [];
+
         let protocolList: urlProtocol[] = [];
         for (const protocol of rawProtocolList) {
             // @ts-ignore
@@ -84,10 +85,32 @@ export class IOR extends Url implements IorInterface {
         }
         this.protocol = protocolList;
 
-        this.namespace = urlParsed[4];
-
+        this.namespace = urlParsed[2];
+        this.namespaceVersion = urlParsed[4];
     }
 
+    protected _formatUrl(protocolFilter: string[] = [], type: formatType = formatType.normal) {
+
+        if (!this.protocol.includes(urlProtocol.esm)) {
+            return super._formatUrl(protocolFilter, type);
+        }
+        let url = '';
+
+        let protocol;
+
+        if (protocolFilter.length > 0) {
+            // @ts-ignore
+            protocol = this.protocol.filter(p => { return protocolFilter.includes(p) })
+        } else {
+            protocol = this.protocol
+        }
+        if (type === formatType.origin) return '';
+        url += protocol.join(':') + ':';
+        url += this.namespace;
+        if (this.namespaceVersion) url += `[${this.namespaceVersion}]`
+
+        return url;
+    }
 
     get isLoaded() {
         // if (!this._referencedObject && this.class) {

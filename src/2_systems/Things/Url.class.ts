@@ -6,7 +6,7 @@ declare global {
     var ONCE: OnceInterface | undefined;
 }
 
-enum formatType { "normal", "origin", "originPath" }
+export enum formatType { "normal", "origin", "originPath" }
 
 export default class Url extends DefaultThing implements UrlInterface {
 
@@ -66,7 +66,7 @@ export default class Url extends DefaultThing implements UrlInterface {
     }
 
 
-    private _formatUrl(protocolFilter: string[] = [], type: formatType = formatType.normal) {
+    protected _formatUrl(protocolFilter: string[] = [], type: formatType = formatType.normal) {
         let url = '';
         let protocol;
         let hostName = this.hostName;
