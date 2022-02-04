@@ -1,34 +1,45 @@
-// import { Once, OnceMode, OnceState } from "../../3_services/Once.interface";
-// import { OnceKernel } from "./OnceKernel.class";
-// import { DefaultEAMD } from "../EAMD/DefaultEAMD.class";
-// import { Environment } from "../../3_services/Enviroment.interface";
-// import { RootEAMD } from "../EAMD/RootEAMD.class";
-// import { UserEAMD } from "../EAMD/UserEAMD.class";
+import EAMD from "../../3_services/EAMD.interface";
+import Once, {
+  OnceMode,
+  OnceState,
+} from "../../3_services/Once.interface";
+import { RootEAMD } from "../EAMD/RootEAMD.class";
+import { UserEAMD } from "../EAMD/UserEAMD.class";
 
-// export class OnceNodeServer extends OnceKernel implements Environment {
-//   ENV = process.env;
-//   public mode = OnceMode.NODE_JS;
-//   state = OnceState.DISCOVER_SUCESS;
+export default class OnceNodeServer implements Once {
+  mode = OnceMode.NODE_JS;
+  state = OnceState.DISCOVER_SUCCESS;
+  eamd: EAMD;
+  creationDate: Date;
+  id: string;
 
-//   // static get getInstance() {
-//   //   return new OnceNodeServer(global);
-//   // }
+  // TODO@PB ask marcel if breaking the empty constructor rule is ok here
+  private constructor(id: string, eamd: EAMD) {
+    this.creationDate = new Date();
+    this.eamd = eamd;
+    this.id = id;
+  }
 
-//   async start(): Promise<Once> {
-//     console.log("\nStarting OnceNodeServer");
-//     //TODO start once.webServer
-//     return this;
-//   }
+  start() {
+    console.log("ONCE STARTED AS NODE_JS")
+    return OnceNodeServer.start();
+  }
 
-//   async getEAMD(): Promise<DefaultEAMD | undefined> {
-//     // if (RootEAMD.hasWriteAccess())
-//     //   if (RootEAMD.isInstalled()) return RootEAMD.getInstalled();
-//     //   else return await RootEAMD.install();
+  static async start(): Promise<Once> {
+    //TODO@PB
+    return new OnceNodeServer("ASK BENE WHAT ID", await this.initEAMD());
+  }
 
-//     // if (UserEAMD.hasWriteAccess())
-//     //   if (UserEAMD.isInstalled()) return UserEAMD.getInstalled();
-//     //   else return await UserEAMD.install();
+  static async initEAMD(): Promise<EAMD> {
+    const rootEAMD = RootEAMD.getInstance().init()
+    if (await rootEAMD.hasWriteAccess())
+      if (await rootEAMD.isInstalled()) return await rootEAMD.getInstalled();
+      else return await rootEAMD.install();
+    const userEAMD = UserEAMD.getInstance().init()
 
-//     throw new Error("User has no access to either root nor user repository");
-//   }
-// }
+    if (await userEAMD.hasWriteAccess())
+      if (await userEAMD.isInstalled()) return await userEAMD.getInstalled();
+      else return await userEAMD.install();
+    throw new Error("User has no access to either root nor user repository");
+  }
+}

@@ -1,6 +1,5 @@
+import Once from "./2_systems/Things/IOR.class";
+import IOR from "./2_systems/Things/IOR.class";
+import Thing from "./3_services/Thing.interface";
 
-export { IOR } from "./2_systems/Things/IOR.class"
-
-export { Thing } from "./3_services/Thing.interface"
-
-//export { DefaultThing } from "./2_systems/Things/DefaultThing.class"
+export { Thing, IOR, Once };

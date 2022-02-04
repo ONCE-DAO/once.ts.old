@@ -1,6 +1,6 @@
 import { cpSync, writeFileSync } from "fs";
 import { join } from "path";
-import { GitRepositoryParameter } from "../../3_services/NewOnce/GitRepository.interface";
+import { GitRepositoryParameter } from "../../3_services/GitRepository.interface";
 import DefaultGitRepository from "./GitRepository.class";
 
 export class EAMDGitRepository extends DefaultGitRepository {

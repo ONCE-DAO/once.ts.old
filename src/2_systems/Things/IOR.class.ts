@@ -1,17 +1,15 @@
 import { Thing } from "../../exports";
 
 import Url, { formatType } from "./Url.class"
-import { Once as OnceInterface } from "../../3_services/Once.interface";
+import OnceInterface from "../../3_services/Once.interface";
 import Loader, { loadingConfig } from "../../3_services/Loader.interface";
 import IorInterface from "../../3_services/IOR.interface";
 import { urlProtocol } from "../../3_services/Url.interface";
 
 
-declare global {
-    var ONCE: OnceInterface | undefined;
-}
 
-export class IOR extends Url implements IorInterface {
+
+export default class IOR extends Url implements IorInterface {
 
     private _referencedObject: any;
     private _loader: Loader | undefined;
@@ -238,5 +236,3 @@ export class IOR extends Url implements IorInterface {
         return loadingPromiseOrObject;
     }
 }
-
-export default IOR;

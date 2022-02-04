@@ -1,4 +1,4 @@
-import GitRepository from "./NewOnce/GitRepository.interface";
+import GitRepository from "./GitRepository.interface";
 
 export default interface EAMD {
   installedAt: Date | undefined;

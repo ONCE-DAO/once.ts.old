@@ -8,7 +8,7 @@ import GitRepository, {
   GitRepositoryNotInitialisedError,
   GitRepositoryParameter,
   Result,
-} from "../../3_services/NewOnce/GitRepository.interface";
+} from "../../3_services/GitRepository.interface";
 import SubmoduleInterface from "../../3_services/NewOnce/Submodule.interface";
 import DefaultSubmodule from "./Submodule.class";
 

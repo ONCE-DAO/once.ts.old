@@ -1,10 +1,7 @@
 import DefaultThing from "./DefaultThing.class";
-import { Once as OnceInterface } from "../../3_services/Once.interface";
+import OnceInterface  from "../../3_services/Once.interface";
 import UrlInterface, { urlProtocol } from "../../3_services/Url.interface";
 
-declare global {
-    var ONCE: OnceInterface | undefined;
-}
 
 export enum formatType { "normal", "origin", "originPath" }
 

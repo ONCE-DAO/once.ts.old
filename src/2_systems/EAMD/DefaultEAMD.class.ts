@@ -2,7 +2,7 @@ import { W_OK } from "constants";
 import { accessSync, existsSync, mkdirSync, rmSync, symlinkSync } from "fs";
 import { basename, join, relative } from "path";
 import EAMD, { EAMD_FOLDERS } from "../../3_services/EAMD.interface";
-import GitRepositoryInterface from "../../3_services/NewOnce/GitRepository.interface";
+import GitRepositoryInterface from "../../3_services/GitRepository.interface";
 import DefaultGitRepository from "../Git/GitRepository.class";
 import { NpmPackage } from "../NpmPackage.class";
 

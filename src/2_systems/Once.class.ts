@@ -1,5 +1,5 @@
-import { OnceKernel } from "./NewOnce/OnceKernel.class";
-export { load, resolve, globalPreload } from "./NewOnce/OnceNodeImportLoader";
+import { OnceKernel } from "./Once/OnceKernel.class";
+export { load, resolve, globalPreload } from "./Once/OnceNodeImportLoader";
 
 await OnceKernel.start();
 
