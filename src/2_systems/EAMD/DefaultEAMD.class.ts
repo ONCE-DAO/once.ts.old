@@ -1,6 +1,6 @@
 import { W_OK } from "constants";
-import { accessSync, existsSync, mkdirSync } from "fs";
-import { join } from "path";
+import { accessSync, existsSync, mkdirSync, rmSync, symlinkSync } from "fs";
+import { basename, join, relative } from "path";
 import EAMD, { EAMD_FOLDERS } from "../../3_services/EAMD.interface";
 import GitRepositoryInterface from "../../3_services/NewOnce/GitRepository.interface";
 import DefaultGitRepository from "../Git/GitRepository.class";
@@ -98,14 +98,18 @@ export abstract class DefaultEAMD implements EAMD {
     });
 
     if (!this.eamdRepository || !oncetsRepo) throw new Error("TODO");
-
-    const oncetsSubmodule = await this.eamdRepository?.addSubmodule(
-      oncetsRepo,
-      join(this.eamdRepository.folderPath, getdevFolder(oncetsRepo))
+    const devFolder = join(
+      this.eamdRepository.folderPath,
+      getdevFolder(oncetsRepo)
     );
-    oncetsSubmodule?.installDependencies(this.eamdDirectory);
-    oncetsSubmodule?.build(this.eamdDirectory);
-    process.env.node_env === "development" && oncetsSubmodule?.watch(this.eamdDirectory);
+    const oncetsSubmodule = await this.eamdRepository?.addSubmodule(oncetsRepo,devFolder);
+    if (oncetsSubmodule.path) {
+      oncetsSubmodule.path = relative(this.eamdDirectory, oncetsSubmodule.path);
+      oncetsSubmodule?.installDependencies(this.eamdDirectory);
+      oncetsSubmodule?.build(this.eamdDirectory);
+      process.env.node_env === "development" &&
+        oncetsSubmodule?.watch(this.eamdDirectory);
+    }
 
     // // HACK refactor to loader
     // const onceCliFolder = join(this.folder, "tmpOnceCli");
@@ -128,6 +132,19 @@ export abstract class DefaultEAMD implements EAMD {
     this.installedAt = new Date();
     //TODO@PB store installedAt
     console.log("EAMD installed at path", this.eamdDirectory);
+
+    // const thisFolderName = basename(process.cwd());
+    // const parent =join(process.cwd(),"..")
+
+    // TODO incomment later
+    // if (oncetsSubmodule.path && devFolder) {
+    //   rmSync(process.cwd(), { recursive: true });
+    //   symlinkSync(
+    //     join(this.eamdDirectory,oncetsSubmodule.path ),
+    //     join(process.cwd())
+    //     // process.kill(process.pid)
+    //   );
+    // }
     return this;
   }
 
