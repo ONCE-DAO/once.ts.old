@@ -11,126 +11,139 @@ import {
 } from "fs";
 import { basename, join } from "path";
 import { EAMD_FOLDERS } from "../../3_services/EAMD.interface";
+import GitRepository from "../../3_services/NewOnce/GitRepository.interface";
+import Submodule from "../../3_services/NewOnce/Submodule.interface";
 import { NpmPackage } from "../NpmPackage.class";
 import { Once } from "../Once/Once";
-import GitRepository from "./GitRepository.class";
+import DefaultGitRepository from "./GitRepository.class";
 
 //TODO @PB Refactor code
-export class Submodule {
-  path: string | undefined;
-
-  static getInstance() {
-    const instance = new Submodule();
-    return instance;
+export default class DefaultSubmodule implements Submodule {
+  installDependencies(): Promise<void> {
+    throw new Error("Method not implemented.");
   }
-
+  build(): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
   async init(path: string): Promise<Submodule> {
     this.path = path;
     return this;
   }
 
-  build(copyFolder?: string[], npmCommands?: string[]) {
-    if (!this.path) throw new Error("...");
+  path: string | undefined;
 
-    // install deps
-    execSync(`npm install --prefix ${this.path}`);
-    const npmPackage = NpmPackage.getByFolder(this.path);
-
-    const snapshot = npmPackage?.name;
-    const version = `${npmPackage?.version}-SNAPSHOT-${snapshot}`;
-    // write tsconfig extensin
-    writeFileSync(
-      join(this.path, "tsconfig.build.json"),
-      JSON.stringify(
-        {
-          extends: "./tsconfig.json",
-          compilerOptions: {
-            rootDir: "./",
-            outDir: version,
-          },
-          include: ["src/**/*.ts"],
-        },
-        null,
-        2
-      ),
-      { encoding: "utf8", flag: "w+" }
-    );
-
-    execSync(`npm --prefix ${this.path} run build:version`);
-
-    existsSync(join(this.path, "node_modules")) &&
-      cpSync(
-        join(this.path, "node_modules"),
-        join(this.path, version, "node_modules"),
-        { recursive: true }
-      );
-
-    existsSync(join(this.path, "ressources")) &&
-      cpSync(
-        join(this.path, "ressources"),
-        join(this.path, version, "ressources"),
-        { recursive: true }
-      );
-    cpSync(
-      join(this.path, "package.json"),
-      join(this.path, version, "package.json"),
-      { recursive: true }
-    );
-
-    writeFileSync(
-      join(
-        this.path,
-        version,
-        `${npmPackage?.name}.${npmPackage?.version
-          ?.replace(/\./g, "_")
-          .replace("/", "-")}.component.xml`
-      ),
-      ""
-    );
-
-    copyFolder &&
-      copyFolder.forEach((f) => {
-        existsSync(join(this.path || "", f)) &&
-          cpSync(join(this.path || "", f), join(this.path || "", version, f), {
-            recursive: true,
-          });
-      });
-    const dist = join(this.path, "..", "..", EAMD_FOLDERS.DIST, version);
-
-    const current = join(dist, "..", EAMD_FOLDERS.CURRENT);
-    if (existsSync(dist)) {
-      console.log("DIST", dist);
-      rmSync(dist, { recursive: true });
-      unlinkSync(current);
-    }
-
-    mkdirSync(dist, { recursive: true });
-
-    renameSync(join(this.path, version), dist);
-    symlinkSync(dist, current);
-
-    npmCommands &&
-      npmCommands.forEach((npmCommand) => {
-        npmCommand === "install" || npmCommand === "link"
-          ? execSync(`npm ${npmCommand} --prefix ${dist}`)
-          : execSync(`npm --prefix ${dist} run ${npmCommand}`);
-      });
+  static getInstance() {
+    const instance = new DefaultSubmodule();
+    return instance;
   }
+
+  // async init(path: string) {
+  //   this.path = path;
+  //   return this;
+  // }
+
+  // build(copyFolder?: string[], npmCommands?: string[]) {
+  //   if (!this.path) throw new Error("...");
+
+  //   // install deps
+  //   execSync(`npm install --prefix ${this.path}`);
+  //   const npmPackage = NpmPackage.getByFolder(this.path);
+
+  //   const snapshot = npmPackage?.name;
+  //   const version = `${npmPackage?.version}-SNAPSHOT-${snapshot}`;
+  //   // write tsconfig extensin
+  //   writeFileSync(
+  //     join(this.path, "tsconfig.build.json"),
+  //     JSON.stringify(
+  //       {
+  //         extends: "./tsconfig.json",
+  //         compilerOptions: {
+  //           rootDir: "./",
+  //           outDir: version,
+  //         },
+  //         include: ["src/**/*.ts"],
+  //       },
+  //       null,
+  //       2
+  //     ),
+  //     { encoding: "utf8", flag: "w+" }
+  //   );
+
+  //   execSync(`npm --prefix ${this.path} run build:version`);
+
+  //   existsSync(join(this.path, "node_modules")) &&
+  //     cpSync(
+  //       join(this.path, "node_modules"),
+  //       join(this.path, version, "node_modules"),
+  //       { recursive: true }
+  //     );
+
+  //   existsSync(join(this.path, "ressources")) &&
+  //     cpSync(
+  //       join(this.path, "ressources"),
+  //       join(this.path, version, "ressources"),
+  //       { recursive: true }
+  //     );
+  //   cpSync(
+  //     join(this.path, "package.json"),
+  //     join(this.path, version, "package.json"),
+  //     { recursive: true }
+  //   );
+
+  //   writeFileSync(
+  //     join(
+  //       this.path,
+  //       version,
+  //       `${npmPackage?.name}.${npmPackage?.version
+  //         ?.replace(/\./g, "_")
+  //         .replace("/", "-")}.component.xml`
+  //     ),
+  //     ""
+  //   );
+
+  //   copyFolder &&
+  //     copyFolder.forEach((f) => {
+  //       existsSync(join(this.path || "", f)) &&
+  //         cpSync(join(this.path || "", f), join(this.path || "", version, f), {
+  //           recursive: true,
+  //         });
+  //     });
+  //   const dist = join(this.path, "..", "..", EAMD_FOLDERS.DIST, version);
+
+  //   const current = join(dist, "..", EAMD_FOLDERS.CURRENT);
+  //   if (existsSync(dist)) {
+  //     console.log("DIST", dist);
+  //     rmSync(dist, { recursive: true });
+  //     unlinkSync(current);
+  //   }
+
+  //   mkdirSync(dist, { recursive: true });
+
+  //   renameSync(join(this.path, version), dist);
+  //   symlinkSync(dist, current);
+
+  //   npmCommands &&
+  //     npmCommands.forEach((npmCommand) => {
+  //       npmCommand === "install" || npmCommand === "link"
+  //         ? execSync(`npm ${npmCommand} --prefix ${dist}`)
+  //         : execSync(`npm --prefix ${dist} run ${npmCommand}`);
+  //     });
+  // }
 
   static async addFromUrl({
     url,
     branch,
     overwrite,
     copyFolder,
-  }: AddSubmoduleArgs): Promise<Submodule> {
+  }: AddSubmoduleArgs): Promise<DefaultSubmodule> {
     if (!global.ONCE) global.ONCE = await Once.start();
-    const root = ONCE?.eamd?.eamdPath;
+    const root = ONCE?.eamd?.eamdDirectory;
     if (!root) throw new Error("EAMD.ucp not defined");
 
     const tmpFolder = join(root, "tmp");
     !existsSync(tmpFolder) && mkdirSync(tmpFolder);
 
-    const repo = await GitRepository.getInstance().init({
+    const repo = await DefaultGitRepository.getInstance().init({
       baseDir: join(root, "tmp"),
       clone: { url, branch },
     });
@@ -148,7 +161,9 @@ export class Submodule {
       );
     }
 
-    const eamdRepo = await GitRepository.getInstance().init({ baseDir: root });
+    const eamdRepo = await DefaultGitRepository.getInstance().init({
+      baseDir: root,
+    });
     const sub = await eamdRepo.addSubmodule(
       repo,
       join(eamdRepo.folderPath, getdevFolder(repo))

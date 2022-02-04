@@ -1,9 +1,9 @@
 import { cpSync, writeFileSync } from "fs";
 import { join } from "path";
-import { GitRepositoryParameter } from "../../3_services/types/GitRepositoryTypes";
-import GitRepository from "./GitRepository.class";
+import { GitRepositoryParameter } from "../../3_services/NewOnce/GitRepository.interface";
+import DefaultGitRepository from "./GitRepository.class";
 
-export class EAMDGitRepository extends GitRepository {
+export class EAMDGitRepository extends DefaultGitRepository {
   static getInstance() {
     return new EAMDGitRepository();
   }

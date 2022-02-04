@@ -1,5 +1,5 @@
 import { Thing } from "./Thing.interface";
-import { EAMD } from "./EAMD.interface";
+import EAMD from "./EAMD.interface";
 import { Environment } from "./Enviroment.interface";
 
 /* eslint-disable no-unused-vars */
@@ -20,12 +20,12 @@ export enum OnceMode {
   WEB_WORKER = "WEB_WORKER",
   SERVICE_WORKER = "SERVICE_WORKER",
   I_FRAME = "I_FRAME",
-  NOT_DISCOVERED = "NOT_DISCOVERED"
+  NOT_DISCOVERED = "NOT_DISCOVERED",
 }
 
 export interface Once extends Thing {
   eamd: EAMD | undefined;
-  creationDate: Date
+  creationDate: Date;
   mode: OnceMode;
   state: OnceState;
   getEAMD(): Promise<EAMD | undefined>;

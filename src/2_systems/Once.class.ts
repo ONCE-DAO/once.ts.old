@@ -3,19 +3,11 @@
 
 
 
-import { Once } from "./Once/Once";
+import { OnceKernel } from "./NewOnce/OnceKernel.class";
+await OnceKernel.start();
 
 
-Once.start();
-console.log("foo");
-
-
-// nodeLoader hooksxxxx
+// TODO@PB talk with Bene why it was removed
+// nodeLoader hooks
 // import { load, resolve } from "./Once/OnceNodeImportLoader";
 // export { load, resolve };
-
-// @ts-ignore
-let IOR = await import("ior:esm:git:tla.EAM.Once");
-IOR;
-
-

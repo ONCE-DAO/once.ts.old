@@ -1,17 +1,15 @@
-import { execSync } from "child_process";
 import { W_OK } from "constants";
-import { accessSync, existsSync, mkdirSync, rm, rmSync } from "fs";
+import { accessSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
-import { EAMD, EAMD_FOLDERS } from "../../3_services/EAMD.interface";
-import { EAMDGitRepository } from "../Git/EAMDGitRepository.class";
-import GitRepository from "../Git/GitRepository.class";
+import EAMD, { EAMD_FOLDERS } from "../../3_services/EAMD.interface";
+import GitRepositoryInterface from "../../3_services/NewOnce/GitRepository.interface";
+import DefaultGitRepository from "../Git/GitRepository.class";
 import { NpmPackage } from "../NpmPackage.class";
-import { RootEAMD } from "./RootEAMD.class";
 
 // HACK
 // TODO@PB
 // REFACTOR
-function getdevFolder(repo: GitRepository) {
+function getdevFolder(repo: GitRepositoryInterface) {
   const npmPackage = NpmPackage.getByFolder(repo.folderPath);
   if (!npmPackage) throw new Error("TODO");
 
@@ -29,37 +27,30 @@ function getdevFolder(repo: GitRepository) {
 export abstract class DefaultEAMD implements EAMD {
   installedAt: Date | undefined;
   preferredFolder: string[] = [];
-  folder: string | undefined;
-  eamdPath: string | undefined;
+  installationDirectory: string;
+  eamdDirectory: string;
+  eamdRepository: GitRepositoryInterface | undefined;
 
-  static getInstance(): EAMD {
+  static getInstance(): DefaultEAMD {
     throw new Error("Not implemented in abstract class");
   }
 
-  static getInstalled(): EAMD {
+  static getInstalled() {
     const instance = this.getInstance();
-    instance.folder = instance.preferredFolder.find((folder) =>
-      existsSync(join(folder, EAMD_FOLDERS.ROOT))
-    );
-    if (!instance.folder) throw new Error("can't find installed eamd");
-
-    instance.eamdPath = join(instance.folder, EAMD_FOLDERS.ROOT);
-    if (!instance.eamdPath) throw new Error("repository is not installed");
-
-    console.log("EAMD returned with path", instance.eamdPath);
-    return this.getInstance().init(instance.eamdPath);
+    if (!existsSync(instance.eamdDirectory))
+      throw new Error("can't find installed eamd");
+    console.log("EAMD returned with path", instance.eamdDirectory);
+    return this.getInstance().init(instance.eamdDirectory);
   }
 
   static isInstalled(): boolean {
-    return this.getInstance().preferredFolder.some((folder) =>
-      existsSync(join(folder, EAMD_FOLDERS.ROOT))
-    );
+    return existsSync(this.getInstance().installationDirectory);
   }
+
   static hasWriteAccess(): boolean {
-    return this.getInstance().preferredFolder.some((folder) =>
-      this.hasWriteAccessFor(folder)
-    );
+    return this.hasWriteAccessFor(this.getInstance().installationDirectory);
   }
+
   static async install(): Promise<EAMD> {
     return this.getInstance().install();
   }
@@ -73,35 +64,49 @@ export abstract class DefaultEAMD implements EAMD {
     }
   }
 
-  async install(): Promise<EAMD> {
-    if (!this.folder)
-      this.folder = this.preferredFolder.find((folder) =>
+  constructor() {
+    this.installationDirectory = this.getInstallDirectory();
+    this.eamdDirectory = join(this.installationDirectory, EAMD_FOLDERS.ROOT);
+  }
+
+  /**
+   * Iterate through preferred folder and return first which is writeable by the user
+   * if none of the preferred is accessable it returns the parent
+   * @returns
+   */
+  getInstallDirectory(): string {
+    return (
+      this.preferredFolder.find((folder) =>
         DefaultEAMD.hasWriteAccessFor(folder)
-      );
+      ) || join(process.cwd(), "..")
+    );
+  }
 
-    if (!this.folder) throw new Error("path is not initialised");
-    this.eamdPath = join(this.folder, EAMD_FOLDERS.ROOT);
-    if (!this.eamdPath) throw new Error("eamdPath is not initialised");
+  async install(): Promise<EAMD> {
+    mkdirSync(this.eamdDirectory, { recursive: true });
+    this.eamdRepository = await DefaultGitRepository.getInstance().init({
+      baseDir: this.eamdDirectory,
+      clone: { url: "https://github.com/ONCE-DAO/EAMD.ucp.git" },
+    });
+    //TODO@PB remove origin ;)
 
-    mkdirSync(this.eamdPath, { recursive: true });
-    mkdirSync(join(this.eamdPath, EAMD_FOLDERS.COMPONENTS), {
+    mkdirSync(join(this.eamdDirectory, EAMD_FOLDERS.COMPONENTS), {
       recursive: true,
     });
-    mkdirSync(join(this.eamdPath, EAMD_FOLDERS.SCENARIOS), { recursive: true });
-
-    // init new local repo
-    const eamdRepo = await EAMDGitRepository.getInstance().init({
-      baseDir: this.eamdPath,
-      init: true,
+    mkdirSync(join(this.eamdDirectory, EAMD_FOLDERS.SCENARIOS), {
+      recursive: true,
     });
+
     // get current repo
-    const oncetsRepo = await GitRepository.getInstance().init({
+    const oncetsRepo = await DefaultGitRepository.getInstance().init({
       baseDir: process.cwd(),
     });
 
-    const oncetsSubmodule = await eamdRepo.addSubmodule(
+    if (!this.eamdRepository || !oncetsRepo) throw new Error("TODO");
+
+    const oncetsSubmodule = await this.eamdRepository?.addSubmodule(
       oncetsRepo,
-      join(eamdRepo.folderPath, getdevFolder(oncetsRepo))
+      join(this.eamdRepository.folderPath, getdevFolder(oncetsRepo))
     );
     oncetsSubmodule?.build();
 
@@ -125,18 +130,18 @@ export abstract class DefaultEAMD implements EAMD {
     //TODO install once.browser as submodule
     this.installedAt = new Date();
     //TODO@PB store installedAt
-    console.log("EAMD installed at path", this.eamdPath);
-    return this.init(this.folder);
+    console.log("EAMD installed at path", this.eamdDirectory);
+    return this.init(this.installationDirectory);
   }
 
   init(path: string): EAMD {
     //TODO@PB recover installedAt
-    this.eamdPath = path;
-    this.folder = join(this.eamdPath, "..");
+    this.eamdDirectory = path;
+    this.installationDirectory = join(this.eamdDirectory, "..");
     //TODO@PB build all Submodules
     // await this.update()
 
-    console.log("EAMD initialised with path", this.eamdPath);
+    console.log("EAMD initialised with path", this.eamdDirectory);
     return this;
   }
 

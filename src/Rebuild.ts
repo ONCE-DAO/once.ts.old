@@ -6,9 +6,9 @@ export async function rebuild() {
 
   const once = await Once.start();
   const eamd = await once.getEAMD();
-  if (eamd?.eamdPath) {
+  if (eamd?.eamdDirectory) {
     (
-      await EAMDGitRepository.getInstance().init({ baseDir: eamd.eamdPath })
+      await EAMDGitRepository.getInstance().init({ baseDir: eamd.eamdDirectory })
     ).rebuildAllSubmodules();
   }
 }

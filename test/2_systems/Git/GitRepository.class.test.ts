@@ -1,10 +1,7 @@
 import { mkdirSync, rm, rmSync } from "fs";
 import { join } from "path/posix";
 import GitRepository from "../../../src/2_systems/Git/GitRepository.class";
-import {
-  GitRepositoryConstants,
-  GitRepositoryNotInitialisedError,
-} from "../../../src/3_services/types/GitRepositoryTypes";
+import { GitRepositoryConstants, GitRepositoryNotInitialisedError } from "../../../src/3_services/NewOnce/GitRepository.interface";
 
 let gitRepository: GitRepository;
 beforeEach(() => {
