@@ -9,6 +9,10 @@ abstract class DefaultThing<T> implements Thing<T> {
     return this._id;
   }
 
+  init(...a: any[]) {
+    return this;
+  }
+
   start(): Promise<T> {
     throw new Error("Method not implemented.");
   }

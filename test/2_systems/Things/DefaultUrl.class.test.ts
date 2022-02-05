@@ -1,4 +1,4 @@
-import DefaultUrl from "../../../src/2_systems/Things/Url.class";
+import DefaultUrl from "../../../src/2_systems/Things/DefaultUrl.class";
 
 
 describe("Url Class", () => {

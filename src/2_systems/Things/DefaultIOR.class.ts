@@ -1,4 +1,4 @@
-import DefaultUrl, { formatType } from "./Url.class"
+import DefaultUrl, { formatType } from "./DefaultUrl.class"
 import Loader, { loadingConfig } from "../../3_services/Loader.interface";
 import IOR from "../../3_services/IOR.interface";
 import { urlProtocol } from "../../3_services/Url.interface";
@@ -12,8 +12,8 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
 
     private _referencedObject: any;
     private _loader: Loader | undefined;
-    public namespace: string | undefined;
-    public namespaceVersion: string | undefined;
+    public namespace: string | undefined = undefined;
+    public namespaceVersion: string | undefined = undefined;
 
     // static async load<T extends Thing>(url: string, name: string): Promise<{ new(): T } | undefined> {
     //     try {
@@ -26,7 +26,7 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
     //     }
     // }
 
-    static async load(iorString: string, config: loadingConfig) {
+    static async load(iorString: string, config?: loadingConfig) {
         return new this().init(iorString).load(config);
     }
 
