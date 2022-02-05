@@ -25,6 +25,16 @@ function getdevFolder(repo: GitRepositoryInterface) {
 }
 
 export abstract class BaseEAMD implements EAMD {
+  installedAt: Date | undefined;
+  preferredFolder: string[] = [];
+  installationDirectory: string | undefined;
+  eamdDirectory: string | undefined;
+  eamdRepository: GitRepositoryInterface | undefined;
+
+  static getInstance(): BaseEAMD {
+    throw new Error("Not implemented in abstract class");
+  }
+
   hasWriteAccess(): boolean {
     if (this.installationDirectory)
       return BaseEAMD.hasWriteAccessFor(this.installationDirectory);
@@ -53,31 +63,17 @@ export abstract class BaseEAMD implements EAMD {
     return this;
   }
 
-  installedAt: Date | undefined;
-  preferredFolder: string[] = [];
-  installationDirectory: string | undefined;
-  eamdDirectory: string | undefined;
-  eamdRepository: GitRepositoryInterface | undefined;
-
-  static getInstance(): BaseEAMD {
-    throw new Error("Not implemented in abstract class");
-  }
-
-  private static hasWriteAccessFor(path: string): boolean {
-    try {
-      accessSync(path, W_OK);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
   getInstallDirectory(): string | undefined {
     return this.preferredFolder.find((folder) =>
       BaseEAMD.hasWriteAccessFor(folder)
     );
   }
-
+  init(): EAMD {
+    this.installationDirectory = this.getInstallDirectory();
+    if (this.installationDirectory)
+      this.eamdDirectory = join(this.installationDirectory, EAMD_FOLDERS.ROOT);
+    return this;
+  }
   async install(): Promise<EAMD> {
     if (!this.eamdDirectory)
       throw new Error("cant install if directory not exists");
@@ -117,58 +113,39 @@ export abstract class BaseEAMD implements EAMD {
       process.env.node_env === "development" &&
         oncetsSubmodule?.watch(this.eamdDirectory);
     }
-
-    // // HACK refactor to loader
-    // const onceCliFolder = join(this.folder, "tmpOnceCli");
-    // mkdirSync(onceCliFolder, { recursive: true });
-    // const onceCli = await GitRepository.getInstance.init({
-    //   baseDir: onceCliFolder,
-    //   clone: {
-    //     url: "https://github.com/ONCE-DAO/once.cli.git",
-    //   },
-    // });
-    // const onceCliSubmodule = await eamdRepo.addSubmodule(
-    //   onceCli,
-    //   join(eamdRepo.folderPath, getdevFolder(onceCli))
-    // );
-    // onceCliSubmodule?.build(["bin"], ["link"]);
-    // rmSync(onceCliFolder, { recursive: true });
-
+    //TODO install once.cli as submodule
     //TODO install once.webServer as submodule
     //TODO install once.browser as submodule
+
     this.installedAt = new Date();
     //TODO@PB store installedAt
     console.log("EAMD installed at path", this.eamdDirectory);
 
-    // const thisFolderName = basename(process.cwd());
-    // const parent =join(process.cwd(),"..")
-
-    // TODO incomment later
-    // if (oncetsSubmodule.path && devFolder) {
-    //   rmSync(process.cwd(), { recursive: true });
-    //   symlinkSync(
-    //     join(this.eamdDirectory,oncetsSubmodule.path ),
-    //     join(process.cwd())
-    //     // process.kill(process.pid)
-    //   );
-    // }
+    if (oncetsSubmodule.path && devFolder) {
+      rmSync(process.cwd(), { recursive: true });
+      symlinkSync(
+        join(this.eamdDirectory,oncetsSubmodule.path ),
+        join(process.cwd())
+      );
+    }
     return this;
   }
-
-  init(): EAMD {
-    this.installationDirectory = this.getInstallDirectory();
-    if (this.installationDirectory)
-      this.eamdDirectory = join(this.installationDirectory, EAMD_FOLDERS.ROOT);
-    return this;
-  }
-
   update(): Promise<EAMD> {
     //TODO@PB implement
     throw new Error("Method not implemented.");
   }
   test(): void {
-    //TODO implement
+    //TODO@PB implement
     throw new Error("Method not implemented.");
+  }
+
+  private static hasWriteAccessFor(path: string): boolean {
+    try {
+      accessSync(path, W_OK);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async discover(): Promise<object> {

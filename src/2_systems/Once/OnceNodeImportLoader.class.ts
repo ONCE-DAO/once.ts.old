@@ -18,7 +18,7 @@ export default class OnceNodeImportLoader extends DefaultThing<Once> implements 
     this.creationDate = new Date();
   }
 
-  static getInstance() {
+  static start() {
     if (!this.instance) {
       this.instance = new OnceNodeImportLoader();
     }
@@ -39,7 +39,7 @@ export default class OnceNodeImportLoader extends DefaultThing<Once> implements 
     context: resolveContext,
     defaultResolve: Function
   ): Promise<{ url: string }> {
-    if (global.ONCE === undefined) global.ONCE = OnceNodeImportLoader.getInstance();
+    if (global.ONCE === undefined) global.ONCE = OnceNodeImportLoader.start();
 
     return defaultResolve(specifier, context, defaultResolve);
   }
@@ -70,9 +70,9 @@ export default class OnceNodeImportLoader extends DefaultThing<Once> implements 
   }
 }
 
-const load = OnceNodeImportLoader.getInstance().load;
-const resolve = OnceNodeImportLoader.getInstance().resolve;
-const globalPreload = OnceNodeImportLoader.getInstance().globalPreload;
+const load = OnceNodeImportLoader.start().load;
+const resolve = OnceNodeImportLoader.start().resolve;
+const globalPreload = OnceNodeImportLoader.start().globalPreload;
 export { load, resolve, globalPreload };
 
 type resolveContext = {

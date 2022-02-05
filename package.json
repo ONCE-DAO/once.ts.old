@@ -14,20 +14,16 @@
   },
   "homepage": "https://github.com/ONCE-DAO/once.ts#readme",
   "scripts": {
-    "prepare": "npm-run-all prepare:patch",
+    "prepare": "npm-run-all prepare:patch prepare:install",
     "prepare:patch": "ts-patch install",
-    "prepare:run": "node --loader ts-node/esm ./src/2_systems/Once.class.ts",
+    "prepare:install": "node --loader ts-node/esm ./src/1_infrastructure/OnceInstall.script.ts",
+    "build:version:before": "echo 'NOTHING'",
     "build:version": "tsc -p tsconfig.build.json",
     "build:version:after": "echo 'NOTHING'",
-    "startold": "node --loader ./src/2_systems/Once.class.js src/2_systems/Once.class.js",
-    "start": "node --loader ./dist/src/2_systems/Once.class.js dist/src/2_systems/Once.class.js",
-    "start:no-loader": "node src/2_systems/Once.class.js",
-    "rebuild:ts": "node --loader ts-node/esm ./src/Rebuild.ts",
-    "rebuild": "node src/Rebuild.js",
-    "dev": "npm run prepare:run",
-    "test": "jest --config jest.config.mjs"
+    "test": "jest"
   },
   "devDependencies": {
+    "@alex_neo/jest-expect-message": "^1.0.5",
     "@types/jest": "^27.4.0",
     "@types/node": "^17.0.14",
     "jest": "^27.4.7",

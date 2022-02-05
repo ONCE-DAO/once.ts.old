@@ -25,10 +25,10 @@ export default class OnceNodeServer extends DefaultThing<Once> implements Once {
   }
 
   static async initEAMD(): Promise<EAMD> {
-    // const rootEAMD = RootEAMD.getInstance().init();
-    // if (rootEAMD.hasWriteAccess())
-    //   if (rootEAMD.isInstalled()) return await rootEAMD.getInstalled();
-    //   else return await rootEAMD.install();
+    const rootEAMD = RootEAMD.getInstance().init();
+    if (rootEAMD.hasWriteAccess())
+      if (rootEAMD.isInstalled()) return await rootEAMD.getInstalled();
+      else return await rootEAMD.install();
 
     const userEAMD = UserEAMD.getInstance().init();
     if (userEAMD.hasWriteAccess())
