@@ -1,4 +1,3 @@
-import EAMD from "../../3_services/EAMD.interface";
 import { BaseEAMD } from "../../1_infrastructure/BaseEAMD.class";
 
 export class RootEAMD extends BaseEAMD {
