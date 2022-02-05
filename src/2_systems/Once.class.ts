@@ -1,8 +1,6 @@
-import { BaseOnce } from "../1_infrastructure/BaseOnce.class";
+(await import("../1_infrastructure/BaseOnce.class.js")).default.start();
 export {
   load,
   resolve,
   globalPreload,
 } from "./Once/OnceNodeImportLoader.class";
-
-await BaseOnce.start();
