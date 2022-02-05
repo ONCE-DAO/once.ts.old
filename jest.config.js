@@ -8,7 +8,7 @@ export default {
   testEnvironment: "node",
 
   transform: {
-    ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js",
+    ".(ts|tsx)": "ts-jest",
   },
   testRegex: "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
   moduleFileExtensions: ["ts", "js"], // All imported modules in your tests should be mocked automatically
@@ -176,9 +176,6 @@ export default {
   // Setting this value to "fake" allows the use of fake timers for functions such as "setTimeout"
   // timers: "real",
 
-  // A map from regular expressions to paths to transformers
-  // transform: undefined,
-
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
   // transformIgnorePatterns: [
   //   "/node_modules/",
@@ -189,7 +186,7 @@ export default {
   // unmockedModulePathPatterns: undefined,
 
   // Indicates whether each individual test should be reported during the run
-  // verbose: undefined,
+  verbose: true,
 
   // An array of regexp patterns that are matched against all source file paths before re-running tests in watch mode
   // watchPathIgnorePatterns: [],
@@ -197,7 +194,7 @@ export default {
   // Whether to use watchman for file crawling
   // watchman: true,
 
-  collectCoverageFrom: ["src/**/*.{ts,tsx}", "!src/Rebuild.ts"],
+  collectCoverageFrom: ["src/**/*.{ts,tsx}"],
   coverageThreshold: {
     global: {
       statements: 75,
@@ -206,4 +203,5 @@ export default {
       lines: 75,
     },
   },
+  setupFilesAfterEnv: ["jest-expect-message"],
 };
