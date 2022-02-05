@@ -203,5 +203,5 @@ export default {
       lines: 75,
     },
   },
-  setupFilesAfterEnv: ["jest-expect-message"],
+  setupFilesAfterEnv: ["@alex_neo/jest-expect-message"],
 };

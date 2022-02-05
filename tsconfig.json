@@ -102,7 +102,6 @@
     ]
   },
   "include": [
-    "src/**/*.ts",
-    "test/2_systems/Things/Url.class.test.ts"
+    "src/**/*.ts"
   ]
 }
