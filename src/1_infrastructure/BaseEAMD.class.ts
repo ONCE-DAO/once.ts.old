@@ -121,15 +121,13 @@ export abstract class BaseEAMD implements EAMD {
     //TODO@PB store installedAt
     console.log("EAMD installed at path", this.eamdDirectory);
 
-    // TODO incomment later
-    // if (oncetsSubmodule.path && devFolder) {
-    //   rmSync(process.cwd(), { recursive: true });
-    //   symlinkSync(
-    //     join(this.eamdDirectory,oncetsSubmodule.path ),
-    //     join(process.cwd())
-    //     // process.kill(process.pid)
-    //   );
-    // }
+    if (oncetsSubmodule.path && devFolder) {
+      rmSync(process.cwd(), { recursive: true });
+      symlinkSync(
+        join(this.eamdDirectory,oncetsSubmodule.path ),
+        join(process.cwd())
+      );
+    }
     return this;
   }
   update(): Promise<EAMD> {
