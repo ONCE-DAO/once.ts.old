@@ -13,7 +13,7 @@ import { join } from "path";
 import { EAMD_FOLDERS } from "../../3_services/EAMD.interface";
 import Submodule, {
   AddSubmoduleArgs,
-} from "../../3_services/NewOnce/Submodule.interface";
+} from "../../3_services/Submodule.interface";
 import { NpmPackage } from "../NpmPackage.class";
 import UcpComponentDescriptor from "../UcpComponentDescriptor.class";
 

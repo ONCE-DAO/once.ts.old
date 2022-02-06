@@ -9,7 +9,7 @@ import GitRepository, {
   GitRepositoryParameter,
   Result,
 } from "../../3_services/GitRepository.interface";
-import SubmoduleInterface from "../../3_services/NewOnce/Submodule.interface";
+import SubmoduleInterface from "../../3_services/Submodule.interface";
 import DefaultSubmodule from "./Submodule.class";
 
 export default class DefaultGitRepository implements GitRepository {

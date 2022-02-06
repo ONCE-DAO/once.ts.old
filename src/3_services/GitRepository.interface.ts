@@ -1,4 +1,4 @@
-import Submodule from "./NewOnce/Submodule.interface";
+import Submodule from "./Submodule.interface";
 
 export default interface GitRepository {
   identifier: Promise<string>;
