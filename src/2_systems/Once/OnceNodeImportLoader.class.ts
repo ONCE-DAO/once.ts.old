@@ -1,10 +1,15 @@
 import Once, { OnceMode, OnceState } from "../../3_services/Once.interface";
 
 import EAMDInterface from "../../3_services/EAMD.interface";
-import DefaultThing from "../../1_infrastructure/BaseThing.class";
+import BaseThing from "../../1_infrastructure/BaseThing.class";
 import DefaultIOR from "../Things/DefaultIOR.class";
 
-export default class OnceNodeImportLoader extends DefaultThing<Once> implements Once {
+export default class OnceNodeImportLoader extends BaseThing<Once> implements Once {
+
+  get class(): typeof OnceNodeImportLoader {
+    return OnceNodeImportLoader;
+  }
+
   creationDate: Date;
   ENV = process.env;
   eamd: EAMDInterface | undefined;

@@ -1,6 +1,11 @@
+import DefaultTypeDescriptor from "../2_systems/Things/DefaultTypeDescriptor.class";
 import Thing from "../3_services/Thing.interface";
+import TypeDescriptor from "../3_services/TypeDescriptor.interface";
 
-abstract class DefaultThing<T> implements Thing<T> {
+export default abstract class BaseThing<T> implements Thing<T> {
+  type: any;
+  get name(): string { return this.constructor.name };
+  static _typeDescriptor: any;
   private _id: string | undefined;
   get id() {
     // TODO Preplace with correct ID generator
@@ -27,5 +32,18 @@ abstract class DefaultThing<T> implements Thing<T> {
   destroy(): void {
 
   }
+
+  abstract get class(): any
+
+  static get typeDescriptor(): any {
+    if (!this._typeDescriptor) {
+      this._typeDescriptor = new DefaultTypeDescriptor().init(this);
+    }
+    return this._typeDescriptor;
+  }
+
+  get typeDescriptor(): TypeDescriptor {
+    return this.class.typeDescriptor;
+  }
+
 }
-export default DefaultThing;

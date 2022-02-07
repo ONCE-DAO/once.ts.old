@@ -6,6 +6,11 @@ import extendedPromise from "../JSExtensions/Promise";
 type storedObject = { ref?: any, promise?: any };
 
 export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> implements Store {
+
+    get class(): typeof WeakRefPromiseStore {
+        return WeakRefPromiseStore;
+    }
+
     discover(): any[] {
         let result = [];
         for (const [key, objectRef] of Object.entries(this.registry)) {
