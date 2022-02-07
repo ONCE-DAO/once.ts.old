@@ -14,7 +14,9 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
     }
     private _referencedObject: any;
     private _loader: Loader | undefined;
+    // TODO@BE refactor to package
     public namespace: string | undefined = undefined;
+    // TODO@BE refactor to versionString
     public namespaceVersion: string | undefined = undefined;
 
     // static async load<T extends Thing>(url: string, name: string): Promise<{ new(): T } | undefined> {

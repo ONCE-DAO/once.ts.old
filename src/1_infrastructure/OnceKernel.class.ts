@@ -1,7 +1,7 @@
 import DefaultSubmodule from "../2_systems/Git/Submodule.class";
 import Once, { OnceRuntimeResolver } from "../3_services/Once.interface";
 
-export default abstract class BaseOnce {
+export default abstract class OnceKernel {
   static async start(): Promise<Once> {
     const once: Once = await this.discover();
     await once.start();
