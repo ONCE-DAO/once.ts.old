@@ -39,8 +39,6 @@ export default class OnceNodeImportLoader extends DefaultThing<Once> implements 
     context: resolveContext,
     defaultResolve: Function
   ): Promise<{ url: string }> {
-    if (global.ONCE === undefined) global.ONCE = OnceNodeImportLoader.start();
-
     return defaultResolve(specifier, context, defaultResolve);
   }
 

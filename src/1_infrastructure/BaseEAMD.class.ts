@@ -53,13 +53,15 @@ export abstract class BaseEAMD implements EAMD {
     const eamdRepository = await DefaultGitRepository.getInstance().init({
       baseDir: this.eamdDirectory,
     });
-
     (await eamdRepository.getSubmodules()).forEach((submodule) => {
       submodule.installDependencies(eamdDirectory);
-      submodule.build(eamdDirectory);
-      submodule.afterbuild(eamdDirectory);
       //TODO@MD ENUMs for static constant
-      process.env.node_env === "development" && submodule?.watch(eamdDirectory);
+      if (process.env.NODE_ENV === "development") {
+        submodule?.watch(eamdDirectory);
+      } else {
+        submodule.build(eamdDirectory);
+        submodule.afterbuild(eamdDirectory);
+      }
     });
     return this;
   }
@@ -76,6 +78,8 @@ export abstract class BaseEAMD implements EAMD {
     return this;
   }
   async install(): Promise<EAMD> {
+    console.log("EAMD install");
+
     if (!this.eamdDirectory)
       throw new Error("cant install if directory not exists");
     mkdirSync(this.eamdDirectory, { recursive: true });
@@ -109,10 +113,11 @@ export abstract class BaseEAMD implements EAMD {
 
     if (oncetsSubmodule.path) {
       oncetsSubmodule.path = relative(this.eamdDirectory, oncetsSubmodule.path);
+
       oncetsSubmodule?.installDependencies(this.eamdDirectory);
       oncetsSubmodule?.build(this.eamdDirectory);
       oncetsSubmodule?.afterbuild(this.eamdDirectory);
-      process.env.node_env === "development" &&
+      if (process.env.NODE_ENV === "development")
         oncetsSubmodule?.watch(this.eamdDirectory);
     }
     //TODO install once.cli as submodule
