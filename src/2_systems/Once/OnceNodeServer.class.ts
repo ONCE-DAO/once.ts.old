@@ -6,6 +6,9 @@ import { BaseNodeOnce } from "../../1_infrastructure/BaseNodeOnce.class";
 import DefaultSubmodule from "../Git/Submodule.class";
 
 export default class OnceNodeServer extends BaseNodeOnce implements Once {
+  get class(): any {
+    return OnceNodeServer;
+  }
   init(...a: any[]) {
     throw new Error("Method not implemented.");
   }
@@ -34,8 +37,8 @@ export default class OnceNodeServer extends BaseNodeOnce implements Once {
 
     if (once.eamd && once.eamd.eamdRepository) {
       const submodules = await once.eamd.eamdRepository.getSubmodules();
-      const isOnceCliInstalled = submodules.some((x) =>
-        x.path?.indexOf("once.cli")!==-1
+      const isOnceCliInstalled = submodules.some(
+        (x) => x.path?.indexOf("once.cli") !== -1
       );
       if (!isOnceCliInstalled) {
         const cli = DefaultSubmodule.addFromRemoteUrl({
