@@ -111,13 +111,11 @@ describe("Url Class", () => {
   });
 
   for (let testConfig of validate) {
-    describe("Test Parser URL: " + testConfig.url, () => {
+    test("Test Parser URL: " + testConfig.url, () => {
       let url = new DefaultUrl().init(testConfig.url);
       for (const [key, value] of Object.entries(testConfig.result)) {
-        test(`Teste ${key} = ${value}`, () => {
-          // @ts-ignore
-          expect(url[key]).toEqual(value);
-        });
+        // @ts-ignore
+        expect(url[key], `${key} : ${value} => ${url[key]}`).toEqual(value);
       }
     });
   }

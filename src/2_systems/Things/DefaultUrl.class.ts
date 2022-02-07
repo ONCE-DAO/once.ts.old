@@ -1,12 +1,14 @@
-import DefaultThing from "../../1_infrastructure/BaseThing.class";
+import BaseThing from "../../1_infrastructure/BaseThing.class";
 import OnceInterface from "../../3_services/Once.interface";
 import Url, { urlProtocol } from "../../3_services/Url.interface";
 
 
 export enum formatType { "normal", "origin", "originPath" }
 
-export default class DefaultUrl extends DefaultThing<DefaultUrl> implements Url {
-
+export default class DefaultUrl extends BaseThing<DefaultUrl> implements Url {
+    get class(): typeof DefaultUrl {
+        return DefaultUrl;
+    }
 
     private _searchParameters: { [index: string]: any } = {};
 

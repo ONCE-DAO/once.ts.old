@@ -5,6 +5,11 @@ import WeakRefPromiseStore from "./WeakRefPromiseStore.class";
 import DefaultEvent from "./DefaultEvent.class";
 
 export default class DefaultEventService extends BaseThing<DefaultEventService> implements EventService {
+
+    get class(): typeof DefaultEventService {
+        return DefaultEventService;
+    }
+
     private _store = new WeakRefPromiseStore();
     addEventListener(eventSourceObject: Thing<any>, eventName: string, callbackFunction: Function, eventTarget: Thing<any>): void {
         let sourceEvents = this.getEvents(eventSourceObject);

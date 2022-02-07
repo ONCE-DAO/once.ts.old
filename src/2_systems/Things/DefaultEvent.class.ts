@@ -5,6 +5,10 @@ import WeakRefPromiseStore from "./WeakRefPromiseStore.class";
 
 export default class DefaultEvent extends BaseThing<DefaultEvent> implements OnceEvent {
 
+    get class(): typeof DefaultEvent {
+        return DefaultEvent;
+    }
+
     private readonly _store = new WeakRefPromiseStore();
     addCallback(callbackFunction: Function, targetObject: Thing<any>): void {
         this._store.register(targetObject, callbackFunction);

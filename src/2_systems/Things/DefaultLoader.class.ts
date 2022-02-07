@@ -5,6 +5,11 @@ import EAMDLoader from "../EAMD/EAMDLoader.class";
 
 
 export default class DefaultLoader extends BaseLoader {
+
+    get class(): typeof DefaultLoader {
+        return DefaultLoader;
+    }
+
     static discover(): LoaderStatic[] {
         // TODO Discover Loader over interface interface
 

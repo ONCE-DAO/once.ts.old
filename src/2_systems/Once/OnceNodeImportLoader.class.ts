@@ -1,11 +1,12 @@
-import Once, { OnceMode, OnceState } from "../../3_services/Once.interface";
+import { OnceMode, OnceState } from "../../3_services/Once.interface";
 
-import EAMDInterface from "../../3_services/EAMD.interface";
-import DefaultThing from "../../1_infrastructure/BaseThing.class";
 import DefaultIOR from "../Things/DefaultIOR.class";
 import { BaseNodeOnce } from "../../1_infrastructure/BaseNodeOnce.class";
 
 export default class OnceNodeImportLoader extends BaseNodeOnce {
+  get class(): any {
+    return OnceNodeImportLoader;
+  }
   creationDate: Date;
   ENV = process.env;
   mode = OnceMode.NODE_LOADER;

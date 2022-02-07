@@ -105,15 +105,13 @@ describe("IOR Class", () => {
   });
 
   for (let testConfig of validate) {
-    describe("Test Parser URL: " + testConfig.url, () => {
+    test("Test Parser IOR: " + testConfig.url, () => {
       let url = new DefaultIOR().init(testConfig.url);
       for (const [key, value] of Object.entries(testConfig.result)) {
         // @ts-ignore
-        test(`Teste ${key} : ${value}  =  ${url[key]}`, () => {
-          // @ts-ignore
-          expect(url[key]).toEqual(value);
-        });
+        expect(url[key], `${key} : ${value} => ${url[key]}`).toEqual(value);
       }
     });
+
   }
 });
