@@ -5,6 +5,7 @@ import EAMD, { EAMD_FOLDERS } from "../3_services/EAMD.interface";
 import GitRepositoryInterface from "../3_services/GitRepository.interface";
 import DefaultGitRepository from "../2_systems/Git/GitRepository.class";
 import { NpmPackage } from "../2_systems/NpmPackage.class";
+import { execSync } from "child_process";
 
 export abstract class BaseEAMD implements EAMD {
   installedAt: Date | undefined;
@@ -69,6 +70,8 @@ export abstract class BaseEAMD implements EAMD {
       baseDir: this.eamdDirectory,
       clone: { url: "https://github.com/ONCE-DAO/EAMD.ucp.git" },
     });
+
+    execSync(`npm install --prefix ${this.eamdDirectory}`);
     //TODO@PB remove origin ;)
     mkdirSync(join(this.eamdDirectory, EAMD_FOLDERS.COMPONENTS), {
       recursive: true,
@@ -86,7 +89,10 @@ export abstract class BaseEAMD implements EAMD {
     const oncetsSubmodule = await this.eamdRepository?.addSubmodule(oncetsRepo);
 
     if (oncetsSubmodule.path) {
+      const tmpPath = oncetsSubmodule.path;
       oncetsSubmodule.path = relative(this.eamdDirectory, oncetsSubmodule.path);
+
+      if (oncetsSubmodule.path.startsWith("..")) oncetsSubmodule.path = tmpPath;
 
       oncetsSubmodule?.installDependencies(this.eamdDirectory);
       oncetsSubmodule?.build(this.eamdDirectory);

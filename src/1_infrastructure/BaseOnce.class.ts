@@ -7,7 +7,7 @@ export abstract class BaseOnce extends DefaultThing<Once> implements Once {
   mode: OnceMode = OnceMode.BOOTING;
   state: OnceState = OnceState.DISCOVER;
   eamd: EAMDInterface | undefined;
-  ENV: NodeJS.ProcessEnv;
+  ENV: any;
 
   constructor(glob: typeof globalThis) {
     super();
