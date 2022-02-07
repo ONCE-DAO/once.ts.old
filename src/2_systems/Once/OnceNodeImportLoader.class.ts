@@ -3,19 +3,22 @@ import Once, { OnceMode, OnceState } from "../../3_services/Once.interface";
 import EAMDInterface from "../../3_services/EAMD.interface";
 import DefaultThing from "../../1_infrastructure/BaseThing.class";
 import DefaultIOR from "../Things/DefaultIOR.class";
+import { BaseNodeOnce } from "../../1_infrastructure/BaseNodeOnce.class";
 
-export default class OnceNodeImportLoader extends DefaultThing<Once> implements Once {
+export default class OnceNodeImportLoader extends BaseNodeOnce {
   creationDate: Date;
   ENV = process.env;
-  eamd: EAMDInterface | undefined;
-
-  public mode = OnceMode.NODE_LOADER;
+  mode = OnceMode.NODE_LOADER;
   state = OnceState.DISCOVER_SUCCESS;
   private static instance: any;
 
   constructor() {
     super();
     this.creationDate = new Date();
+  }
+
+  init(...a: any[]) {
+    throw new Error("Method not implemented.");
   }
 
   static start() {
@@ -46,7 +49,10 @@ export default class OnceNodeImportLoader extends DefaultThing<Once> implements 
     url: string,
     context: loadContext,
     defaultLoad: Function
-  ): Promise<{ format: "builtin" | "commonjs" | "json" | "module" | "wasm"; source: string | ArrayBuffer | Int8Array; }> {
+  ): Promise<{
+    format: "builtin" | "commonjs" | "json" | "module" | "wasm";
+    source: string | ArrayBuffer | Int8Array;
+  }> {
     // TODO hook it load via IOR
     // console.log(`Import: ${url}`);
     if (url.startsWith("ior:")) {

@@ -19,9 +19,13 @@ import Submodule, {
 import { NpmPackage } from "../NpmPackage.class";
 import UcpComponentDescriptor from "../UcpComponentDescriptor.class";
 import glob from "glob";
+import DefaultGitRepository from "./GitRepository.class";
 
 //TODO @PB Refactor code
 export default class DefaultSubmodule implements Submodule {
+  addFromRemoteUrl(args: AddSubmoduleArgs): Promise<Submodule> {
+    throw new Error("Method not implemented.");
+  }
   afterbuild(eamdPath: string): void {
     // this.updateTsMaps(eamdPath);
   }
@@ -135,8 +139,28 @@ export default class DefaultSubmodule implements Submodule {
     return instance;
   }
 
-  addFromRemoteUrl(args: AddSubmoduleArgs): Promise<Submodule> {
-    throw new Error("Method not implemented.");
+  static async addFromRemoteUrl({
+    url,
+    branch,
+    once,
+  }: AddSubmoduleArgs): Promise<Submodule> {
+    if (!once.eamd?.eamdRepository || !once.eamd.eamdDirectory)
+      throw new Error("eamd repo not found");
+    const tmpFolder = join(once.eamd.eamdDirectory, "tmp", url, branch || "");
+    if (existsSync(tmpFolder)) rmSync(tmpFolder, { recursive: true });
+    else mkdirSync(tmpFolder, { recursive: true });
+    const repo = await DefaultGitRepository.getInstance().init({
+      baseDir: tmpFolder,
+      clone: { url, branch },
+    });
+
+    const sub = await once.eamd.eamdRepository.addSubmodule(repo);
+    await sub.installDependencies(once.eamd.eamdDirectory);
+    await sub.build(once.eamd.eamdDirectory);
+    once.ENV.NODE_ENV === "development" &&
+      (await sub.watch(once.eamd.eamdDirectory));
+
+    return sub;
   }
 
   //   static async addFromUrl({

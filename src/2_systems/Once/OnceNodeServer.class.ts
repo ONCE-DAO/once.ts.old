@@ -2,9 +2,13 @@ import EAMD from "../../3_services/EAMD.interface";
 import Once, { OnceMode, OnceState } from "../../3_services/Once.interface";
 import { RootEAMD } from "../EAMD/RootEAMD.class";
 import { UserEAMD } from "../EAMD/UserEAMD.class";
-import DefaultThing from "../../1_infrastructure/BaseThing.class";
+import { BaseNodeOnce } from "../../1_infrastructure/BaseNodeOnce.class";
+import DefaultSubmodule from "../Git/Submodule.class";
 
-export default class OnceNodeServer extends DefaultThing<Once> implements Once {
+export default class OnceNodeServer extends BaseNodeOnce implements Once {
+  init(...a: any[]) {
+    throw new Error("Method not implemented.");
+  }
   mode = OnceMode.NODE_JS;
   state = OnceState.DISCOVER_SUCCESS;
   eamd: EAMD;
@@ -26,8 +30,21 @@ export default class OnceNodeServer extends DefaultThing<Once> implements Once {
     }, 1000 * 60 * 60);
 
     console.log("ONCE STARTED AS NODE_JS");
+    const once = new OnceNodeServer(await this.initEAMD());
 
-    return new OnceNodeServer(await this.initEAMD());
+    if (once.eamd && once.eamd.eamdRepository) {
+      const submodules = await once.eamd.eamdRepository.getSubmodules();
+      const isOnceCliInstalled = submodules.some((x) =>
+        x.path?.indexOf("once.cli")!==-1
+      );
+      if (!isOnceCliInstalled) {
+        const cli = DefaultSubmodule.addFromRemoteUrl({
+          url: "https://github.com/ONCE-DAO/once.cli.git",
+          once,
+        });
+      }
+    }
+    return once;
   }
 
   static async initEAMD(): Promise<EAMD> {

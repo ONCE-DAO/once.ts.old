@@ -2,6 +2,7 @@ import Thing from "./Thing.interface";
 import EAMD from "./EAMD.interface";
 
 export default interface Once extends Thing<Once> {
+  ENV: NodeJS.ProcessEnv;
   eamd: EAMD | undefined;
   creationDate: Date;
   mode: OnceMode;
@@ -39,7 +40,7 @@ type OnceRuntime =
   | OnceMode.NODE_JS
   | OnceMode.NODE_LOADER
   | OnceMode.WEB_WORKER
-  | OnceMode.SERVICE_WORKER
+  | OnceMode.SERVICE_WORKER;
 
 export type OnceRuntimeResolver = {
   [key in OnceRuntime]: () => boolean;

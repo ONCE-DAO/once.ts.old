@@ -6,24 +6,6 @@ import GitRepositoryInterface from "../3_services/GitRepository.interface";
 import DefaultGitRepository from "../2_systems/Git/GitRepository.class";
 import { NpmPackage } from "../2_systems/NpmPackage.class";
 
-// HACK
-// TODO@PB
-// REFACTOR
-function getdevFolder(repo: GitRepositoryInterface) {
-  const npmPackage = NpmPackage.getByFolder(repo.folderPath);
-  if (!npmPackage) throw new Error("TODO");
-
-  const split = npmPackage.namespace?.split(".");
-  const packageFolder = split ? split : [EAMD_FOLDERS.MISSING_NAMESPACE];
-
-  return join(
-    EAMD_FOLDERS.COMPONENTS,
-    ...packageFolder,
-    npmPackage.name || "",
-    EAMD_FOLDERS.DEV
-  );
-}
-
 export abstract class BaseEAMD implements EAMD {
   installedAt: Date | undefined;
   preferredFolder: string[] = [];
@@ -50,10 +32,10 @@ export abstract class BaseEAMD implements EAMD {
     if (!existsSync(eamdDirectory))
       throw new Error("can't find installed eamd");
     console.log("EAMD returned with path", eamdDirectory);
-    const eamdRepository = await DefaultGitRepository.getInstance().init({
+    this.eamdRepository = await DefaultGitRepository.getInstance().init({
       baseDir: this.eamdDirectory,
     });
-    (await eamdRepository.getSubmodules()).forEach((submodule) => {
+    (await this.eamdRepository.getSubmodules()).forEach((submodule) => {
       submodule.installDependencies(eamdDirectory);
       //TODO@MD ENUMs for static constant
       if (process.env.NODE_ENV === "development") {
@@ -101,15 +83,7 @@ export abstract class BaseEAMD implements EAMD {
 
     if (!this.eamdRepository || !oncetsRepo) throw new Error("TODO");
 
-    const devFolder = join(
-      this.eamdRepository.folderPath,
-      getdevFolder(oncetsRepo)
-    );
-
-    const oncetsSubmodule = await this.eamdRepository?.addSubmodule(
-      oncetsRepo,
-      devFolder
-    );
+    const oncetsSubmodule = await this.eamdRepository?.addSubmodule(oncetsRepo);
 
     if (oncetsSubmodule.path) {
       oncetsSubmodule.path = relative(this.eamdDirectory, oncetsSubmodule.path);
@@ -128,7 +102,7 @@ export abstract class BaseEAMD implements EAMD {
     //TODO@PB store installedAt
     console.log("EAMD installed at path", this.eamdDirectory);
 
-    if (oncetsSubmodule.path && devFolder) {
+    if (oncetsSubmodule.path) {
       rmSync(process.cwd(), { recursive: true });
       symlinkSync(
         join(this.eamdDirectory, oncetsSubmodule.path),

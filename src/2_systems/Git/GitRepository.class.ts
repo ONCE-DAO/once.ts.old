@@ -11,6 +11,7 @@ import GitRepository, {
 } from "../../3_services/GitRepository.interface";
 import SubmoduleInterface from "../../3_services/Submodule.interface";
 import DefaultSubmodule from "./Submodule.class";
+import { EAMD_FOLDERS } from "../../3_services/EAMD.interface";
 
 export default class DefaultGitRepository implements GitRepository {
   async init({
@@ -25,13 +26,11 @@ export default class DefaultGitRepository implements GitRepository {
     }
     return this;
   }
-  async addSubmodule(
-    repoToAdd: GitRepository,
-    folderPath: string
-  ): Promise<SubmoduleInterface> {
+  async addSubmodule(repoToAdd: GitRepository): Promise<SubmoduleInterface> {
     if (!this.gitRepo) throw new Error("Not Initialized");
 
-    const submoduleFolder = join(folderPath, await repoToAdd.identifier);
+    const devFolder = join(this.gitRepo[1], DefaultGitRepository.getdevFolder(repoToAdd));
+    const submoduleFolder = join(devFolder, await repoToAdd.identifier);
     const modules = await this.gitRepo[0].subModule();
     const relativeFolderPath = relative(this.gitRepo[1], submoduleFolder);
 
@@ -48,11 +47,25 @@ export default class DefaultGitRepository implements GitRepository {
         relativeFolderPath,
       ]);
     }
-    return await DefaultSubmodule.getInstance().init(submoduleFolder);
+    return await DefaultSubmodule.getInstance().init(relativeFolderPath);
   }
 
   protected gitRepo?: [SimpleGit, string];
 
+  private static getdevFolder(repo: GitRepository) {
+    const npmPackage = NpmPackage.getByFolder(repo.folderPath);
+    if (!npmPackage) throw new Error("TODO");
+  
+    const split = npmPackage.namespace?.split(".");
+    const packageFolder = split ? split : [EAMD_FOLDERS.MISSING_NAMESPACE];
+  
+    return join(
+      EAMD_FOLDERS.COMPONENTS,
+      ...packageFolder,
+      npmPackage.name || "",
+      EAMD_FOLDERS.DEV
+    );
+  } 
   static getInstance() {
     return new DefaultGitRepository();
   }

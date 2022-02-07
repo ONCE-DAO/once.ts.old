@@ -6,10 +6,7 @@ export default interface GitRepository {
   currentBranch: Promise<string>;
   remoteUrl: Promise<string>;
 
-  addSubmodule(
-    repoToAdd: GitRepository,
-    folderPath: string
-  ): Promise<Submodule>;
+  addSubmodule(repoToAdd: GitRepository): Promise<Submodule>;
   getSubmodules(): Promise<Submodule[]>;
   init({
     baseDir,
