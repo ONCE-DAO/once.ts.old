@@ -9,7 +9,7 @@ import GitRepository, {
   GitRepositoryParameter,
   Result,
 } from "../../3_services/GitRepository.interface";
-import SubmoduleInterface from "../../3_services/NewOnce/Submodule.interface";
+import SubmoduleInterface from "../../3_services/Submodule.interface";
 import DefaultSubmodule from "./Submodule.class";
 
 export default class DefaultGitRepository implements GitRepository {
@@ -37,7 +37,7 @@ export default class DefaultGitRepository implements GitRepository {
 
     // check whether repo is not already added
     if (modules.indexOf(relativeFolderPath) === -1) {
-      mkdirSync(relativeFolderPath, { recursive: true });
+      mkdirSync(join(this.gitRepo[1], relativeFolderPath), { recursive: true });
       cpSync(repoToAdd.folderPath, submoduleFolder, { recursive: true });
 
       await this.gitRepo[0].subModule([

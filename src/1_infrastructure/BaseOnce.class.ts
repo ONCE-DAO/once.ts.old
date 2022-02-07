@@ -1,56 +1,19 @@
-import Once, { OnceRuntimeResolver } from "../3_services/Once.interface";
+import EAMDInterface from "../3_services/EAMD.interface";
+import Once, { OnceMode, OnceState } from "../3_services/Once.interface";
+import DefaultThing from "./BaseThing.class";
 
-export default abstract class BaseOnce {
-  static async start(): Promise<Once> {
-    const once: Once = await this.discover();
-    return await once.start();
+export abstract class BaseOnce extends DefaultThing<Once> implements Once {
+  eamd: EAMDInterface | undefined;
+  creationDate: Date;
+  mode: OnceMode = OnceMode.BOOTING;
+  state: OnceState = OnceState.DISCOVER;
+
+  constructor(glob: typeof globalThis) {
+    super();
+    this.creationDate = new Date();
+    glob.ONCE = this;
   }
-
-  static async discover(): Promise<Once> {
-    console.log("START DISCOVER");
-
-    if (this.RuntimeIs.NODE_LOADER()) {
-      return (
-        await import("../2_systems/Once/OnceNodeImportLoader.class.js")
-      ).default.start();
-    }
-    if (this.RuntimeIs.NODE_JS()) {
-      return (
-        await import("../2_systems/Once/OnceNodeServer.class.js")
-      ).default.start();
-    }
-    if (this.RuntimeIs.BROWSER()) {
-    }
-    if (this.RuntimeIs.SERVICE_WORKER()) {
-    }
-    if (this.RuntimeIs.WEB_WORKER()) {
-    }
-    throw "not discovered";
-  }
-
-  static get RuntimeIs(): OnceRuntimeResolver {
-    return {
-      BROWSER: () =>
-        typeof window !== "undefined" && typeof window.document !== "undefined",
-      NODE_JS: () =>
-        typeof process !== "undefined" &&
-        process.versions != null &&
-        process.versions.node != null &&
-        global.NODE_JS !== undefined &&
-        global.NODE_JS === true,
-      NODE_LOADER: () =>
-        typeof process !== "undefined" &&
-        process.versions != null &&
-        process.versions.node != null &&
-        global.NODE_JS === undefined,
-      SERVICE_WORKER: () =>
-        typeof self === "object" &&
-        self.constructor &&
-        self.constructor.name === "ServiceWorkerGlobalScope",
-      WEB_WORKER: () =>
-        typeof self === "object" &&
-        self.constructor &&
-        self.constructor.name === "DedicatedWorkerGlobalScope",
-    };
-  }
+  
+  abstract start(): Promise<Once>;
+  abstract init(...a: any[]): any;
 }

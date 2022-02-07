@@ -1,4 +1,5 @@
 import { execSync } from "child_process";
+import chokidar from "chokidar";
 import {
   cpSync,
   existsSync,
@@ -7,22 +8,45 @@ import {
   rmSync,
   symlinkSync,
   unlinkSync,
+  watch,
   writeFileSync,
 } from "fs";
 import { join } from "path";
 import { EAMD_FOLDERS } from "../../3_services/EAMD.interface";
 import Submodule, {
   AddSubmoduleArgs,
-} from "../../3_services/NewOnce/Submodule.interface";
+} from "../../3_services/Submodule.interface";
 import { NpmPackage } from "../NpmPackage.class";
 import UcpComponentDescriptor from "../UcpComponentDescriptor.class";
+import glob from "glob";
 
 //TODO @PB Refactor code
 export default class DefaultSubmodule implements Submodule {
+  afterbuild(eamdPath: string): void {
+    // this.updateTsMaps(eamdPath);
+  }
+  updateTsMaps(eamdPath: string) {
+    glob(eamdPath + "/**/*.component.xml", {}, (err, files) => {
+      console.log(files);
+    });
+  }
   path: string | undefined;
 
-  watch(eamdPath: string): Promise<void> {
-    throw new Error("Method not implemented.");
+  async watch(eamdPath: string): Promise<void> {
+    if (!this.path) throw "TODO RIGHT ERROR";
+    console.log("START WATCH MODE", join(eamdPath, this.path, "package.json"));
+    watch(join(eamdPath, this.path, "package.json"), undefined, () => {
+      console.log("package.json changed -> install dependencies");
+      this.installDependencies(eamdPath);
+    });
+    console.log(join(eamdPath, this.path, "src", "**", "*.ts"));
+    chokidar
+      .watch(join(eamdPath, this.path, "src"), { ignoreInitial: true })
+      .on("add", (path, stats) => console.log("ADD", path))
+      .on("change", (path) => {
+        console.log("changed", path);
+        this.build(eamdPath);
+      });
   }
   installDependencies(eamdPath: string) {
     if (!this.path) throw new Error("Submodule does not exist");
@@ -57,9 +81,13 @@ export default class DefaultSubmodule implements Submodule {
       });
   }
 
-  private copy(path: string, version: string, name: string, destname?:string) {
+  private copy(path: string, version: string, name: string, destname?: string) {
     existsSync(join(path, name)) &&
-      cpSync(join(path, name), join(path, version, destname? destname: name), { recursive: true });
+      cpSync(
+        join(path, name),
+        join(path, version, destname ? destname : name),
+        { recursive: true }
+      );
   }
 
   build(eamdPath: string) {
@@ -68,28 +96,33 @@ export default class DefaultSubmodule implements Submodule {
     const npmPackage = NpmPackage.getByFolder(fullPath);
     const snapshot = npmPackage?.name;
     const version = `${npmPackage?.version}-SNAPSHOT-${snapshot}`;
-    this.npmBuild(fullPath, version);
-    this.copy(fullPath, version, "package.build.json","package.json");
-    this.copy(fullPath, version, "ressources");
-    this.copy(fullPath, version, "bin");
-    UcpComponentDescriptor.getInstance()
-      .init(fullPath)
-      .writeToPath(fullPath, version);
+    try {
+      this.npmBuild(fullPath, version);
+      this.copy(fullPath, version, "package.build.json", "package.json");
+      this.copy(fullPath, version, "ressources");
+      this.copy(fullPath, version, "bin");
+      UcpComponentDescriptor.getInstance()
+        .init({ path: fullPath, relativePath: this.path })
+        .writeToPath(fullPath, version);
 
-    const dist = join(fullPath, "..", "..", EAMD_FOLDERS.DIST, version);
-    const current = join(dist, "..", EAMD_FOLDERS.CURRENT);
+      const dist = join(fullPath, "..", "..", EAMD_FOLDERS.DIST, version);
+      const current = join(dist, "..", EAMD_FOLDERS.CURRENT);
 
-    if (existsSync(dist)) {
-      // TODO@PB mit versionsnummer kein problem
-      rmSync(dist, { recursive: true });
-      unlinkSync(current);
+      if (existsSync(dist)) {
+        // TODO@PB mit versionsnummer kein problem
+        rmSync(dist, { recursive: true });
+        unlinkSync(current);
+      }
+
+      mkdirSync(dist, { recursive: true });
+      renameSync(join(fullPath, version), dist);
+      symlinkSync(dist, current);
+      execSync(`npm --prefix ${dist} run build:version:after`);
+      console.log("build");
+    } finally {
+      if (existsSync(join(fullPath, version)))
+        rmSync(join(fullPath, version), { recursive: true });
     }
-
-    mkdirSync(dist, { recursive: true });
-    renameSync(join(fullPath, version), dist);
-    symlinkSync(dist, current);
-    execSync(`npm --prefix ${dist} run build:version:after`);
-    console.log("build")
   }
 
   async init(path: string): Promise<Submodule> {
@@ -167,5 +200,4 @@ export default class DefaultSubmodule implements Submodule {
   //   const packageFolder = split ? split : ["empty"];
 
   //   return join("Components", ...packageFolder, npmPackage.name || "", "dev");
-
 }

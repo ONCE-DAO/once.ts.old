@@ -7,10 +7,10 @@ export default interface Once extends Thing<Once> {
   mode: OnceMode;
   state: OnceState;
 }
+
 declare global {
   var ONCE: Once | undefined;
   var NODE_JS: boolean;
-  var started: boolean;
 }
 
 /* eslint-disable no-unused-vars */
