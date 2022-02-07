@@ -1,4 +1,6 @@
-(await import("../1_infrastructure/BaseOnce.class.js")).default.start();
+console.log("Once.class.ts startup sequence");
+
+(await import("../1_infrastructure/OnceStarter.class.js")).default.start();
 export {
   load,
   resolve,

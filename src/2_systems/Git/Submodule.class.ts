@@ -16,9 +16,20 @@ import Submodule, {
 } from "../../3_services/Submodule.interface";
 import { NpmPackage } from "../NpmPackage.class";
 import UcpComponentDescriptor from "../UcpComponentDescriptor.class";
+import glob from "glob"
 
 //TODO @PB Refactor code
 export default class DefaultSubmodule implements Submodule {
+  afterbuild(eamdPath: string): void {
+    
+    this.updateTsMaps(eamdPath);
+  }
+  updateTsMaps(eamdPath: string) {
+
+    glob(eamdPath + '/**/*.component.xml', {}, (err, files)=>{
+      console.log(files)
+    })
+  }
   path: string | undefined;
 
   watch(eamdPath: string): Promise<void> {
@@ -57,9 +68,13 @@ export default class DefaultSubmodule implements Submodule {
       });
   }
 
-  private copy(path: string, version: string, name: string, destname?:string) {
+  private copy(path: string, version: string, name: string, destname?: string) {
     existsSync(join(path, name)) &&
-      cpSync(join(path, name), join(path, version, destname? destname: name), { recursive: true });
+      cpSync(
+        join(path, name),
+        join(path, version, destname ? destname : name),
+        { recursive: true }
+      );
   }
 
   build(eamdPath: string) {
@@ -69,11 +84,11 @@ export default class DefaultSubmodule implements Submodule {
     const snapshot = npmPackage?.name;
     const version = `${npmPackage?.version}-SNAPSHOT-${snapshot}`;
     this.npmBuild(fullPath, version);
-    this.copy(fullPath, version, "package.build.json","package.json");
+    this.copy(fullPath, version, "package.build.json", "package.json");
     this.copy(fullPath, version, "ressources");
     this.copy(fullPath, version, "bin");
     UcpComponentDescriptor.getInstance()
-      .init(fullPath)
+      .init({ path: fullPath, relativePath: this.path })
       .writeToPath(fullPath, version);
 
     const dist = join(fullPath, "..", "..", EAMD_FOLDERS.DIST, version);
@@ -89,7 +104,7 @@ export default class DefaultSubmodule implements Submodule {
     renameSync(join(fullPath, version), dist);
     symlinkSync(dist, current);
     execSync(`npm --prefix ${dist} run build:version:after`);
-    console.log("build")
+    console.log("build");
   }
 
   async init(path: string): Promise<Submodule> {
@@ -167,5 +182,4 @@ export default class DefaultSubmodule implements Submodule {
   //   const packageFolder = split ? split : ["empty"];
 
   //   return join("Components", ...packageFolder, npmPackage.name || "", "dev");
-
 }

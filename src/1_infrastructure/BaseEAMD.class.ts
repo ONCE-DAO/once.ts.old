@@ -57,6 +57,7 @@ export abstract class BaseEAMD implements EAMD {
     (await eamdRepository.getSubmodules()).forEach((submodule) => {
       submodule.installDependencies(eamdDirectory);
       submodule.build(eamdDirectory);
+      submodule.afterbuild(eamdDirectory);
       //TODO@MD ENUMs for static constant
       process.env.node_env === "development" && submodule?.watch(eamdDirectory);
     });
@@ -110,6 +111,7 @@ export abstract class BaseEAMD implements EAMD {
       oncetsSubmodule.path = relative(this.eamdDirectory, oncetsSubmodule.path);
       oncetsSubmodule?.installDependencies(this.eamdDirectory);
       oncetsSubmodule?.build(this.eamdDirectory);
+      oncetsSubmodule?.afterbuild(this.eamdDirectory);
       process.env.node_env === "development" &&
         oncetsSubmodule?.watch(this.eamdDirectory);
     }
@@ -124,7 +126,7 @@ export abstract class BaseEAMD implements EAMD {
     if (oncetsSubmodule.path && devFolder) {
       rmSync(process.cwd(), { recursive: true });
       symlinkSync(
-        join(this.eamdDirectory,oncetsSubmodule.path ),
+        join(this.eamdDirectory, oncetsSubmodule.path),
         join(process.cwd())
       );
     }
