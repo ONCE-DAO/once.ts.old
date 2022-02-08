@@ -1,4 +1,4 @@
-import { execSync } from "child_process";
+import { execSync, spawn, spawnSync } from "child_process";
 import chokidar from "chokidar";
 import {
   cpSync,
@@ -97,9 +97,11 @@ export default class DefaultSubmodule implements Submodule {
   build(eamdPath: string) {
     if (!this.path) throw new Error("Submodule does not exist");
     const fullPath = join(eamdPath, this.path);
+
     const npmPackage = NpmPackage.getByFolder(fullPath);
     const snapshot = npmPackage?.name;
     const version = `${npmPackage?.version}-SNAPSHOT-${snapshot}`;
+    const linkPackage = npmPackage?.linkPackage;
     try {
       this.npmBuild(fullPath, version);
       this.copy(fullPath, version, "package.build.json", "package.json");
@@ -121,7 +123,15 @@ export default class DefaultSubmodule implements Submodule {
       mkdirSync(dist, { recursive: true });
       renameSync(join(fullPath, version), dist);
       symlinkSync(dist, current);
-      execSync(`npm --prefix ${dist} run build:version:after`);
+      spawnSync("npm", ["--prefix", dist, "run", "build:version:after"], {
+        encoding: "utf8",
+      });
+      if (linkPackage) {
+        spawnSync("npm", ["r", npmPackage.name || "", "-g"], {
+          encoding: "utf8",
+        });
+        spawnSync("npm", ["link", dist], { encoding: "utf8" });
+      }
       console.log("build");
     } finally {
       if (existsSync(join(fullPath, version)))
@@ -143,6 +153,7 @@ export default class DefaultSubmodule implements Submodule {
     url,
     branch,
     once,
+    overwrite,
   }: AddSubmoduleArgs): Promise<Submodule> {
     if (!once.eamd?.eamdRepository || !once.eamd.eamdDirectory)
       throw new Error("eamd repo not found");
@@ -153,6 +164,17 @@ export default class DefaultSubmodule implements Submodule {
       baseDir: tmpFolder,
       clone: { url, branch },
     });
+
+    const pkg = NpmPackage.getByFolder(join(tmpFolder, "package.build.json"));
+    if (overwrite && pkg) {
+      pkg.name = overwrite.name;
+      pkg.namespace = overwrite.namespace;
+      writeFileSync(
+        join(tmpFolder, "package.build.json"),
+        JSON.stringify(pkg, null, 2),
+        { flag: "w+" }
+      );
+    }
 
     const sub = await once.eamd.eamdRepository.addSubmodule(repo);
     await sub.installDependencies(once.eamd.eamdDirectory);

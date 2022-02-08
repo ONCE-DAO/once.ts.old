@@ -24,7 +24,7 @@ export default class UcpComponentDescriptor {
 
   writeToPath(path: string, version: string) {
     const descriptor = create();
-    // descriptor.ele("", "foo").txt("vbhjk").up();
+    descriptor.ele("", "foo").txt("vbhjk").up();
     // Object.keys(this).forEach((key, i) => {
     //   //@ts-ignore
     //   const value = this[key];

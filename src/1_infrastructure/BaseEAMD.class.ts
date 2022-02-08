@@ -1,10 +1,9 @@
 import { W_OK } from "constants";
 import { accessSync, existsSync, mkdirSync, rmSync, symlinkSync } from "fs";
-import { basename, join, relative } from "path";
+import { join, relative } from "path";
 import EAMD, { EAMD_FOLDERS } from "../3_services/EAMD.interface";
 import GitRepositoryInterface from "../3_services/GitRepository.interface";
 import DefaultGitRepository from "../2_systems/Git/GitRepository.class";
-import { NpmPackage } from "../2_systems/NpmPackage.class";
 import { execSync } from "child_process";
 
 export abstract class BaseEAMD implements EAMD {
@@ -18,15 +17,21 @@ export abstract class BaseEAMD implements EAMD {
     throw new Error("Not implemented in abstract class");
   }
 
+  get class(): ThisType<BaseEAMD> {
+    return BaseEAMD.prototype;
+  }
+
   hasWriteAccess(): boolean {
     if (this.installationDirectory)
       return BaseEAMD.hasWriteAccessFor(this.installationDirectory);
     return false;
   }
+
   isInstalled(): boolean {
     if (this.eamdDirectory) return existsSync(this.eamdDirectory);
     return false;
   }
+
   async getInstalled() {
     const eamdDirectory = this.eamdDirectory;
     if (!eamdDirectory) throw new Error("no eamd directory");
@@ -39,9 +44,9 @@ export abstract class BaseEAMD implements EAMD {
     (await this.eamdRepository.getSubmodules()).forEach((submodule) => {
       submodule.installDependencies(eamdDirectory);
       //TODO@MD ENUMs for static constant
-      if (process.env.NODE_ENV === "development") {
+      if (process.env.NODE_ENV === "watch") {
         submodule?.watch(eamdDirectory);
-      } else {
+      } else if (process.env.NODE_ENV === "build") {
         submodule.build(eamdDirectory);
         submodule.afterbuild(eamdDirectory);
       }

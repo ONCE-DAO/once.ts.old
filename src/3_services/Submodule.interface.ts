@@ -14,4 +14,5 @@ export type AddSubmoduleArgs = {
   url: string;
   once: Once;
   branch?: string;
+  overwrite?: { name: string; namespace: string };
 };

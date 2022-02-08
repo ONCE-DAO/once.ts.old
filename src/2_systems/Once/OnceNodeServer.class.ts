@@ -28,25 +28,28 @@ export default class OnceNodeServer extends BaseNodeOnce implements Once {
   }
 
   static async start(): Promise<Once> {
-    setInterval(function () {
-      console.log("timer that keeps nodejs processing running");
-    }, 1000 * 60 * 60);
+    // WATCHMODE
+    if (process.env.NODE_ENV === "watch") {
+      setInterval(function () {
+        console.log("timer that keeps nodejs processing running");
+      }, 1000 * 60 * 60);
+    }
 
     console.log("ONCE STARTED AS NODE_JS");
     const once = new OnceNodeServer(await this.initEAMD());
 
-    if (once.eamd && once.eamd.eamdRepository) {
-      const submodules = await once.eamd.eamdRepository.getSubmodules();
-      const isOnceCliInstalled = submodules.some(
-        (x) => x.path?.indexOf("once.cli") !== -1
-      );
-      if (!isOnceCliInstalled) {
-        const cli = DefaultSubmodule.addFromRemoteUrl({
-          url: "https://github.com/ONCE-DAO/once.cli.git",
-          once,
-        });
-      }
-    }
+    // if (once.eamd && once.eamd.eamdRepository) {
+    //   const submodules = await once.eamd.eamdRepository.getSubmodules();
+    //   const isOnceCliInstalled = submodules.some(
+    //     (x) => x.path?.indexOf("once.cli") !== -1
+    //   );
+    //   if (!isOnceCliInstalled) {
+    //     const cli = DefaultSubmodule.addFromRemoteUrl({
+    //       url: "https://github.com/ONCE-DAO/once.cli.git",
+    //       once,
+    //     });
+    //   }
+    // }
     return once;
   }
 
