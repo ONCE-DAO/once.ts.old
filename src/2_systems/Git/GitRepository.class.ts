@@ -1,4 +1,4 @@
-import { cpSync, existsSync, mkdirSync, renameSync } from "fs";
+import fs, { cpSync, existsSync, fstat, mkdirSync, renameSync } from "fs";
 import { join, relative } from "path";
 import simpleGit, { Options, SimpleGit, TaskOptions } from "simple-git";
 import { NpmPackage } from "../NpmPackage.class";
@@ -30,7 +30,10 @@ export default class DefaultGitRepository implements GitRepository {
   async addSubmodule(repoToAdd: GitRepository): Promise<SubmoduleInterface> {
     if (!this.gitRepo) throw new Error("Not Initialized");
 
-    const devFolder = join(this.gitRepo[1], DefaultGitRepository.getdevFolder(repoToAdd));
+    const devFolder = join(
+      this.gitRepo[1],
+      DefaultGitRepository.getdevFolder(repoToAdd)
+    );
     const submoduleFolder = join(devFolder, await repoToAdd.identifier);
     const modules = await this.gitRepo[0].subModule();
     const relativeFolderPath = relative(this.gitRepo[1], submoduleFolder);
@@ -48,7 +51,9 @@ export default class DefaultGitRepository implements GitRepository {
         relativeFolderPath,
       ]);
     }
-    return await DefaultSubmodule.getInstance().init({ path: relativeFolderPath });
+    return await DefaultSubmodule.getInstance().init({
+      path: relativeFolderPath,
+    });
   }
 
   protected gitRepo?: [SimpleGit, string];
@@ -78,39 +83,41 @@ export default class DefaultGitRepository implements GitRepository {
 
   async getSubmodules(): Promise<SubmoduleInterface[]> {
     if (this.gitRepo) {
-      let repoParameter: { [index: string]: { path?: string, url?: string, branch?: string } } = {};
+      let repoParameter: {
+        [index: string]: { path?: string; url?: string; branch?: string };
+      } = {};
       const submodulePaths = (
-        await this.gitRepo[0].raw(
-          "config",
-          "--file",
-          ".gitmodules",
-          "-l")
+        await this.gitRepo[0].raw("config", "--file", ".gitmodules", "-l")
       )
         .split("\n")
-        .filter(l => l)
-        .forEach(l => {
+        .filter((l) => l)
+        .forEach((l) => {
           let splitLine = l.match(/^(.+)\.(.+)=(.+)$/);
           if (!splitLine) throw new Error("Could not parse line: " + l);
 
           repoParameter[splitLine[1]] = repoParameter[splitLine[1]] || {};
           // @ts-ignore
           repoParameter[splitLine[1]][splitLine[2]] = splitLine[3];
-        })
+        });
 
-      return Promise.all(Object.keys(repoParameter).map((key) => DefaultSubmodule.getInstance().init(repoParameter[key])))
-
+      return Promise.all(
+        Object.keys(repoParameter).map((key) =>
+          DefaultSubmodule.getInstance().init(repoParameter[key])
+        )
+      );
     }
     return [];
   }
 
-  async getAndInstallSubmodule(ior: IOR, url: string): Promise<SubmoduleInterface> {
+  async getAndInstallSubmodule(
+    ior: IOR,
+    url: string
+  ): Promise<SubmoduleInterface> {
     const submodules = await this.getSubmodules();
-    const path = url + '@' + (ior.namespaceVersion || 'main');
-    if (ior.namespace === undefined) throw new Error("Missing Namespace")
+    const path = url + "@" + (ior.namespaceVersion || "main");
+    if (ior.namespace === undefined) throw new Error("Missing Namespace");
     let namespace = ior.namespace;
-    const existingSubmodule = submodules.filter(
-      (x) => x.url?.includes(url)
-    );
+    const existingSubmodule = submodules.filter((x) => x.url?.includes(url));
     if (existingSubmodule.length > 0) {
       return existingSubmodule[0];
     }
@@ -121,8 +128,6 @@ export default class DefaultGitRepository implements GitRepository {
       url: url,
       once,
     });
-
-
   }
 
   private async clone({ url, branch }: GitCloneParameter): Promise<Result> {
@@ -151,7 +156,7 @@ export default class DefaultGitRepository implements GitRepository {
     return new Promise(async (resolve) => {
       const remoteUrl = this.gitRepo
         ? (await this.gitRepo[0].getConfig("remote.origin.url")).value ||
-        undefined
+          undefined
         : undefined;
       resolve(remoteUrl || "");
     });

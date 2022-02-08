@@ -38,11 +38,13 @@ export default class OnceNodeImportLoader extends BaseNodeOnce {
     return undefined;
   }
 
-  resolve(
+  async resolve(
     specifier: string,
     context: resolveContext,
     defaultResolve: Function
   ): Promise<{ url: string }> {
+    if (specifier.startsWith("ior:"))
+      specifier = await DefaultIOR.load(specifier);
     return defaultResolve(specifier, context, defaultResolve);
   }
 
@@ -55,10 +57,6 @@ export default class OnceNodeImportLoader extends BaseNodeOnce {
     source: string | ArrayBuffer | Int8Array;
   }> {
     // TODO hook it load via IOR
-    console.log(`Import: ${url}`);
-    if (url.startsWith("ior:")) {
-      return await DefaultIOR.load(url);
-    }
     return defaultLoad(url, context, defaultLoad);
   }
 

@@ -24,6 +24,9 @@ export default class OnceNodeServer extends BaseNodeOnce implements Once {
   }
 
   async start(): Promise<Once> {
+    //@ts-ignore
+    await import("ior:esm:git:tla.EAM.Once.cli");
+
     return this;
   }
 
