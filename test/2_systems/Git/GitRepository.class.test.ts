@@ -1,7 +1,10 @@
-import { mkdirSync, rm, rmSync } from "fs";
+import { existsSync, mkdirSync, rm, rmSync } from "fs";
 import { join } from "path/posix";
 import GitRepository from "../../../src/2_systems/Git/GitRepository.class";
-import { GitRepositoryNotInitialisedError, GitRepositoryConstants } from "../../../src/3_services/GitRepository.interface";
+import {
+  GitRepositoryNotInitialisedError,
+  GitRepositoryConstants,
+} from "../../../src/3_services/GitRepository.interface";
 
 let gitRepository: GitRepository;
 beforeEach(() => {
@@ -19,7 +22,7 @@ test("unitializedFolderPath", async () => {
 });
 
 test("itializedFolderPath", async () => {
-  const baseDir = join(process.cwd(), "tmp");
+  const baseDir = join(process.cwd(), "tmptest" + Date.now());
   mkdirSync(baseDir);
   try {
     gitRepository.init({ baseDir });

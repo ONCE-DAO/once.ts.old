@@ -35,10 +35,7 @@ export const EAMDLoader: LoaderStatic = class EAMDLoader extends BaseLoader impl
     let submodules = await global.ONCE.eamd.eamdRepository.getAndInstallSubmodule(ior, repoPath);
 
 
-    let relativePath = "../../../../../../../../../" + submodules.path + "/../../dist/current/src/exports.js";
-
-    return await import(relativePath);
-
+    return "../../../../../../../../../" + submodules.path + "/../../dist/current/src/exports.js";
   }
 
   canHandle(ior: IorInterface): number {

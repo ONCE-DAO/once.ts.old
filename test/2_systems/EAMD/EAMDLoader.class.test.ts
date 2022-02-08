@@ -4,7 +4,6 @@ import OnceKernel from "../../../src/1_infrastructure/OnceKernel.class";
 import OnceNodeServer from "../../../src/2_systems/Once/OnceNodeServer.class";
 
 describe("EAMD Loader", () => {
-
   test(`IOR Find Loader`, () => {
     // @ts-ignore
     let ior = new DefaultIOR().init("ior:esm:git:tla.EAM.Once");
@@ -13,13 +12,12 @@ describe("EAMD Loader", () => {
   });
 
   test(`IOR load Thing from Namespace`, async () => {
-
-    let loadedDefaultIOR = (await (DefaultIOR.load("ior:esm:git:tla.EAM.Once"))).DefaultIOR;
+    let loadedDefaultIOR = (await DefaultIOR.load("ior:esm:git:tla.EAM.Once"))
+      .DefaultIOR;
     expect(loadedDefaultIOR).toEqual(DefaultIOR);
-  })
+  });
 
   test(`CanHandler`, async () => {
-
     let ior = new DefaultIOR().init("ior:esm:git:tla.EAM.Once");
 
     expect(EAMDLoader.canHandle(ior)).toBe(1);
@@ -28,17 +26,13 @@ describe("EAMD Loader", () => {
     let ior2 = new DefaultIOR().init("ior:google.de");
 
     expect(EAMDLoader.canHandle(ior2)).toBe(0);
-
-  })
+  });
 
   test(`load once.cli`, async () => {
-
     if (!global.ONCE) await OnceNodeServer.start();
-    let loadedONCE = (await (DefaultIOR.load("ior:esm:git:tla.EAM.Once.ts"))).default;
-    expect(loadedONCE).toBe(OnceNodeServer);
-
-
-  }, 100000000)
+    let loadedONCE = await DefaultIOR.load("ior:esm:git:tla.EAM.Once.ts");
+    expect(typeof loadedONCE).toBe("string");
+  }, 100000000);
 
   // test(`import load Thing from Namespace`, async () => {
 
