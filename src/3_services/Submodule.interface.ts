@@ -4,6 +4,7 @@ export default interface Submodule {
   path: string | undefined;
   url: string | undefined;
   branch: string | undefined;
+  distPath: string;
   installDependencies(eamdPath: string): void;
   build(eamdPath: string): void;
   afterbuild(eamdPath: string): void;
