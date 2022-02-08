@@ -7,7 +7,7 @@ type storedObject = { ref?: any, promise?: any };
 
 export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> implements Store {
 
-    get class(): typeof WeakRefPromiseStore {
+    get typeDescriptor(): typeof WeakRefPromiseStore {
         return WeakRefPromiseStore;
     }
 

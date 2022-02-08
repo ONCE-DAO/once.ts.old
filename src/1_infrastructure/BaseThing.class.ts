@@ -1,12 +1,13 @@
 import DefaultTypeDescriptor from "../2_systems/Things/DefaultTypeDescriptor.class";
 import Thing from "../3_services/Thing.interface";
-import TypeDescriptor from "../3_services/TypeDescriptor.interface";
+import TypeDescriptor, { TSClass } from "../3_services/TypeDescriptor.interface";
+
 
 export default abstract class BaseThing<T> implements Thing<T> {
   type: any;
   get name(): string { return this.constructor.name };
-  static _typeDescriptor: any;
   private _id: string | undefined;
+  private _typeDescriptor: TSClass | undefined;
   get id() {
     // TODO Preplace with correct ID generator
     if (!this._id) {
@@ -16,6 +17,7 @@ export default abstract class BaseThing<T> implements Thing<T> {
   }
 
   init(...a: any[]) {
+    this.typeDescriptor
     return this;
   }
 
@@ -33,17 +35,26 @@ export default abstract class BaseThing<T> implements Thing<T> {
 
   }
 
-  abstract get class(): any
+  // get typeDescriptor(): TSClass {
+  //   if (!this.constructor._typeDescriptor) this.constructor._typeDescriptor = new TSClass(this.constructor);
+  //   return this.constructor._typeDescriptor
+  // }
 
-  static get typeDescriptor(): any {
-    if (!this._typeDescriptor) {
-      this._typeDescriptor = new DefaultTypeDescriptor().init(this);
-    }
-    return this._typeDescriptor;
+  get typeDescriptor(): TSClass {
+    if (!this._typeDescriptor) this._typeDescriptor = new TSClass(this.constructor);
+    return this._typeDescriptor
   }
 
-  get typeDescriptor(): TypeDescriptor {
-    return this.class.typeDescriptor;
-  }
+
+  // static get typeDescriptor(): any {
+  //   if (!this._typeDescriptor) {
+  //     this._typeDescriptor = new DefaultTypeDescriptor();
+  //   }
+  //   return this._typeDescriptor;
+  // }
+
+  // get typeDescriptor(): TypeDescriptor {
+  //   return this.class.typeDescriptor;
+  // }
 
 }

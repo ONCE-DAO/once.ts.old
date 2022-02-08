@@ -2,11 +2,13 @@ import EventServiceInterface from "../../3_services/EventService.interface";
 import Store from "../../3_services/Store.interface";
 import BaseThing from "../../1_infrastructure/BaseThing.class";
 
-export default class DefaultStore extends BaseThing<DefaultStore> implements Store {
+export default class DefaultStore 
+    extends BaseThing<DefaultStore> 
+    implements Store {
 
-    get class(): typeof DefaultStore {
-        return DefaultStore;
-    }
+    // get class(): typeof DefaultStore {
+    //     return DefaultStore;
+    // }
 
     eventSupport: EventServiceInterface | undefined;
     private registry: { [index: string]: any } = {};

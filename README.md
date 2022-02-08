@@ -59,6 +59,8 @@ in launch.json
 ...
 ```
 
+use debug in Jest Tree View (Laboratory Glas)
+
 ## Updating
 
 ```

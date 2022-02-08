@@ -6,7 +6,7 @@ import Url, { urlProtocol } from "../../3_services/Url.interface";
 export enum formatType { "normal", "origin", "originPath" }
 
 export default class DefaultUrl extends BaseThing<DefaultUrl> implements Url {
-    get class(): typeof DefaultUrl {
+    get typeDescriptor(): typeof DefaultUrl {
         return DefaultUrl;
     }
 

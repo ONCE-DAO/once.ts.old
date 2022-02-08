@@ -6,7 +6,7 @@ import DefaultEvent from "./DefaultEvent.class";
 
 export default class DefaultEventService extends BaseThing<DefaultEventService> implements EventService {
 
-    get class(): typeof DefaultEventService {
+    get typeDescriptor(): typeof DefaultEventService {
         return DefaultEventService;
     }
 

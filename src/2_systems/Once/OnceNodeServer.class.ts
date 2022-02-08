@@ -6,7 +6,7 @@ import { BaseNodeOnce } from "../../1_infrastructure/BaseNodeOnce.class";
 import DefaultSubmodule from "../Git/Submodule.class";
 
 export default class OnceNodeServer extends BaseNodeOnce implements Once {
-  get class(): any {
+  get typeDescriptor(): any {
     return OnceNodeServer;
   }
   init(...a: any[]) {

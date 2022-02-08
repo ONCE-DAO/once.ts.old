@@ -1,4 +1,4 @@
-import IorInterface from "../../3_services/IOR.interface";
+import IOR from "../../3_services/IOR.interface";
 import Loader, { LoaderStatic, loadingConfig } from "../../3_services/Loader.interface";
 import { urlProtocol } from "../../3_services/Url.interface";
 import BaseLoader from "../../1_infrastructure/BaseLoader.class";
@@ -6,11 +6,11 @@ import BaseLoader from "../../1_infrastructure/BaseLoader.class";
 
 export const EAMDLoader: LoaderStatic = class EAMDLoader extends BaseLoader implements Loader {
 
-  get class(): typeof EAMDLoader {
+  get typeDescriptor(): typeof EAMDLoader {
     return EAMDLoader;
   }
 
-  async load(ior: IorInterface, config: loadingConfig): Promise<any> {
+  async load(ior: IOR, config: loadingConfig): Promise<any> {
     // Shortcut for once itself
     if (ior.namespace === 'tla.EAM.Once') {
       return await import("../../exports");
@@ -19,12 +19,12 @@ export const EAMDLoader: LoaderStatic = class EAMDLoader extends BaseLoader impl
 
   }
 
-  canHandle(ior: IorInterface): number {
+  canHandle(ior: IOR): number {
     return EAMDLoader.canHandle(ior);
   }
 
 
-  static canHandle(ior: IorInterface): number {
+  static canHandle(ior: IOR): number {
     if (ior.protocol.includes(urlProtocol.esm) && ior.namespace) {
       return 1;
     }

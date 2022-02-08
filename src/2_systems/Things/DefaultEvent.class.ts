@@ -5,7 +5,7 @@ import WeakRefPromiseStore from "./WeakRefPromiseStore.class";
 
 export default class DefaultEvent extends BaseThing<DefaultEvent> implements OnceEvent {
 
-    get class(): typeof DefaultEvent {
+    get typeDescriptor(): typeof DefaultEvent {
         return DefaultEvent;
     }
 

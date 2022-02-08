@@ -9,7 +9,7 @@ import DefaultLoader from "./DefaultLoader.class";
 
 
 export default class DefaultIOR extends DefaultUrl implements IOR {
-    get class(): typeof DefaultIOR {
+    get typeDescriptor(): typeof DefaultIOR {
         return DefaultIOR;
     }
     private _referencedObject: any;

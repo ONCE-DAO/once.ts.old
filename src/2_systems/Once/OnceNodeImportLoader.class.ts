@@ -4,7 +4,7 @@ import DefaultIOR from "../Things/DefaultIOR.class";
 import { BaseNodeOnce } from "../../1_infrastructure/BaseNodeOnce.class";
 
 export default class OnceNodeImportLoader extends BaseNodeOnce {
-  get class(): any {
+  get typeDescriptor(): any {
     return OnceNodeImportLoader;
   }
   creationDate: Date;
