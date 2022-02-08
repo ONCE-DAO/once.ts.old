@@ -161,7 +161,7 @@ export default class DefaultSubmodule implements Submodule {
   }: AddSubmoduleArgs): Promise<Submodule> {
     if (!once.eamd?.eamdRepository || !once.eamd.eamdDirectory)
       throw new Error("eamd repo not found");
-    const tmpFolder = join(once.eamd.eamdDirectory, "tmp", url, branch || "");
+    const tmpFolder = join(once.eamd.eamdDirectory, "tmp", Date.now().toString() );
     if (existsSync(tmpFolder)) rmSync(tmpFolder, { recursive: true });
     else mkdirSync(tmpFolder, { recursive: true });
     const repo = await DefaultGitRepository.getInstance().init({
@@ -169,12 +169,18 @@ export default class DefaultSubmodule implements Submodule {
       clone: { url, branch },
     });
 
-    const pkg = NpmPackage.getByFolder(join(tmpFolder, "package.build.json"));
+    const pkg = NpmPackage.getByPath(join(tmpFolder, "package.build.json"));
     if (overwrite && pkg) {
+      console.log("OVERWRITE with", overwrite)
       pkg.name = overwrite.name;
       pkg.namespace = overwrite.namespace;
       writeFileSync(
         join(tmpFolder, "package.build.json"),
+        JSON.stringify(pkg, null, 2),
+        { flag: "w+" }
+      );
+      writeFileSync(
+        join(tmpFolder, "package.json"),
         JSON.stringify(pkg, null, 2),
         { flag: "w+" }
       );
