@@ -49,6 +49,8 @@ class RelationshipBehavior implements Behaviour {
 
 }
 
+// TODO Array of relationships
+// Object with keys: Map extends Collection
 class CollectionBehavior implements Behaviour {
   private _name: any;
   get type(): Constructor {
@@ -112,7 +114,8 @@ class Metaclass extends ClassDescription {
     }
 }
 
-// TODO REFACTOR make sure TSClass comes form the TS framework
+// TODO 
+// REFACTOR make sure TSClass comes form the TS framework
 export class TSClass extends ClassDescription implements TypeDescriptor {
   metaclass: Metaclass;
   protected _type: Constructor;
