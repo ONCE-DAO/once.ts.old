@@ -42,14 +42,16 @@ export abstract class BaseEAMD implements EAMD {
       baseDir: this.eamdDirectory,
     });
 
-    
     // TODO make Parallel
     (await this.eamdRepository.getSubmodules()).forEach((submodule) => {
       //TODO@MD ENUMs for static constant
       if (process.env.NODE_ENV === "watch") {
         submodule?.watch(eamdDirectory);
-      } else if (process.env.NODE_ENV === "build") {
+      }
+      if (process.env.NODE_ENV === "build_pkg") {
         submodule.installDependencies(eamdDirectory);
+      }
+      if (process.env.NODE_ENV === "build" || process.env.NODE_ENV === "build_pkg") {
         submodule.build(eamdDirectory);
         submodule.afterbuild(eamdDirectory);
       }
