@@ -41,6 +41,7 @@ export abstract class BaseEAMD implements EAMD {
       //TODO@MD ENUMs for static constant
       if (process.env.NODE_ENV === "development") {
         submodule?.watch(eamdDirectory);
+
       } else {
         submodule.build(eamdDirectory);
         submodule.afterbuild(eamdDirectory);
@@ -137,8 +138,8 @@ export abstract class BaseEAMD implements EAMD {
 
   async discover(): Promise<object> {
     return {
-      "tla.EAM.Once.ts": "github.com/ONCE-DAO/EAMD.ucp.git",
-      "tla.EAM.Once.cli": "github.com/ONCE-DAO/once.cli.git",
+      "tla.EAM.Once.ts": "git@github.com:ONCE-DAO/once.ts.git",
+      "tla.EAM.Once.cli": "https://github.com/ONCE-DAO/once.cli.git",
     };
   }
 }

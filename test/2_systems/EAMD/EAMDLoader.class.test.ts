@@ -1,5 +1,7 @@
 import EAMDLoader from "../../../src/2_systems/EAMD/EAMDLoader.class";
 import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class";
+import OnceKernel from "../../../src/1_infrastructure/OnceKernel.class";
+import OnceNodeServer from "../../../src/2_systems/Once/OnceNodeServer.class";
 
 describe("EAMD Loader", () => {
 
@@ -27,8 +29,16 @@ describe("EAMD Loader", () => {
 
     expect(EAMDLoader.canHandle(ior2)).toBe(0);
 
-
   })
+
+  test(`load once.cli`, async () => {
+
+    if (!global.ONCE) await OnceNodeServer.start();
+    let loadedONCE = (await (DefaultIOR.load("ior:esm:git:tla.EAM.Once.ts"))).default;
+    expect(loadedONCE).toBe(OnceNodeServer);
+
+
+  }, 100000000)
 
   // test(`import load Thing from Namespace`, async () => {
 
