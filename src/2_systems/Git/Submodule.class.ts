@@ -101,7 +101,8 @@ export default class DefaultSubmodule implements Submodule {
     const fullPath = join(eamdPath, this.path);
 
     const npmPackage = NpmPackage.getByFolder(fullPath);
-    const snapshot = npmPackage?.name;
+    const branchString = this.branch ? `@${this.branch}` : "";
+    const snapshot = npmPackage?.name + branchString;
     const version = `${npmPackage?.version}-SNAPSHOT-${snapshot}`;
     const linkPackage = npmPackage?.linkPackage;
     try {
@@ -116,10 +117,11 @@ export default class DefaultSubmodule implements Submodule {
       const dist = join(fullPath, "..", "..", EAMD_FOLDERS.DIST, version);
       const current = join(dist, "..", EAMD_FOLDERS.CURRENT);
 
-      if (existsSync(dist)) {
-        // TODO@PB mit versionsnummer kein problem
-        rmSync(dist, { recursive: true });
+      try {
         unlinkSync(current);
+      } catch {} //HACK REMOVE PB
+      if (existsSync(dist)) {
+        rmSync(dist, { recursive: true });
       }
 
       mkdirSync(dist, { recursive: true });
@@ -141,7 +143,11 @@ export default class DefaultSubmodule implements Submodule {
     }
   }
 
-  async init(config: { path?: string, url?: string, branch?: string }): Promise<Submodule> {
+  async init(config: {
+    path?: string;
+    url?: string;
+    branch?: string;
+  }): Promise<Submodule> {
     this.path = config.path;
     this.url = config.url;
     this.branch = config.branch;
@@ -153,7 +159,7 @@ export default class DefaultSubmodule implements Submodule {
     return instance;
   }
 
-  static async addFromRemoteUrl({
+  static async getOrAddFromRemoteUrl({
     url,
     branch,
     once,
@@ -161,7 +167,11 @@ export default class DefaultSubmodule implements Submodule {
   }: AddSubmoduleArgs): Promise<Submodule> {
     if (!once.eamd?.eamdRepository || !once.eamd.eamdDirectory)
       throw new Error("eamd repo not found");
-    const tmpFolder = join(once.eamd.eamdDirectory, "tmp", Date.now().toString() );
+    const tmpFolder = join(
+      once.eamd.eamdDirectory,
+      "tmp",
+      Date.now().toString()
+    );
     if (existsSync(tmpFolder)) rmSync(tmpFolder, { recursive: true });
     else mkdirSync(tmpFolder, { recursive: true });
     const repo = await DefaultGitRepository.getInstance().init({
@@ -171,7 +181,7 @@ export default class DefaultSubmodule implements Submodule {
 
     const pkg = NpmPackage.getByPath(join(tmpFolder, "package.build.json"));
     if (overwrite && pkg) {
-      console.log("OVERWRITE with", overwrite)
+      console.log("OVERWRITE with", overwrite);
       pkg.name = overwrite.name;
       pkg.namespace = overwrite.namespace;
       writeFileSync(
