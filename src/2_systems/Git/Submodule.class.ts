@@ -23,6 +23,8 @@ import DefaultGitRepository from "./GitRepository.class";
 
 //TODO @PB Refactor code
 export default class DefaultSubmodule implements Submodule {
+  url: string | undefined;
+  branch: string | undefined;
   addFromRemoteUrl(args: AddSubmoduleArgs): Promise<Submodule> {
     throw new Error("Method not implemented.");
   }
@@ -139,8 +141,10 @@ export default class DefaultSubmodule implements Submodule {
     }
   }
 
-  async init(path: string): Promise<Submodule> {
-    this.path = path;
+  async init(config: { path?: string, url?: string, branch?: string }): Promise<Submodule> {
+    this.path = config.path;
+    this.url = config.url;
+    this.branch = config.branch;
     return this;
   }
 

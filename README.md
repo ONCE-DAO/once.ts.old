@@ -20,7 +20,11 @@ cd ~/tmp/dev/once.ts
 npm i
 ```
 
+## install the EAMD Repository 
 
+```
+npm run eamd:install
+```
 
 As a result Once will be 
 - started
@@ -29,13 +33,6 @@ As a result Once will be
 - then you can open a new VS Code Window in with Open Folder ```~/EAMD.ucp```
 
 ## running Once
-
-```
-cd ~/EAMD.ucp
-npm run prepare:run
-```
-prepare:run
-## rebuilding Once
 
 ```
 cd ~/EAMD.ucp
@@ -67,3 +64,15 @@ in launch.json
 ```
 git pull --recurse-submodules
 ```
+
+
+## Trouble Shooting
+
+```
+jest
+io.orta.jest.toggle-coverage
+not found
+```
+
+Shift Control P: Jest: Start All Runners
+Shift Control P: Jest: Toggle Coverage

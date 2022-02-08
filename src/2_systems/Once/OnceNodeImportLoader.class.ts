@@ -55,7 +55,7 @@ export default class OnceNodeImportLoader extends BaseNodeOnce {
     source: string | ArrayBuffer | Int8Array;
   }> {
     // TODO hook it load via IOR
-    // console.log(`Import: ${url}`);
+    console.log(`Import: ${url}`);
     if (url.startsWith("ior:")) {
       return await DefaultIOR.load(url);
     }

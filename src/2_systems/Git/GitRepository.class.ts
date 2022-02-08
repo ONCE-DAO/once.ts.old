@@ -12,6 +12,7 @@ import GitRepository, {
 import SubmoduleInterface from "../../3_services/Submodule.interface";
 import DefaultSubmodule from "./Submodule.class";
 import { EAMD_FOLDERS } from "../../3_services/EAMD.interface";
+import IOR from "../../3_services/IOR.interface";
 
 export default class DefaultGitRepository implements GitRepository {
   async init({
@@ -47,7 +48,7 @@ export default class DefaultGitRepository implements GitRepository {
         relativeFolderPath,
       ]);
     }
-    return await DefaultSubmodule.getInstance().init(relativeFolderPath);
+    return await DefaultSubmodule.getInstance().init({ path: relativeFolderPath });
   }
 
   protected gitRepo?: [SimpleGit, string];
@@ -55,17 +56,17 @@ export default class DefaultGitRepository implements GitRepository {
   private static getdevFolder(repo: GitRepository) {
     const npmPackage = NpmPackage.getByFolder(repo.folderPath);
     if (!npmPackage) throw new Error("TODO");
-  
+
     const split = npmPackage.namespace?.split(".");
     const packageFolder = split ? split : [EAMD_FOLDERS.MISSING_NAMESPACE];
-  
+
     return join(
       EAMD_FOLDERS.COMPONENTS,
       ...packageFolder,
       npmPackage.name || "",
       EAMD_FOLDERS.DEV
     );
-  } 
+  }
   static getInstance() {
     return new DefaultGitRepository();
   }
@@ -77,24 +78,51 @@ export default class DefaultGitRepository implements GitRepository {
 
   async getSubmodules(): Promise<SubmoduleInterface[]> {
     if (this.gitRepo) {
+      let repoParameter: { [index: string]: { path?: string, url?: string, branch?: string } } = {};
       const submodulePaths = (
         await this.gitRepo[0].raw(
           "config",
           "--file",
           ".gitmodules",
-          "--get-regexp",
-          "path"
-        )
+          "-l")
       )
         .split("\n")
-        .map((x) => x.split(" ")[1])
-        .filter((x) => x);
+        .filter(l => l)
+        .forEach(l => {
+          let splitLine = l.match(/^(.+)\.(.+)=(.+)$/);
+          if (!splitLine) throw new Error("Could not parse line: " + l);
 
-      return Promise.all(
-        submodulePaths.map((path) => DefaultSubmodule.getInstance().init(path))
-      );
+          repoParameter[splitLine[1]] = repoParameter[splitLine[1]] || {};
+          // @ts-ignore
+          repoParameter[splitLine[1]][splitLine[2]] = splitLine[3];
+        })
+
+      return Promise.all(Object.keys(repoParameter).map((key) => DefaultSubmodule.getInstance().init(repoParameter[key])))
+
     }
     return [];
+  }
+
+  async getAndInstallSubmodule(ior: IOR, url: string): Promise<SubmoduleInterface> {
+    const submodules = await this.getSubmodules();
+    const path = url + '@' + (ior.namespaceVersion || 'main');
+    if (ior.namespace === undefined) throw new Error("Missing Namespace")
+    let namespace = ior.namespace;
+    const existingSubmodule = submodules.filter(
+      (x) => x.url?.includes(url)
+    );
+    if (existingSubmodule.length > 0) {
+      return existingSubmodule[0];
+    }
+
+    const once = global.ONCE;
+    if (!once) throw new Error("Missing ONCE");
+    return await DefaultSubmodule.addFromRemoteUrl({
+      url: url,
+      once,
+    });
+
+
   }
 
   private async clone({ url, branch }: GitCloneParameter): Promise<Result> {
@@ -123,7 +151,7 @@ export default class DefaultGitRepository implements GitRepository {
     return new Promise(async (resolve) => {
       const remoteUrl = this.gitRepo
         ? (await this.gitRepo[0].getConfig("remote.origin.url")).value ||
-          undefined
+        undefined
         : undefined;
       resolve(remoteUrl || "");
     });

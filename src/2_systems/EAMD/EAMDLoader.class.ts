@@ -12,10 +12,32 @@ export const EAMDLoader: LoaderStatic = class EAMDLoader extends BaseLoader impl
 
   async load(ior: IorInterface, config: loadingConfig): Promise<any> {
     // Shortcut for once itself
+
+    if (this.canHandle(ior) !== 1 || !ior.namespace) throw new Error("Can not load this IOR");
+
     if (ior.namespace === 'tla.EAM.Once') {
       return await import("../../exports");
     }
-    throw new Error("Not implemented yet");
+
+    if (!global.ONCE) throw new Error("Missing ONCE");
+    if (!global.ONCE.eamd) throw new Error("Missing EAMD in ONCE");
+
+    let eamdRepos = await global.ONCE?.eamd?.discover() as Object;
+
+    //@ts-ignore
+    const repoPath = eamdRepos[ior.namespace];
+    if (repoPath === undefined) {
+      throw new Error("Missing Mapping from Namespace to Repository")
+    }
+
+    if (!global.ONCE.eamd.eamdRepository) throw new Error("Missing eamdRepository");
+
+    let submodules = await global.ONCE.eamd.eamdRepository.getAndInstallSubmodule(ior, repoPath);
+
+
+    let relativePath = "../../../../../../../../../" + submodules.path + "/../../dist/current/src/exports.js";
+
+    return await import(relativePath);
 
   }
 
@@ -25,7 +47,7 @@ export const EAMDLoader: LoaderStatic = class EAMDLoader extends BaseLoader impl
 
 
   static canHandle(ior: IorInterface): number {
-    if (ior.protocol.includes(urlProtocol.esm) && ior.namespace) {
+    if (ior.protocol.includes(urlProtocol.esm) && ior.namespace !== undefined) {
       return 1;
     }
     return 0;

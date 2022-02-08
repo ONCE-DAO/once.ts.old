@@ -8,11 +8,13 @@ export abstract class BaseOnce extends DefaultThing<Once> implements Once {
   state: OnceState = OnceState.DISCOVER;
   eamd: EAMDInterface | undefined;
   ENV: any;
+  global: typeof globalThis;
 
   constructor(glob: typeof globalThis) {
     super();
     this.creationDate = new Date();
     glob.ONCE = this;
+    this.global = glob;
     this.ENV = {};
   }
 

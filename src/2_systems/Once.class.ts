@@ -1,4 +1,4 @@
-(await import("../1_infrastructure/OnceStarter.class.js")).default.start();
+(await import("../1_infrastructure/OnceKernel.class.js")).default.start();
 export {
   load,
   resolve,

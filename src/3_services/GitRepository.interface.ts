@@ -1,3 +1,4 @@
+import IOR from "./IOR.interface";
 import Submodule from "./Submodule.interface";
 
 export default interface GitRepository {
@@ -6,6 +7,7 @@ export default interface GitRepository {
   currentBranch: Promise<string>;
   remoteUrl: Promise<string>;
 
+  getAndInstallSubmodule(ior: IOR, path: string): Promise<Submodule>
   addSubmodule(repoToAdd: GitRepository): Promise<Submodule>;
   getSubmodules(): Promise<Submodule[]>;
   init({
