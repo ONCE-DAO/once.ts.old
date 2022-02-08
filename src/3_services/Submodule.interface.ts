@@ -14,6 +14,7 @@ export default interface Submodule {
 
 export type AddSubmoduleArgs = {
   url: string;
+  // TODO remove from args
   once: Once;
   branch?: string;
   overwrite?: { name: string; namespace: string };

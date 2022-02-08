@@ -109,24 +109,22 @@ export default class DefaultGitRepository implements GitRepository {
     return [];
   }
 
-  async getAndInstallSubmodule(
-    ior: IOR,
-    url: string
-  ): Promise<SubmoduleInterface> {
-    const submodules = await this.getSubmodules();
-    const path = url + "@" + (ior.namespaceVersion || "main");
-    if (ior.namespace === undefined) throw new Error("Missing Namespace");
-    let namespace = ior.namespace;
-    const existingSubmodule = submodules.filter((x) => x.url?.includes(url));
-    if (existingSubmodule.length > 0) {
-      return existingSubmodule[0];
-    }
+  getAndInstallSubmodule(ior: IOR, url: string): Promise<SubmoduleInterface> {
+    // const submodules = await this.getSubmodules();
+    // const path = url + "@" + (ior.namespaceVersion || "main");
+    // if (ior.namespace === undefined) throw new Error("Missing Namespace");
+    // let namespace = ior.namespace;
+    // const existingSubmodule = submodules.filter((x) => x.url?.includes(url));
+    // if (existingSubmodule.length > 0) {
+    //   return existingSubmodule[0];
+    // }
 
     const once = global.ONCE;
     if (!once) throw new Error("Missing ONCE");
-    return await DefaultSubmodule.addFromRemoteUrl({
+    return DefaultSubmodule.getOrAddFromRemoteUrl({
       url: url,
       once,
+      branch: ior.namespaceVersion,
     });
   }
 
