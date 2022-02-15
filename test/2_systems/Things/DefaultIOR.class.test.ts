@@ -95,7 +95,7 @@ describe("IOR Class", () => {
     result: {
       protocol: ["ior", "esm", "git"],
       hostName: undefined,
-      pathName: undefined,
+      pathName: "tla.EAM.Namespace[#sdsgzudhsudhusidh]",
       origin: undefined,
       isLoaded: false,
       namespace: "tla.EAM.Namespace",
@@ -103,6 +103,82 @@ describe("IOR Class", () => {
       href: "ior:esm:git:tla.EAM.Namespace[#sdsgzudhsudhusidh]"
     },
   });
+
+  validate.push({
+    url: "ior:github:tla.EAM.OnceService.Once.express#/ONCE-DAO/Once.express",
+    result: {
+      protocol: ["ior", "esm", "git"],
+      hostName: undefined,
+      pathName: "tla.EAM.OnceService.Once.express",
+      origin: undefined,
+      isLoaded: false,
+      namespace: "tla.EAM.OnceService.Once.express",
+      namespaceVersion: "#sdsgzudhsudhusidh",
+      href: "ior:esm:git:tla.EAM.Namespace[#sdsgzudhsudhusidh]"
+    },
+  });
+
+  validate.push({
+    url: "ior:http://some.host.name:1234,failoverhost:2345/route/tla.EAM.OnceService.Once.express#/ONCE-DAO/Once.express",
+    result: {
+      protocol: ["ior", "esm", "git"],
+      host: "some.host.name:1234",
+      port: 1234,
+      hostName: "some.host.name",
+      
+      pathName: "route/tla.EAM.OnceService.Once.express#/ONCE-DAO/Once.express",      
+      hash: "/ONCE-DAO/Once.express",
+      anchor: "/ONCE-DAO/Once.express",
+
+      fileName: "Once.express",
+      fileType: "express",
+
+      hosts: ["some.host.name:1234","failoverhost:2345"],
+      hostNames: ["some.host.name","failoverhost"],
+      ports: ["1234","2345"],
+
+      origin: "some.host.name",
+      isLoaded: false,
+      namespace: "tla.EAM.OnceService.Once.express",
+      namespaceVersion: "#sdsgzudhsudhusidh",
+      href: "ior:http://some.host.name:1234,failoverhost:2345/route/tla.EAM.OnceService.Once.express#/ONCE-DAO/Once.express",
+      normalizedHref: "http://some.host.name:1234/route/tla.EAM.OnceService.Once.express#/ONCE-DAO/Once.express"
+    },
+  });
+
+    validate.push({
+      url: "ior:http://some.host.name:1234,failoverhost:2345/route/some.package.file.template.html#anchorRef?param=value&param1=value1",
+      result: {
+        protocol: ["ior", "hhtp"],
+        host: "some.host.name:1234",
+        port: 1234,
+        hostName: "some.host.name",
+        
+        path: "route/some.package.file.template.html#anchorRef?param=value&param1=value1", //neu
+        pathName: "route/some.package.file.template.html",      
+        hash: "anchorRef",
+        anchor: "anchorRef",                                     //neu
+  
+        fileName: "some.package.file.template.html",
+        fileType: "html",
+
+        fileTypes: ["some","package","file","template","html"],  //neu
+  
+        hosts: ["some.host.name:1234","failoverhost:2345"],      //neu
+        hostNames: ["some.host.name","failoverhost"],            //neu
+        ports: ["1234","2345"],
+
+        origin: "some.host.name",
+        isLoaded: false,
+        namespace: "some.package.file.template",
+        namespaceVersion: undefined,
+        href: "ior:http://some.host.name:1234,failoverhost:2345/route/some.package.file.template.html#anchorRef?param=value&param1=value1",
+
+        search: "param=value&param=value",
+        searchParameters: { param: "value", param1: "value1" }
+      },
+  });
+
 
   for (let testConfig of validate) {
     test("Test Parser IOR: " + testConfig.url, () => {
