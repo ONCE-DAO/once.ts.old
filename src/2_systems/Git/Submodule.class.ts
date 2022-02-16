@@ -23,8 +23,18 @@ import DefaultGitRepository from "./GitRepository.class";
 
 //TODO @PB Refactor code
 export default class DefaultSubmodule implements Submodule {
+  path: string | undefined;
   url: string | undefined;
   branch: string | undefined;
+  devPath: string | undefined;
+  private distFolder: string | undefined;
+
+  // COmponents
+  get distPath(){
+const p = join(this.fullPath)
+    return p
+  }
+
   addFromRemoteUrl(args: AddSubmoduleArgs): Promise<Submodule> {
     throw new Error("Method not implemented.");
   }
@@ -36,18 +46,17 @@ export default class DefaultSubmodule implements Submodule {
       console.log(files);
     });
   }
-  path: string | undefined;
 
   async watch(eamdPath: string): Promise<void> {
-    if (!this.path) throw "TODO RIGHT ERROR";
-    console.log("START WATCH MODE", join(eamdPath, this.path, "package.json"));
-    watch(join(eamdPath, this.path, "package.json"), undefined, () => {
+    if (!this.devPath) throw "TODO RIGHT ERROR";
+    console.log("START WATCH MODE", join(eamdPath, this.devPath, "package.json"));
+    watch(join(eamdPath, this.devPath, "package.json"), undefined, () => {
       console.log("package.json changed -> install dependencies");
       this.installDependencies(eamdPath);
     });
-    console.log(join(eamdPath, this.path, "src", "**", "*.ts"));
+    console.log(join(eamdPath, this.devPath, "src", "**", "*.ts"));
     chokidar
-      .watch(join(eamdPath, this.path, "src"), { ignoreInitial: true })
+      .watch(join(eamdPath, this.devPath, "src"), { ignoreInitial: true })
       .on("add", (path, stats) => console.log("ADD", path))
       .on("change", (path) => {
         console.log("changed", path);
@@ -55,8 +64,8 @@ export default class DefaultSubmodule implements Submodule {
       });
   }
   installDependencies(eamdPath: string) {
-    if (!this.path) throw new Error("Submodule does not exist");
-    execSync(`npm install --prefix ${join(eamdPath, this.path)}`);
+    if (!this.devPath) throw new Error("Submodule does not exist");
+    execSync(`npm install --prefix ${join(eamdPath, this.devPath)}`);
   }
 
   private npmBuild(path: string, version: string) {
@@ -96,25 +105,46 @@ export default class DefaultSubmodule implements Submodule {
       );
   }
 
-  build(eamdPath: string) {
-    if (!this.path) throw new Error("Submodule does not exist");
-    const fullPath = join(eamdPath, this.path);
+  private get fullPath() {
+    if (!global.ONCE) throw "ONCE not globally defined";
+    return join(global.ONCE.eamd?.eamdDirectory || "", this.devPath || "");
+  }
+  private get npmPackage() {
+    return NpmPackage.getByFolder(this.fullPath);
+  }
 
-    const npmPackage = NpmPackage.getByFolder(fullPath);
+  private get snapshot() {
     const branchString = this.branch ? `@${this.branch}` : "";
-    const snapshot = npmPackage?.name + branchString;
-    const version = `${npmPackage?.version}-SNAPSHOT-${snapshot}`;
-    const linkPackage = npmPackage?.linkPackage;
-    try {
-      this.npmBuild(fullPath, version);
-      this.copy(fullPath, version, "package.build.json", "package.json");
-      this.copy(fullPath, version, "ressources");
-      this.copy(fullPath, version, "bin");
-      UcpComponentDescriptor.getInstance()
-        .init({ path: fullPath, relativePath: this.path })
-        .writeToPath(fullPath, version);
+    return this.npmPackage?.name + branchString;
+  }
+  private get version() {
+    return `${this.npmPackage?.version}-SNAPSHOT-${this.snapshot}`;
+  }
 
-      const dist = join(fullPath, "..", "..", EAMD_FOLDERS.DIST, version);
+  build(eamdPath: string) {
+    if (!this.devPath) throw new Error("Submodule does not exist");
+    const linkPackage = this.npmPackage?.linkPackage;
+    try {
+      this.npmBuild(this.fullPath, this.version);
+      this.copy(
+        this.fullPath,
+        this.version,
+        "package.build.json",
+        "package.json"
+      );
+      this.copy(this.fullPath, this.version, "ressources");
+      this.copy(this.fullPath, this.version, "bin");
+      UcpComponentDescriptor.getInstance()
+        .init({ path: this.fullPath, relativePath: this.devPath })
+        .writeToPath(this.fullPath, this.version);
+
+      const dist = join(
+        this.fullPath,
+        "..",
+        "..",
+        EAMD_FOLDERS.DIST,
+        this.version
+      );
       const current = join(dist, "..", EAMD_FOLDERS.CURRENT);
 
       try {
@@ -125,21 +155,21 @@ export default class DefaultSubmodule implements Submodule {
       }
 
       mkdirSync(dist, { recursive: true });
-      renameSync(join(fullPath, version), dist);
+      renameSync(join(this.fullPath, this.version), dist);
       symlinkSync(dist, current);
       spawnSync("npm", ["--prefix", dist, "run", "build:version:after"], {
         encoding: "utf8",
       });
       if (linkPackage) {
-        spawnSync("npm", ["r", npmPackage.name || "", "-g"], {
+        spawnSync("npm", ["r", this.npmPackage?.name || "", "-g"], {
           encoding: "utf8",
         });
         spawnSync("npm", ["link", dist], { encoding: "utf8" });
       }
       console.log("build");
     } finally {
-      if (existsSync(join(fullPath, version)))
-        rmSync(join(fullPath, version), { recursive: true });
+      if (existsSync(join(this.fullPath, this.version)))
+        rmSync(join(this.fullPath, this.version), { recursive: true });
     }
   }
 
@@ -148,7 +178,8 @@ export default class DefaultSubmodule implements Submodule {
     url?: string;
     branch?: string;
   }): Promise<Submodule> {
-    this.path = config.path;
+    this.devPath = config.path;
+    this.distFolder = join('..','..','dist')
     this.url = config.url;
     this.branch = config.branch;
     return this;
@@ -204,66 +235,4 @@ export default class DefaultSubmodule implements Submodule {
 
     return sub;
   }
-
-  //   static async addFromUrl({
-  //     url,
-  //     branch,
-  //     overwrite,
-  //     copyFolder,
-  //   }: AddSubmoduleArgs): Promise<DefaultSubmodule> {
-  //     // if (!global.ONCE) global.ONCE = await Once.start();
-  //     // const root = ONCE?.eamd?.eamdDirectory;
-  //     // if (!root) throw new Error("EAMD.ucp not defined");
-
-  //     // const tmpFolder = join(root, "tmp");
-  //     // !existsSync(tmpFolder) && mkdirSync(tmpFolder);
-
-  //     // const repo = await DefaultGitRepository.getInstance().init({
-  //     //   baseDir: join(root, "tmp"),
-  //     //   clone: { url, branch },
-  //     // });
-
-  //     // const pkg = await NpmPackage.getByFolder(tmpFolder);
-
-  //     // execSync(`npm install --prefix ${tmpFolder}`);
-  //     // if (overwrite && pkg) {
-  //     //   pkg.name = overwrite.name;
-  //     //   pkg.namespace = overwrite.namespace;
-  //     //   writeFileSync(
-  //     //     join(tmpFolder, "package.json"),
-  //     //     JSON.stringify(pkg, null, 2),
-  //     //     { flag: "w+" }
-  //     //   );
-  //     // }
-
-  //     // const eamdRepo = await DefaultGitRepository.getInstance().init({
-  //     //   baseDir: root,
-  //     // });
-  //     // const sub = await eamdRepo.addSubmodule(
-  //     //   repo,
-  //     //   join(eamdRepo.folderPath, getdevFolder(repo))
-  //     // );
-  //     // if (!sub) throw new Error("....TODO..");
-  //     // rmSync(tmpFolder, { recursive: true });
-  //     // return sub;
-  //     throw new Error("TODO");
-  //   }
-  // }
-
-  // type AddSubmoduleArgs = {
-  //   url: string;
-  //   branch?: string;
-  //   overwrite?: { name: string; namespace: string };
-  //   copyFolder?: string[];
-  // };
-
-  // // TODO refactor
-  // function getdevFolder(repo: GitRepository) {
-  //   const npmPackage = NpmPackage.getByFolder(repo.folderPath);
-  //   if (!npmPackage) throw new Error("TODO");
-
-  //   const split = npmPackage.namespace?.split(".");
-  //   const packageFolder = split ? split : ["empty"];
-
-  //   return join("Components", ...packageFolder, npmPackage.name || "", "dev");
 }

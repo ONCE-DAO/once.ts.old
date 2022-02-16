@@ -42,14 +42,19 @@ export abstract class BaseEAMD implements EAMD {
       baseDir: this.eamdDirectory,
     });
 
-    
     // TODO make Parallel
     (await this.eamdRepository.getSubmodules()).forEach((submodule) => {
       //TODO@MD ENUMs for static constant
       if (process.env.NODE_ENV === "watch") {
         submodule?.watch(eamdDirectory);
-      } else if (process.env.NODE_ENV === "build") {
+      }
+      if (process.env.NODE_ENV === "build_pkg") {
         submodule.installDependencies(eamdDirectory);
+      }
+      if (
+        process.env.NODE_ENV === "build" ||
+        process.env.NODE_ENV === "build_pkg"
+      ) {
         submodule.build(eamdDirectory);
         submodule.afterbuild(eamdDirectory);
       }
@@ -145,8 +150,8 @@ export abstract class BaseEAMD implements EAMD {
 
   async discover(): Promise<object> {
     return {
-      "tla.EAM.Once.ts": "git@github.com:ONCE-DAO/once.ts.git",
-      "tla.EAM.Once.cli": "https://github.com/ONCE-DAO/once.cli.git",
+      "tla.EAM.Once.ts": "https://ithub.com/ONCE-DAO/once.ts",
+      "tla.EAM.Once.cli": "https://github.com/ONCE-DAO/once.cli",
       "tla.EAM.MarcelDonges": "https://github.com/temp-phibar/MarcelDonges",
     };
   }
