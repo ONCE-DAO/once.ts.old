@@ -1,6 +1,8 @@
 import Thing, { ThingObjectState } from "../3_services/Thing.interface";
 import EventService from "../3_services/EventService.interface";
 import ClassDescriptor from "../2_systems/Things/DefaultClassDescriptor.class";
+import TypeDescriptor from "../3_services/TypeDescriptor.interface";
+import { TSClass } from '../3_services/TypeDescriptor.interface';
 
 export enum emptyEventList { }
 
@@ -26,7 +28,13 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
 
 
   protected _name: string | undefined;
-  get name(): string { return this._name || this.constructor.name };
+
+  type: any;
+  get name(): string { return this.constructor.name };
+  //get name(): string { return this._name || this.constructor.name };
+
+  static _typeDescriptor: any;
+
   private _id: string | undefined;
   get id() {
     // TODO Preplace with correct ID generator
@@ -51,6 +59,9 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
     this.objectState = ThingObjectState.DESTROYED;
   }
 
+  get class(): any {
+    return this.constructor
+  }
 
 
 }
