@@ -28,7 +28,7 @@ export default class OnceNodeServer extends BaseNodeOnce implements Once {
     await import("ior:esm:git:tla.EAM.Once.cli");
 
     //@ts-ignore
-    await import("ior:esm:git:tla.EAM.MarcelDonges[myBranch]");
+    //await import("ior:esm:git:tla.EAM.MarcelDonges[myBranch]");
 
     return this;
   }

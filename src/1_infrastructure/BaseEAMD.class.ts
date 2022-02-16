@@ -150,7 +150,7 @@ export abstract class BaseEAMD implements EAMD {
 
   async discover(): Promise<object> {
     return {
-      "tla.EAM.Once.ts": "https://ithub.com/ONCE-DAO/once.ts",
+      "tla.EAM.Once.ts": "https://github.com/ONCE-DAO/once.ts",
       "tla.EAM.Once.cli": "https://github.com/ONCE-DAO/once.cli",
       "tla.EAM.MarcelDonges": "https://github.com/temp-phibar/MarcelDonges",
     };
