@@ -6,6 +6,7 @@ export default abstract class BaseThing<T> implements Thing<T> {
   type: any;
   get name(): string { return this.constructor.name };
   static _typeDescriptor: any;
+  
   private _id: string | undefined;
   get id() {
     // TODO Preplace with correct ID generator

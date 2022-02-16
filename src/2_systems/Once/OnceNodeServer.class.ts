@@ -23,13 +23,87 @@ export default class OnceNodeServer extends BaseNodeOnce implements Once {
     this.eamd = eamd;
   }
 
+
+  static {
+    console.log("OnceNodeServer static was called");
+    console.log("OnceNodeServer CAN IT BE INHERITED");
+  }
+
   async start(): Promise<Once> {
     //@ts-ignore
     await import("ior:esm:git:tla.EAM.Once.cli");
 
-    //@ts-ignore
-    await import("ior:esm:git:tla.EAM.MarcelDonges[myBranch]");
 
+    /*
+    IOR.pathName  'tla.EAM.OnceService.Once.express'
+        TODO add IOR.anchor should be a getter on IOR.hash
+    IOR.hash      '/ONCE-DAO/Once.express'
+    */
+    //@ts-ignore
+    // TODO bad
+    // await import("ior:github:/ONCE-DAO/Once.express#tla.EAM.OnceService.Once.express");
+    
+    //@ts-ignore  
+    await import("ior:github:tla.EAM.OnceService.Once.express#/ONCE-DAO/Once.express");
+    //@ts-ignore
+    await import("ior:github:#/ONCE-DAO/Once.express");
+    //@ts-ignore
+    // TODO false
+    await import("ior:github:/ONCE-DAO/Once.express");
+
+
+    "ior:esm:ns:github:ONCE-DAO/Once.express:https://github.com:8443/some.matched.namespace[0.3.0]"
+    
+
+    //@ts-ignore
+    await import("ior:github:tla.EAM.OnceSevrice.Once.express#/ONCE-DAO/Once.express");
+    
+
+
+    // "ior:esm:ns:github:tla.EAM.Once.express"
+    // "ior:esm:ns:github:tla.EAM.Once.express[main]"
+    // "ior:esm:ns:github:tla.EAM.Once.express[0.3.0]"
+
+    // "ior:esm:npm:ONCE-DAO/Once.express"
+    // "ior:esm:npm:ONCE-DAO/Once.express[main]"
+    // "ior:esm:npm:ONCE-DAO/Once.express[0.3.0]"
+
+    // "ior:esm:github:#ONCE-DAO/Once.express"
+    // "ior:esm:github:#ONCE-DAO/Once.express[main]"
+    // "ior:esm:github:#ONCE-DAO/Once.express[0.3.0]"
+    // "ior:esm:github:https://github.com:8443/#ONCE-DAO/Once.express"
+    // "ior:esm:github:https://github.com:8443/#ONCE-DAO/Once.express[main]"
+    // "ior:esm:github:https://github.com:8443/some.ignored.namespace#ONCE-DAO/Once.express[0.3.0]"
+
+    // "ior:esm:git:https://github.com:8443/ONCE-DAO/Once.express"
+    // "ior:esm:git:https://github.com:8443/ONCE-DAO/Once.express[main]"
+    // "ior:esm:git:https://github.com:8443/ONCE-DAO/Once.express[0.3.0]"
+    // "ior:esm:git:https://shift.gitlab.com:8443/ONCE-DAO/Once.express"
+    // "ior:esm:git:https://shift.gitlab.com:8443/ONCE-DAO/Once.express[main]"
+    // "ior:esm:git:https://shift.gitlab.com:8443/ONCE-DAO/Once.express[0.3.0]"
+
+    // "ior:esm:ns:tla.EAM.OnceServices.OnceExpress"
+    // "ior:esm:ns:tla.EAM.OnceServices.OnceExpress[main]"
+    // "ior:esm:ns:tla.EAM.OnceServices.OnceExpress[0.3.0]"
+
+    // "ior:esm:ns:tla.EAM.OnceServices.OnceExpress"
+    // "ior:esm:ns:tla.EAM.OnceServices.OnceExpress[main]"
+    // "ior:esm:ns:tla.EAM.OnceServices.OnceExpress[0.3.0]"
+
+    // "ior:esm:file:///tla/EAM/OnceServices/OnceExpress"
+    // "ior:esm:file:///tla/EAM/OnceServices/OnceExpress@main"
+    // "ior:esm:file:///tla/EAM/OnceServices/OnceExpress@0.3.0"
+
+
+    // "ior:esm:ipfs:mtwirsqawjuoloq2gvtyug2tc3jbf5htm2zeo4rsknfiv3fdp46a"
+    // "ior:esm:ipns:mtwirsqawjuoloq2gvtyug2tc3jbf5htm2zeo4rsknfiv3fdp46a/0.3.0"
+
+
+
+
+    //@ts-ignore
+    //await import("ior:esm:git:tla.EAM.MarcelDonges[myBranch]");
+    console.log("Once Started")
     return this;
   }
 

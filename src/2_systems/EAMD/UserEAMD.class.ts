@@ -4,7 +4,7 @@ import os from "os";
 import path, { join } from "path";
 
 export class UserEAMD extends BaseEAMD {
-  preferredFolder = [os.userInfo().homedir];
+  preferredFolder = [os.userInfo().homedir+"/Development"];
 
   static getInstance(): UserEAMD {
     return new UserEAMD();

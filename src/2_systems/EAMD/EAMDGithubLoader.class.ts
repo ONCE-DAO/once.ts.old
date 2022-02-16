@@ -1,12 +1,13 @@
 import IOR from "../../3_services/IOR.interface";
 import Loader, { LoaderStatic, loadingConfig } from "../../3_services/Loader.interface";
 import { urlProtocol } from "../../3_services/Url.interface";
-import BaseLoader from "../../1_infrastructure/BaseLoader.class";
 
+import EAMDLoader from "./EAMDLoader.class";
 
-
-class EAMDLoader 
-    extends BaseLoader 
+// REFACTOR prevents inheritance (extension) ....see solution in EAMDLoader...think about better alternatives
+export const EAMDGithubLoader: LoaderStatic = 
+  class EAMDGithubLoader 
+    extends EAMDLoader 
     implements Loader {
 
   get class(): typeof EAMDLoader {
@@ -25,10 +26,12 @@ class EAMDLoader
     if (!global.ONCE) throw new Error("Missing ONCE");
     if (!global.ONCE.eamd) throw new Error("Missing EAMD in ONCE");
 
-    let eamdRepos = await global.ONCE?.eamd?.discover() as Object;
+    //let eamdRepos = await global.ONCE?.eamd?.discover() as Object;
+
+    console.log("loading  "+ior.pathName+ "from GitHub: "+ior.hash)
 
     //@ts-ignore
-    const repoPath = eamdRepos[ior.namespace];
+    const repoPath = ior.hash;
     if (repoPath === undefined) {
       throw new Error("Missing Mapping from Namespace to Repository in BaseEAMD discover")
     }
@@ -47,7 +50,11 @@ class EAMDLoader
 
 
   static canHandle(ior: IOR): number {
-    if (ior.protocol.includes(urlProtocol.esm) && ior.namespace !== undefined) {
+    if (ior.protocol.includes(urlProtocol.github) 
+    //&& ior.namespace !== undefined
+    && ior.pathName !== undefined
+    && ior.hash !== undefined
+    ) {
       return 1;
     }
     return 0;
@@ -55,5 +62,4 @@ class EAMDLoader
 
 }
 
-export const EAMDLoaderStatic: LoaderStatic = EAMDLoader;
-export default EAMDLoader;
+export default EAMDGithubLoader;

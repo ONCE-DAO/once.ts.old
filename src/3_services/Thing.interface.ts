@@ -1,7 +1,7 @@
 export default interface Thing<T> {
   id: string;
-  start(): Promise<T>;
-  init(...a: any[]): any;
+  //start(): Promise<T>;
+  init(...a: any[]): Thing<T>;
   name: string;
 
   type: any;
