@@ -6,9 +6,7 @@ import { BaseNodeOnce } from "../../1_infrastructure/BaseNodeOnce.class";
 import DefaultSubmodule from "../Git/Submodule.class";
 
 export default class OnceNodeServer extends BaseNodeOnce implements Once {
-  get class(): any {
-    return OnceNodeServer;
-  }
+
   init(...a: any[]) {
     throw new Error("Method not implemented.");
   }

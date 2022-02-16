@@ -4,10 +4,6 @@ import BaseThing from "../../1_infrastructure/BaseThing.class";
 
 export default class DefaultStore extends BaseThing<DefaultStore> implements Store {
 
-    get class(): typeof DefaultStore {
-        return DefaultStore;
-    }
-
     eventSupport: EventServiceInterface | undefined;
     private registry: { [index: string]: any } = {};
     private eventService: EventServiceInterface | undefined;

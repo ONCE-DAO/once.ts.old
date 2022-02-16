@@ -17,10 +17,6 @@ export abstract class BaseEAMD implements EAMD {
     throw new Error("Not implemented in abstract class");
   }
 
-  get class(): ThisType<BaseEAMD> {
-    return BaseEAMD.prototype;
-  }
-
   hasWriteAccess(): boolean {
     if (this.installationDirectory)
       return BaseEAMD.hasWriteAccessFor(this.installationDirectory);

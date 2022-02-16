@@ -7,6 +7,7 @@ export default interface Once extends Thing<Once> {
   creationDate: Date;
   mode: OnceMode;
   state: OnceState;
+  start(): void;
 }
 
 declare global {
