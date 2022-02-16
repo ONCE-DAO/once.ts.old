@@ -1,12 +1,14 @@
+import Class from "./Class.interface";
+import ClassDescriptor from "./ClassDescriptor.interface";
+
 export default interface Thing<T> {
   id: string;
-  start(): Promise<T>;
   init(...a: any[]): any;
   name: string;
 
-  type: any;
+  classDescriptor: ClassDescriptor
 }
 
-export interface ThingStatics {
-  type: any;
+export interface ThingStatics extends Class<any> {
+  classDescriptor: ClassDescriptor
 }

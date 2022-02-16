@@ -1,11 +1,31 @@
-import DefaultTypeDescriptor from "../2_systems/Things/DefaultTypeDescriptor.class";
-import Thing from "../3_services/Thing.interface";
-import TypeDescriptor from "../3_services/TypeDescriptor.interface";
-
+import DefaultClassDescriptor from "../2_systems/Things/DefaultClassDescriptor.class";
+import Thing, { ThingStatics } from "../3_services/Thing.interface";
+import ClassDescriptor from "../3_services/ClassDescriptor.interface";
+import WeakRefPromiseStore from "../2_systems/Things/WeakRefPromiseStore.class";
+import Store from "../3_services/Store.interface";
+import Class from "../3_services/Class.interface";
 export default abstract class BaseThing<T> implements Thing<T> {
-  type: any;
+
+  private static _typeDescriptorStore = new WeakMap();
+  static get classDescriptor(): ClassDescriptor {
+    let result = this._typeDescriptorStore.get(this);
+    if (!result) {
+      // @ts-ignore
+      // It is abstract, but TS does not understand that
+      result = new DefaultClassDescriptor().init(this);
+      this._typeDescriptorStore.set(this, result);
+    }
+    return result;
+  }
+
+  get classDescriptor(): ClassDescriptor {
+    //TODO@MD Check how to do it better
+    // @ts-ignore
+    return this.constructor.classDescriptor;
+  }
+
+
   get name(): string { return this.constructor.name };
-  static _typeDescriptor: any;
   private _id: string | undefined;
   get id() {
     // TODO Preplace with correct ID generator
@@ -19,9 +39,6 @@ export default abstract class BaseThing<T> implements Thing<T> {
     return this;
   }
 
-  start(): Promise<T> {
-    throw new Error("Method not implemented.");
-  }
 
   static getInstance() {
     // HACK
@@ -33,17 +50,5 @@ export default abstract class BaseThing<T> implements Thing<T> {
 
   }
 
-  abstract get class(): any
-
-  static get typeDescriptor(): any {
-    if (!this._typeDescriptor) {
-      this._typeDescriptor = new DefaultTypeDescriptor().init(this);
-    }
-    return this._typeDescriptor;
-  }
-
-  get typeDescriptor(): TypeDescriptor {
-    return this.class.typeDescriptor;
-  }
 
 }

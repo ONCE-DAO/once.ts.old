@@ -7,10 +7,6 @@ type storedObject = { ref?: any, promise?: any };
 
 export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> implements Store {
 
-    get class(): typeof WeakRefPromiseStore {
-        return WeakRefPromiseStore;
-    }
-
     discover(): any[] {
         let result = [];
         for (const [key, objectRef] of Object.entries(this.registry)) {
@@ -49,9 +45,19 @@ export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> 
     private registry: { [index: string]: storedObject } = {};
     private mapRegistry: Map<any, storedObject> = new Map();
     private eventService: EventServiceInterface | undefined;
+    private _weakRefActive: boolean = true;
 
     private get weakRefAvailable() {
+        if (this._weakRefActive === false) return false;
         return typeof WeakRef !== 'undefined';
+    }
+
+    init(config?: { weakRefActive: boolean }) {
+        super.init();
+        if (config?.weakRefActive !== undefined) {
+            this._weakRefActive = config.weakRefActive;
+        }
+        return this;
     }
 
     clear() {

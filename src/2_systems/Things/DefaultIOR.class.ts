@@ -8,9 +8,7 @@ import DefaultLoader from "./DefaultLoader.class";
 
 
 export default class DefaultIOR extends DefaultUrl implements IOR {
-    get class(): typeof DefaultIOR {
-        return DefaultIOR;
-    }
+
     private _referencedObject: any;
     private _loader: Loader | undefined;
     // TODO@BE refactor to package

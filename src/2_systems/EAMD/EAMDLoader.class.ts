@@ -6,10 +6,6 @@ import BaseLoader from "../../1_infrastructure/BaseLoader.class";
 
 export const EAMDLoader: LoaderStatic = class EAMDLoader extends BaseLoader implements Loader {
 
-  get class(): typeof EAMDLoader {
-    return EAMDLoader;
-  }
-
   async load(ior: IorInterface, config: loadingConfig): Promise<any> {
     // Shortcut for once itself
 

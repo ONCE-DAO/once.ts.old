@@ -4,15 +4,18 @@ import Url, { urlProtocol } from "../../3_services/Url.interface";
 
 export enum formatType { "normal", "origin", "originPath", "normalizedHref", "path" }
 
+function testDecorator(...any: any[]): void {
+    console.error("Testing: " + any.join(","));
+}
+
 type numberOrUndefined = number | undefined
+@DefaultUrl.classDescriptor.addInterfaces(['Url'])
 export default class DefaultUrl extends BaseThing<DefaultUrl> implements Url {
     hostNames: string[] = [];
     ports: numberOrUndefined[] = [];
-    get class(): typeof DefaultUrl {
-        return DefaultUrl;
-    }
 
     private _searchParameters: { [index: string]: any } = {};
+
 
     private _protocol: urlProtocol[] = [];
     private _pathName: string | undefined = undefined;
@@ -23,7 +26,6 @@ export default class DefaultUrl extends BaseThing<DefaultUrl> implements Url {
         this._parseUrl(url);
         return this;
     }
-
 
     get href() { return this._formatUrl() }
     set href(url) { this._parseUrl(url) }
