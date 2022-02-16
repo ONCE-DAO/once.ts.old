@@ -72,24 +72,24 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
             return;
         }
 
-        let urlParsed = url.match(/^([^\/]+):([^:\[]+)(\[([\^\.\da-zA-Z#]+)\])?$/);
-        if (!urlParsed) throw new Error("Url string parse failed " + url);
-        let rawProtocolList: string[] = urlParsed[1] ? urlParsed[1].split(':') : [];
+        url = this._parseProtocols(url);
+        url = this._parsePackageAndVersion(url);
 
-        let protocolList: urlProtocol[] = [];
-        for (const protocol of rawProtocolList) {
-            // @ts-ignore
-            if (typeof urlProtocol[protocol] === undefined) throw new Error("Unknown Protocol " + protocol);
-            // @ts-ignore
-            protocolList.push(protocol);
-        }
-        this.protocol = protocolList;
+        if (url.length > 0) throw new Error("Url string parse failed " + url);
 
-        this.namespace = urlParsed[2];
-        this.namespaceVersion = urlParsed[4];
     }
 
-    protected _formatUrl(protocolFilter: string[] = [], type: formatType = formatType.normal) {
+    private _parsePackageAndVersion(url: string): string {
+        let packageMatch = url.match(/^([^:\[]+)(\[([\^\.\da-zA-Z#]+)\])?$/);
+        if (packageMatch) {
+            this.namespace = packageMatch[1];
+            this.namespaceVersion = packageMatch[3];
+            url = url.substring(packageMatch[0].length)
+        }
+        return url;
+    }
+
+    protected _formatUrl(protocolFilter: urlProtocol[] = [], type: formatType = formatType.normal) {
 
         if (!this.protocol.includes(urlProtocol.esm)) {
             return super._formatUrl(protocolFilter, type);
@@ -113,9 +113,6 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
     }
 
     get isLoaded() {
-        // if (!this._referencedObject && this.class) {
-        //     this._referencedObject = this.class;
-        // }
         return this._referencedObject !== undefined;
     }
 

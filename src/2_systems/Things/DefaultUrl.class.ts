@@ -28,31 +28,49 @@ export default class DefaultUrl extends BaseThing<DefaultUrl> implements Url {
     get href() { return this._formatUrl() }
     set href(url) { this._parseUrl(url) }
 
-    protected _parseUrl(url: string) {
-        url = url || '';
+    protected _parseUrl(originalUrl: string) {
+        let url = originalUrl || '';
 
-        this.hostNames = [];
-        this.ports = [];
+        url = this._parseProtocols(url);
 
-        let protocolMatch = url.match(/^([^\/]+):(\/\/)?/);
+        url = this._parseHost(url);
 
+        url = this._parsePathName(url);
 
-        // Parse Protocol
+        url = this._parseSearch(url);
+
+        url = this._parseHash(url);
+
+        // Do This again if the order in the URL is wrong
+        url = this._parseSearch(url);
+
+        if (url.length > 0) {
+            throw new Error(`Could not parse the url ${originalUrl} / Remaining part: ${url}`);
+        }
+    }
+
+    protected _parseProtocols(url: string) {
+        const protocolMatch = url.match(/^([^\/]+):(\/\/)?/);
+
         let protocolList: urlProtocol[] = [];
         if (protocolMatch) {
 
-
             for (const protocol of (protocolMatch[1] ? protocolMatch[1].split(':') : [])) {
                 // @ts-ignore
-                if (typeof urlProtocol[protocol] === undefined) throw new Error("Unknown Protocol " + protocol);
+                if (typeof urlProtocol[protocol] === undefined)
+                    throw new Error("Unknown Protocol " + protocol);
                 // @ts-ignore
                 protocolList.push(protocol);
             }
             url = url.substring(protocolMatch[0].length);
         }
+        this.protocol = protocolList;
+        return url;
+    }
 
-
-        // Parse Host
+    protected _parseHost(url: string) {
+        this.hostNames = [];
+        this.ports = [];
         const hostRegex = /^,?([^:\/]+)(:(\d+))?/;
 
         let hostMatch = url.match(hostRegex);
@@ -63,52 +81,28 @@ export default class DefaultUrl extends BaseThing<DefaultUrl> implements Url {
             hostMatch = url.match(hostRegex);
 
         }
+        return url;
+    }
 
-
-
-
-        // if (!urlParsed) throw new Error("Url string parse failed " + url);
-
-        // if (!urlParsed[4]) {
-        //     if (global?.ONCE?.mode !== 'BROWSER') {
-        //         // if (!urlParsed[2]) {
-        //         //     let serverConfig = ONCE.ENV.ONCE_DEFAULT_URL.match(/^(([^\/]+):(\/\/)?)?([^:\/]+)?(:(\d+))?/);
-        //         //     this.protocol = (serverConfig[2] ? serverConfig[2].split(':') : []);
-        //         //     this.hostName = serverConfig[4];
-        //         //     this.port = serverConfig[6];
-        //         // }
-        //     } else {
-        //         // @ts-ignore
-        //         protocolList.push(document.location.protocol.replace(':', ''));
-        //         this.hostName = document.location.hostname;
-        //         this.port = +document.location.port;
-        //     }
-        // } else {
-        //     this.hostName = urlParsed[4];
-        //     this.port = +urlParsed[6];
-        // }
-        this.protocol = protocolList;
-
-
+    protected _parsePathName(url: string) {
         let pathNameMatch = url.match(/^(\/[^?#]*)/);
         if (pathNameMatch) {
             this.pathName = pathNameMatch[1];
             url = url.substring(pathNameMatch[0].length);
         }
+        return url;
+    }
 
-        url = this._parseSearch(url);
-
+    protected _parseHash(url: string) {
         let hashMatch = url.match(/^#([^\?]*)/);
         if (hashMatch) {
             this.hash = hashMatch[1];
             url = url.substring(hashMatch[0].length);
         }
-
-        url = this._parseSearch(url);
-
+        return url;
     }
 
-    private _parseSearch(url: string): string {
+    protected _parseSearch(url: string): string {
         let searchMatch = url.match(/^\?([^#]*)/);
         if (searchMatch) {
             this.search = searchMatch[1];
@@ -118,11 +112,9 @@ export default class DefaultUrl extends BaseThing<DefaultUrl> implements Url {
     }
 
 
-    protected _formatUrl(protocolFilter: string[] = [], type: formatType = formatType.normal) {
+    protected _formatUrl(protocolFilter: urlProtocol[] = [], type: formatType = formatType.normal) {
         let url = '';
-        let protocol;
-        const hostName = this.hostName;
-
+        let protocol: urlProtocol[] = [];
 
         if (protocolFilter.length > 0) {
             // @ts-ignore
@@ -131,7 +123,7 @@ export default class DefaultUrl extends BaseThing<DefaultUrl> implements Url {
             protocol = this.protocol
         }
 
-        if (protocol && protocol.length > 0) url += protocol.join(':') + (hostName ? '://' : ':');
+        if (protocol && protocol.length > 0) url += protocol.join(':') + (this.hostName ? '://' : ':');
 
         if (type == formatType.normalizedHref || type == formatType.origin) {
             url += this.host;
@@ -161,20 +153,18 @@ export default class DefaultUrl extends BaseThing<DefaultUrl> implements Url {
     }
 
     get search() {
-        //let result = [];
         if (!this._searchParameters || Object.keys(this._searchParameters).length === 0) return '';
         let result = Object.keys(this._searchParameters).sort().map((key) => {
             let value = (typeof this._searchParameters[key] === 'string' ? this._searchParameters[key] : JSON.stringify(this._searchParameters[key]));
             return `${key}=${value}`
 
-            // return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
         }).join('&');
         return result;
     }
     get hash(): string | undefined { return this._hash }
     get anchor(): string | undefined { return this.hash }
     get host(): string | undefined { return (this.hostNames?.[0] + (this.ports?.[0] ? ':' + this.ports?.[0] : '')) || undefined; }
-    get origin(): string | undefined { return this._formatUrl(['https', 'http', 'ws', 'wss'], formatType.origin) || undefined }
+    get origin(): string | undefined { return this._formatUrl([urlProtocol.https, urlProtocol.http, urlProtocol.ws, urlProtocol.wss], formatType.origin) || undefined }
 
     get path(): string | undefined { return this._formatUrl([], formatType.path) }
 
@@ -189,7 +179,7 @@ export default class DefaultUrl extends BaseThing<DefaultUrl> implements Url {
          */
     }
 
-    get originPath() { return this._formatUrl(['https', 'http', 'ws', 'wss'], formatType.originPath) }
+    get originPath() { return this._formatUrl([urlProtocol.https, urlProtocol.http, urlProtocol.ws, urlProtocol.wss], formatType.originPath) }
 
     //get defaultOrigin() { return "https://" + ONCE.ENV.ONCE_DOCKER_HOST + ":" + ONCE.httpsPort }
     //get localFileOrigin() { return ONCE.mode == Once.MODE_NODE_SERVER ? "file://" + ONCE.repositoryRootPath : ONCE.repositoryRootPath }
@@ -259,7 +249,7 @@ export default class DefaultUrl extends BaseThing<DefaultUrl> implements Url {
 
 
     get normalizedHref() {
-        return this._formatUrl(['https', 'http', 'ws', 'wss'], formatType.normalizedHref);
+        return this._formatUrl([urlProtocol.https, urlProtocol.http, urlProtocol.ws, urlProtocol.wss], formatType.normalizedHref);
     }
 
     get isIOR(): boolean {
