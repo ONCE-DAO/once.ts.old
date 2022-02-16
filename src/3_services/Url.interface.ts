@@ -1,5 +1,16 @@
 
-export enum urlProtocol { "http" = "http", "https" = "https", "ws" = "ws", "wss" = "wss", "ior" = "ior", "ude" = "ude", "git" = "git", "esm" = "esm" }
+export enum urlProtocol { 
+  "http" = "http", 
+  "https" = "https", 
+  "ws" = "ws", 
+  "wss" = "wss", 
+  "ior" = "ior", 
+  "ude" = "ude", 
+  "git" = "git", 
+  "github" = "github", 
+  "file" = "file", 
+  "esm" = "esm" 
+}
 
 type numberOrUndefined = number | undefined
 

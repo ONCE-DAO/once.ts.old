@@ -1,5 +1,5 @@
 import BaseLoader from "../../1_infrastructure/BaseLoader.class";
-import IORInterface from "../../3_services/IOR.interface";
+import IOR from "../../3_services/IOR.interface";
 import { LoaderStatic } from "../../3_services/Loader.interface";
 import EAMDLoader from "../EAMD/EAMDLoader.class";
 
@@ -12,7 +12,7 @@ export default class DefaultLoader extends BaseLoader {
         return [EAMDLoader];
     }
 
-    static findLoader(ior: IORInterface) {
+    static findLoader(ior: IOR) {
 
         const loaderList = this.discover();
         let ratedLoader = loaderList.map(loader => {
