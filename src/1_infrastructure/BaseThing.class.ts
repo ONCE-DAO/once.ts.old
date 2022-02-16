@@ -1,6 +1,7 @@
 import DefaultTypeDescriptor from "../2_systems/Things/DefaultTypeDescriptor.class";
 import Thing from "../3_services/Thing.interface";
 import TypeDescriptor from "../3_services/TypeDescriptor.interface";
+import { TSClass } from '../3_services/TypeDescriptor.interface';
 
 export default abstract class BaseThing<T> implements Thing<T> {
   type: any;
@@ -33,7 +34,9 @@ export default abstract class BaseThing<T> implements Thing<T> {
 
   }
 
-  abstract get class(): any
+  get class(): any {
+    return this.constructor
+  }
 
   static get typeDescriptor(): any {
     if (!this._typeDescriptor) {
