@@ -1,7 +1,7 @@
 import { OnceEvent } from "../../3_services/EventService.interface";
 import BaseThing from "../../1_infrastructure/BaseThing.class";
-import { Thing } from "../../exports";
 import WeakRefPromiseStore from "./WeakRefPromiseStore.class";
+import Thing from "../../3_services/Thing.interface";
 
 export default class DefaultEvent extends BaseThing<DefaultEvent> implements OnceEvent {
 

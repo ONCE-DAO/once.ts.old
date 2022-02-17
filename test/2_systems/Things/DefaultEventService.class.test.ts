@@ -1,8 +1,8 @@
 import extendedPromise from "../../../src/2_systems/JSExtensions/Promise";
 import DefaultEvent from "../../../src/2_systems/Things/DefaultEvent.class";
 import DefaultEventService from "../../../src/2_systems/Things/DefaultEventService.class";
+import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class";
 import EventService from "../../../src/3_services/EventService.interface";
-import { DefaultIOR } from "../../../src/exports";
 
 
 describe("Default Event Service", () => {

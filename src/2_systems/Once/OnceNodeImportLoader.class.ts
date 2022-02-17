@@ -2,6 +2,7 @@ import { OnceMode, OnceState } from "../../3_services/Once.interface";
 
 import DefaultIOR from "../Things/DefaultIOR.class";
 import { BaseNodeOnce } from "../../1_infrastructure/BaseNodeOnce.class";
+import { loaderReturnValue } from "../../3_services/Loader.interface";
 
 export default class OnceNodeImportLoader extends BaseNodeOnce {
 
@@ -20,7 +21,7 @@ export default class OnceNodeImportLoader extends BaseNodeOnce {
     throw new Error("Method not implemented.");
   }
 
-  static start() {
+  static start(): OnceNodeImportLoader {
     if (!this.instance) {
       this.instance = new OnceNodeImportLoader();
     }
@@ -42,7 +43,7 @@ export default class OnceNodeImportLoader extends BaseNodeOnce {
     defaultResolve: Function
   ): Promise<{ url: string }> {
     if (specifier.startsWith("ior:"))
-      specifier = await DefaultIOR.load(specifier);
+      specifier = await DefaultIOR.load(specifier, { returnValue: loaderReturnValue.path });
     return defaultResolve(specifier, context, defaultResolve);
   }
 
