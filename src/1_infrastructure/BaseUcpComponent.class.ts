@@ -1,9 +1,13 @@
-import { string, z } from "zod";
-import UcpComponent, { UcpComponentStatics } from "../3_services/UcpComponent.interface";
+import { z } from "zod";
+import DefaultUcpModel from "../2_systems/Things/DefaultUcpModel.class";
+import UcpComponent from "../3_services/UcpComponent.interface";
+import UcpModel from "../3_services/UcpModel.interface";
 import BaseThing from "./BaseThing.class";
 
-export abstract class BaseUcpComponent<ModelDataType> extends BaseThing<UcpComponent<ModelDataType>> implements UcpComponent<ModelDataType> {
-    abstract model: any;
+export default abstract class BaseUcpComponent<ModelDataType, ClassInterface> extends BaseThing<ClassInterface> implements UcpComponent<ModelDataType, ClassInterface> {
+    get model(): ModelDataType {
+        return this.ucpModel.model;
+    }
 
     static get modelSchema() {
         return z.object({
@@ -12,6 +16,9 @@ export abstract class BaseUcpComponent<ModelDataType> extends BaseThing<UcpCompo
             })
         })
     }
+
+    protected abstract ucpModel: UcpModel<ModelDataType>;
+
 
     static get modelDefaultData() {
         return { _component: { name: this.name } }

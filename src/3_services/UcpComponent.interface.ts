@@ -1,10 +1,10 @@
 import Class from "./Class.interface";
 import Thing from "./Thing.interface";
 
-export default interface UcpComponent<ModelDataType> extends Thing<UcpComponent<ModelDataType>> {
+export default interface UcpComponent<ModelDataType, ClassInterface> extends Thing<ClassInterface> {
     model: ModelDataType,
 }
 
-export interface UcpComponentStatics<ModelDataType> extends Class<UcpComponent<ModelDataType>> {
+export interface UcpComponentStatics<ModelDataType, ClassInterface> extends Class<ClassInterface> {
     modelSchema: any
 }

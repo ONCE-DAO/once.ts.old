@@ -1,14 +1,18 @@
 import UcpComponent, { UcpComponentStatics } from "../../3_services/UcpComponent.interface";
 import { z } from "zod";
 import UcpModel from "../../3_services/UcpModel.interface";
-import { DefaultUcpModel } from "./DefaultUcpModel.class";
-import { BaseUcpComponent } from "../../1_infrastructure/BaseUcpComponent.class";
+import DefaultUcpModel from "./DefaultUcpModel.class";
+import BaseUcpComponent from "../../1_infrastructure/BaseUcpComponent.class";
 
 
+interface MyDefaultUcpComponent extends UcpComponent<ModelDataType, MyDefaultUcpComponent> {
+    myName: string | undefined;
+}
 
 const modelSchema = BaseUcpComponent.modelSchema.merge(
     z.object({
         name: z.string(),
+        myName: z.string().optional(),
         age: z.number().optional(),
         inventory: z.object({
             name: z.string().optional(),
@@ -17,20 +21,17 @@ const modelSchema = BaseUcpComponent.modelSchema.merge(
     })
 );
 
-type ModelDataTypeDef = z.infer<typeof modelSchema>
+type ModelDataType = z.infer<typeof modelSchema>
 
-class DefaultUcpComponent extends BaseUcpComponent<ModelDataTypeDef> {
-
-    private ucpModel: UcpModel<ModelDataTypeDef> = new DefaultUcpModel<ModelDataTypeDef>(DefaultUcpComponent.modelDefaultData, this);
-
-    get model() {
-        return this.ucpModel.model;
-    }
+class DefaultUcpComponent extends BaseUcpComponent<ModelDataType, MyDefaultUcpComponent> implements MyDefaultUcpComponent {
+    get myName() { return this.model.myName }
 
     static get modelSchema() {
         return modelSchema;
-        //return super.modelSchema.merge(modelSchema);
     }
+
+    protected ucpModel: UcpModel<ModelDataType> = new DefaultUcpModel<ModelDataType>(DefaultUcpComponent.modelDefaultData, this);
+
 
     static get modelDefaultData() {
         return {
@@ -40,7 +41,7 @@ class DefaultUcpComponent extends BaseUcpComponent<ModelDataTypeDef> {
     }
 }
 
-const DefaultUcpComponentExport: UcpComponentStatics<ModelDataTypeDef> = DefaultUcpComponent;
+const DefaultUcpComponentExport: UcpComponentStatics<ModelDataType, MyDefaultUcpComponent> = DefaultUcpComponent;
 
 export default DefaultUcpComponentExport;
 

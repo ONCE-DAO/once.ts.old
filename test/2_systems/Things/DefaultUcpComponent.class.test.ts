@@ -1,5 +1,4 @@
 
-import componentClass from "../../../src/2_systems/Things/DefaultUcpComponent.class";
 import DefaultUcpComponent from "../../../src/2_systems/Things/DefaultUcpComponent.class";
 
 describe("Default UcpComponent", () => {
