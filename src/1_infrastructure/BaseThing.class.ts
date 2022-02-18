@@ -1,10 +1,8 @@
 import DefaultClassDescriptor from "../2_systems/Things/DefaultClassDescriptor.class";
-import Thing, { ThingStatics } from "../3_services/Thing.interface";
+import Thing from "../3_services/Thing.interface";
 import ClassDescriptor from "../3_services/ClassDescriptor.interface";
-import WeakRefPromiseStore from "../2_systems/Things/WeakRefPromiseStore.class";
-import Store from "../3_services/Store.interface";
-import Class from "../3_services/Class.interface";
-export default abstract class BaseThing<T> implements Thing<T> {
+
+export default abstract class BaseThing<ClassInterface> implements Thing<ClassInterface> {
 
   private static _typeDescriptorStore = new WeakMap();
   static get classDescriptor(): ClassDescriptor {
