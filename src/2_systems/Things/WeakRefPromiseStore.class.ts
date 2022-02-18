@@ -1,7 +1,7 @@
 import EventServiceInterface from "../../3_services/EventService.interface";
 import Store from "../../3_services/Store.interface";
 import BaseThing from "../../1_infrastructure/BaseThing.class";
-import extendedPromise from "../JSExtensions/Promise";
+import ExtendedPromise from "../JSExtensions/Promise";
 
 type storedObject = { ref?: any, promise?: any };
 
@@ -68,7 +68,7 @@ export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> 
     register(key: any, value: any) {
 
         let objectRef: storedObject;
-        const isPromise = extendedPromise.isPromise(value);
+        const isPromise = ExtendedPromise.isPromise(value);
         if (isPromise) {
             objectRef = { promise: value };
         } else {

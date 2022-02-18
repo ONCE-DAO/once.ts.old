@@ -6,5 +6,6 @@ export default interface UcpComponent<ModelDataType, ClassInterface> extends Thi
 }
 
 export interface UcpComponentStatics<ModelDataType, ClassInterface> extends Class<ClassInterface> {
-    modelSchema: any
+    modelSchema: any;
+    modelDefaultData: ModelDataType;
 }

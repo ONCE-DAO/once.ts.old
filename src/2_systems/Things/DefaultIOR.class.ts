@@ -176,7 +176,7 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
 
 
 
-    async load(config: loadingConfig) {
+    async load(config?: loadingConfig) {
         // return Promise.resolve(this.loader.load(this));
         let loadingPromiseOrObject = this.loader.load(this, config);
         loadingPromiseOrObject.then(object => {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import DefaultUcpModel from "../2_systems/Things/DefaultUcpModel.class";
+import DefaultUcpModel, { UcpModelProxySchema } from "../2_systems/Things/DefaultUcpModel.class";
 import UcpComponent from "../3_services/UcpComponent.interface";
 import UcpModel from "../3_services/UcpModel.interface";
 import BaseThing from "./BaseThing.class";
@@ -9,15 +9,19 @@ export default abstract class BaseUcpComponent<ModelDataType, ClassInterface> ex
         return this.ucpModel.model;
     }
 
+    set model(value: ModelDataType) {
+        this.ucpModel.model = value;
+    }
+
     static get modelSchema() {
-        return z.object({
-            _component: z.object({
+        return UcpModelProxySchema.extend({
+            _component: UcpModelProxySchema.extend({
                 name: z.string()
             })
         })
     }
 
-    protected abstract ucpModel: UcpModel<ModelDataType>;
+    protected abstract ucpModel: UcpModel;
 
 
     static get modelDefaultData() {

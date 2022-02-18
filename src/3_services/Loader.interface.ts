@@ -7,7 +7,7 @@ export type loadingConfig = { usedByClass?: Class<any>, returnValue?: loaderRetu
 
 export interface Loader {
 
-  load(ior: IOR, config: loadingConfig): Promise<any>
+  load(ior: IOR, config?: loadingConfig): Promise<any>
   canHandle(ior: IOR): number
 
 }
