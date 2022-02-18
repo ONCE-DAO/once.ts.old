@@ -5,8 +5,9 @@ export class DefaultUcpModel<ModelDataType> implements UcpModel<ModelDataType> {
     private data: ModelDataType;
     get model(): ModelDataType { return this.data }
 
-    constructor(defaultData: ModelDataType, ucpComponent: UcpComponent) {
-        ucpComponent.classDescriptor.class
-        this.data = defaultData;
+    constructor(defaultData: ModelDataType, ucpComponent: UcpComponent<ModelDataType>) {
+        const modelSchema = ucpComponent.classDescriptor.class.modelSchema;
+        const data2Set = modelSchema.parse(defaultData)
+        this.data = data2Set;
     }
 }
