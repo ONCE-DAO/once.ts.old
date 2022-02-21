@@ -2,9 +2,8 @@ import { z } from "zod";
 import UcpComponent from "../../3_services/UcpComponent.interface";
 import UcpModel, { UcpModelChangeLog, UcpModelChangeLogMethods, UcpModelTransactionStates, Wave } from "../../3_services/UcpModel.interface";
 import ExtendedPromise from "../JSExtensions/Promise";
+import UUiD from "../JSExtensions/UUiD.class";
 import DefaultIOR from "./DefaultIOR.class";
-
-type validateResult = { success: true; data: any; } | { success: false; error: z.ZodError; }
 
 export const UcpModelProxySchema = z.object({
     _helper: z.object({
@@ -25,8 +24,6 @@ class DefaultUcpModelChangeLog implements UcpModelChangeLog {
 
 }
 
-type schemaSearchResult = typeof z.ZodType;
-
 
 function getSchemaBottom(schema: any): any {
     if (schema._def.innerType) {
@@ -36,7 +33,6 @@ function getSchemaBottom(schema: any): any {
 }
 
 export const UcpModelSchemaConverter = (schema: any, optional: boolean) => {
-    schema;
     if (getSchemaBottom(schema)._def.typeName !== 'ZodObject') return schema;
 
     if (!schema.shape) return schema;
@@ -49,19 +45,21 @@ export const UcpModelSchemaConverter = (schema: any, optional: boolean) => {
 }
 
 
-class DefaultUcpModelChangeLogItem implements Wave {
+class DefaultWave implements Wave {
     to: any;
     key: string[];
     method: UcpModelChangeLogMethods;
     from: any;
     time: number;
+    id: string;
 
-    constructor(key: string[], from: any, to: any, method: UcpModelChangeLogMethods, time?: number) {
+    constructor(key: string[], from: any, to: any, method: UcpModelChangeLogMethods, time?: number, id?: string) {
         this.key = key;
         this.from = from;
         this.to = to;
         this.method = method;
         this.time = time || Date.now();
+        this.id = id || UUiD.uuidv4();
     }
 }
 
@@ -70,25 +68,27 @@ class DefaultParticle implements Particle {
     snapshot: any;
 
     constructor(id?: string) {
-        this.id = id || '' + Math.round(Math.random() * 1000000000); //TODO@BE Change to uuid
+        this.id = id || UUiD.uuidv4();
     }
-    public readonly changeLog: UcpModelChangeLog = new DefaultUcpModelChangeLog(); // Should be in the wave
+    readonly waveList: Wave[] = [];
+    public readonly changeLog: UcpModelChangeLog = new DefaultUcpModelChangeLog();
 
-    addChange(ChangeLog: Wave): void {
-        this.add2ChangeLog(ChangeLog)
+    addChange(WaveItem: Wave): void {
+        this.waveList.push(WaveItem);
+        this.add2ChangeLog(WaveItem);
     }
 
-    private add2ChangeLog(ChangeLogItem: Wave): void {
+    private add2ChangeLog(WaveItem: Wave): void {
         let changeLog = this.changeLog as any;
-        for (let i = 0; i < ChangeLogItem.key.length - 1; i++) {
-            const subKey = ChangeLogItem.key[i];
+        for (let i = 0; i < WaveItem.key.length - 1; i++) {
+            const subKey = WaveItem.key[i];
             if (!changeLog.hasOwnProperty(subKey)) {
                 changeLog[subKey] = new DefaultUcpModelChangeLog();
             }
             changeLog = changeLog[subKey];
 
         }
-        this.deepChangeLog(ChangeLogItem.to, ChangeLogItem.from, ChangeLogItem.key, ChangeLogItem.time, changeLog);
+        this.deepChangeLog(WaveItem.to, WaveItem.from, WaveItem.key, WaveItem.time, changeLog);
     }
 
     private deepChangeLog(targetData: any, originalData: any, path: string[], time: number, upperLevelChangeLog: UcpModelChangeLog): UcpModelChangeLog | Wave | null {
@@ -104,7 +104,7 @@ class DefaultParticle implements Particle {
                 method = UcpModelChangeLogMethods.set;
             }
 
-            upperLevelChangeLog[path[path.length - 1]] = new DefaultUcpModelChangeLogItem(
+            upperLevelChangeLog[path[path.length - 1]] = new DefaultWave(
                 [...path],
                 originalData,
                 targetData,
@@ -132,7 +132,7 @@ class DefaultParticle implements Particle {
                 Object.keys(originalData).forEach(key => {
                     if (typeof targetData[key] === 'undefined') {
 
-                        innerChangeLog[key] = new DefaultUcpModelChangeLogItem(
+                        innerChangeLog[key] = new DefaultWave(
                             [...path, key],
                             originalData[key],
                             value,
@@ -155,6 +155,7 @@ interface Particle {
     id: string;
     changeLog: UcpModelChangeLog,
     snapshot: any,
+    waveList: Wave[],
     addChange(ChangeLog: Wave): void;
 }
 
@@ -296,7 +297,7 @@ export default class DefaultUcpModel<ModelDataType> implements UcpModel {
                         method = UcpModelChangeLogMethods.set;
                     }
 
-                    let changeObject = new DefaultUcpModelChangeLogItem([...proxyPath, property], from, proxyValue, method);
+                    let changeObject = new DefaultWave([...proxyPath, property], from, proxyValue, method);
 
 
                     //this._checkForIOR(proxyValue);
@@ -315,7 +316,7 @@ export default class DefaultUcpModel<ModelDataType> implements UcpModel {
 
                 //@ToDo Check if writeable
 
-                let changeObject = new DefaultUcpModelChangeLogItem([...proxyPath, property], target[property], undefined, UcpModelChangeLogMethods.delete);
+                let changeObject = new DefaultWave([...proxyPath, property], target[property], undefined, UcpModelChangeLogMethods.delete);
                 ucpModel.registerChange(changeObject)
 
                 if (Array.isArray(target)) {
