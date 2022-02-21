@@ -1,8 +1,11 @@
 import { z } from "zod";
+import BaseThing from "../../1_infrastructure/BaseThing.class";
+import EventService, { EventServiceConsumer } from "../../3_services/EventService.interface";
 import UcpComponent from "../../3_services/UcpComponent.interface";
-import UcpModel, { UcpModelChangeLog, UcpModelChangeLogMethods, UcpModelTransactionStates, Wave } from "../../3_services/UcpModel.interface";
+import UcpModel, { UcpModelChangeLog, UcpModelChangeLogMethods, UcpModelEvents, UcpModelTransactionStates, Wave } from "../../3_services/UcpModel.interface";
 import ExtendedPromise from "../JSExtensions/Promise";
 import UUiD from "../JSExtensions/UUiD.class";
+import DefaultEventService from "./DefaultEventService.class";
 import DefaultIOR from "./DefaultIOR.class";
 
 export const UcpModelProxySchema = z.object({
@@ -160,7 +163,8 @@ interface Particle {
 }
 
 
-export default class DefaultUcpModel<ModelDataType> implements UcpModel {
+
+export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> implements UcpModel, EventServiceConsumer {
     //@ts-ignore   // Is ignored as it is set in the Constructor but typescript does not understand it
     protected data: ModelDataType;
     protected _ucpComponent: UcpComponent<ModelDataType, any>
@@ -168,11 +172,12 @@ export default class DefaultUcpModel<ModelDataType> implements UcpModel {
     protected _history: Particle[] = [];
 
 
-
     constructor(defaultData: any, ucpComponent: UcpComponent<ModelDataType, any>) {
+        super();
         this._ucpComponent = ucpComponent;
         this.model = defaultData;
     }
+    get eventSupport(): EventService { return DefaultEventService.getSingleton() }
 
     protected _createProxy4Data(originalData: any, parent: any, proxyPath: string[] = []) {
         const ucpModel = this;
@@ -409,7 +414,9 @@ export default class DefaultUcpModel<ModelDataType> implements UcpModel {
 
     processTransaction() {
 
+        let particle = this.latestParticle;
 
+        this.eventSupport.fire(UcpModelEvents.ON_MODEL_WILL_CHANGE, this, this.latestParticle.changeLog);
         let schema = this.getSchema();
 
         let parseResult = schema.safeParse(this.data);
@@ -418,7 +425,7 @@ export default class DefaultUcpModel<ModelDataType> implements UcpModel {
             throw parseResult.error;
         }
 
-        let particle = this.latestParticle;
+        this.eventSupport.fire(UcpModelEvents.ON_MODEL_CHANGED, this, this.latestParticle.changeLog);
 
         particle.snapshot = this.deepCopy(this.model);
 
@@ -474,4 +481,6 @@ export default class DefaultUcpModel<ModelDataType> implements UcpModel {
     get toJson(): string {
         throw new Error("Not implemented yet");
     };
+
+
 }

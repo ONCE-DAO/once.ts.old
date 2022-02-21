@@ -1,5 +1,7 @@
+import { Thing } from "..";
+import { EventServiceConsumer } from "./EventService.interface";
 
-export default interface UcpModel {
+export default interface UcpModel extends EventServiceConsumer, Thing<UcpModel> {
     model: any;
     changeLog: any; // UcpModelChangeLog | undefined
     toJson: string;
@@ -31,4 +33,9 @@ export enum UcpModelTransactionStates {
     AFTER_CHANGE,
     TRANSACTION_CLOSED,
     TRANSACTION_ROLLBACK,
+}
+
+export enum UcpModelEvents {
+    ON_MODEL_CHANGED = 'onModelChanges',
+    ON_MODEL_WILL_CHANGE = 'onModelWillChange'
 }

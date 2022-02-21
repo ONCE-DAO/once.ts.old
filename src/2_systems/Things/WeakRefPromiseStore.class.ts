@@ -1,11 +1,14 @@
-import EventServiceInterface from "../../3_services/EventService.interface";
+import EventService from "../../3_services/EventService.interface";
 import Store from "../../3_services/Store.interface";
 import BaseThing from "../../1_infrastructure/BaseThing.class";
 import ExtendedPromise from "../JSExtensions/Promise";
+import EventServiceInterface from "../../3_services/EventService.interface";
+import DefaultEventService from "./DefaultEventService.class";
 
 type storedObject = { ref?: any, promise?: any };
 
 export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> implements Store {
+    get eventSupport(): EventServiceInterface { return DefaultEventService.getSingleton() }
 
     discover(): any[] {
         let result = [];
@@ -41,10 +44,8 @@ export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> 
 
         return result;
     }
-    eventSupport: EventServiceInterface | undefined;
     private registry: { [index: string]: storedObject } = {};
     private mapRegistry: Map<any, storedObject> = new Map();
-    private eventService: EventServiceInterface | undefined;
     private _weakRefActive: boolean = true;
 
     private get weakRefAvailable() {

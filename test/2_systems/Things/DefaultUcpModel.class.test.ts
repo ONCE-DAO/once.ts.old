@@ -1,5 +1,5 @@
 import DefaultUcpComponent from "../../../src/2_systems/Things/DefaultUcpComponent.class";
-import { UcpModelChangeLogMethods, UcpModelTransactionStates } from "../../../src/3_services/UcpModel.interface";
+import { UcpModelChangeLogMethods, UcpModelEvents, UcpModelTransactionStates } from "../../../src/3_services/UcpModel.interface";
 
 describe("Default Ucp Model", () => {
     let ucpComponent = new DefaultUcpComponent();
@@ -49,6 +49,35 @@ describe("Default Ucp Model", () => {
 
     })
 
+    describe("Events", () => {
+        test("Event onModelWillChange", async () => {
+            let ucpComponent = new DefaultUcpComponent();
+
+            let result: any;
+            const callback = (event: any, data: any) => {
+                result = data;
+            }
+
+            ucpComponent.ucpModel.eventSupport.addEventListener(ucpComponent.ucpModel, UcpModelEvents.ON_MODEL_WILL_CHANGE, callback, ucpComponent.ucpModel)
+            ucpComponent.model.age = 10;
+
+            expect(result).not.toBe(undefined);
+        })
+
+        test("Event onModelChanged", async () => {
+            let ucpComponent = new DefaultUcpComponent();
+
+            let result: any;
+            const callback = (event: any, data: any) => {
+                result = data;
+            }
+
+            ucpComponent.ucpModel.eventSupport.addEventListener(ucpComponent.ucpModel, UcpModelEvents.ON_MODEL_CHANGED, callback, ucpComponent.ucpModel)
+            ucpComponent.model.age = 10;
+
+            expect(result).not.toBe(undefined);
+        })
+    })
 
     describe("Helper Functions", () => {
 

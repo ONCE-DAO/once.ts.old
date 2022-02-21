@@ -1,12 +1,11 @@
-import EventServiceInterface from "../../3_services/EventService.interface";
 import Store from "../../3_services/Store.interface";
 import BaseThing from "../../1_infrastructure/BaseThing.class";
+import EventServiceInterface from "../../3_services/EventService.interface";
+import DefaultEventService from "./DefaultEventService.class";
 
 export default class DefaultStore extends BaseThing<DefaultStore> implements Store {
 
-    eventSupport: EventServiceInterface | undefined;
     private registry: { [index: string]: any } = {};
-    private eventService: EventServiceInterface | undefined;
 
     register(key: string, value: any): void {
         this.registry[key] = value;
@@ -24,5 +23,6 @@ export default class DefaultStore extends BaseThing<DefaultStore> implements Sto
         this.registry = {};
     }
 
+    get eventSupport(): EventServiceInterface { return DefaultEventService.getSingleton() }
 
 }

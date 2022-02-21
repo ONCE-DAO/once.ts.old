@@ -6,7 +6,15 @@ import Thing from "../../3_services/Thing.interface";
 
 export default class DefaultEventService extends BaseThing<DefaultEventService> implements EventService {
 
+    private static _singleton: DefaultEventService;
     private _store = new WeakRefPromiseStore();
+
+    static getSingleton() {
+        if (!this._singleton) {
+            this._singleton = new DefaultEventService();
+        }
+        return this._singleton;
+    }
     addEventListener(eventSourceObject: Thing<any>, eventName: string, callbackFunction: Function, eventTarget: Thing<any>): void {
         let sourceEvents = this.getEvents(eventSourceObject);
         if (!sourceEvents) {

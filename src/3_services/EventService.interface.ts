@@ -12,3 +12,7 @@ export interface OnceEvent {
 
     addCallback(callbackFunction: Function, targetObject: Thing<any>): void;
 }
+
+export interface EventServiceConsumer {
+    eventSupport: EventService
+}
