@@ -1,6 +1,6 @@
 import { z } from "zod";
 import UcpComponent from "../../3_services/UcpComponent.interface";
-import UcpModel, { UcpModelChangeLog, UcpModelChangeLogItem, UcpModelChangeLogMethods } from "../../3_services/UcpModel.interface";
+import UcpModel, { UcpModelChangeLog, UcpModelChangeLogMethods, UcpModelTransactionStates, Wave } from "../../3_services/UcpModel.interface";
 import ExtendedPromise from "../JSExtensions/Promise";
 import DefaultIOR from "./DefaultIOR.class";
 
@@ -8,7 +8,7 @@ type validateResult = { success: true; data: any; } | { success: false; error: z
 
 export const UcpModelProxySchema = z.object({
     _helper: z.object({
-        changeLog: z.object({}),
+        changeLog: z.function(),
         validate: z.function().args(z.string(), z.any()).returns(z.object({ success: z.boolean(), data: z.any().optional(), error: z.any() })),
         multiSet: z.function(),
         _proxyTools: z.object({
@@ -17,21 +17,27 @@ export const UcpModelProxySchema = z.object({
             isProxy: z.boolean(),
             myUcpModel: z.any()
         })
-    })
+    }).optional()
 });
+
+class DefaultUcpModelChangeLog implements UcpModelChangeLog {
+    [key: string]: UcpModelChangeLog | Wave;
+
+}
 
 type schemaSearchResult = typeof z.ZodType;
 
-function getSchemaType(schema: any): string {
+
+function getSchemaBottom(schema: any): any {
     if (schema._def.innerType) {
-        return getSchemaType(schema._def.innerType);
+        return getSchemaBottom(schema._def.innerType);
     }
-    return schema._def.typeName;
+    return schema;
 }
 
 export const UcpModelSchemaConverter = (schema: any, optional: boolean) => {
     schema;
-    if (getSchemaType(schema) !== 'ZodObject') return schema;
+    if (getSchemaBottom(schema)._def.typeName !== 'ZodObject') return schema;
 
     if (!schema.shape) return schema;
     for (let [key, element] of Object.entries(schema.shape)) {
@@ -42,51 +48,129 @@ export const UcpModelSchemaConverter = (schema: any, optional: boolean) => {
     return schema;
 }
 
-type ucpModelProxy = {
-    [index: string]: any
-    /* _helper: {
-         changeLog: UcpModelChangeLog,
-         validate: boolean,
-         multiSet: Promise<boolean>
-         _proxyTools: {
-             loadIOR: Promise<boolean>,
-             destroy: void,
-             isProxy: boolean,
-             myUcpModel: UcpModel
-         }
-     }*/
-}
 
-class DefaultUcpModelChangeLogItem implements UcpModelChangeLogItem {
+class DefaultUcpModelChangeLogItem implements Wave {
     to: any;
     key: string[];
     method: UcpModelChangeLogMethods;
     from: any;
-    time: Date;
+    time: number;
 
-    constructor(to: any, key: string[], method: UcpModelChangeLogMethods, from: any) {
-        this.to = to;
+    constructor(key: string[], from: any, to: any, method: UcpModelChangeLogMethods, time?: number) {
         this.key = key;
-        this.method = method;
         this.from = from;
-        this.time = new Date();
+        this.to = to;
+        this.method = method;
+        this.time = time || Date.now();
+    }
+}
+
+class DefaultParticle implements Particle {
+    id: string;
+    snapshot: any;
+
+    constructor(id?: string) {
+        this.id = id || '' + Math.round(Math.random() * 1000000000); //TODO@BE Change to uuid
+    }
+    public readonly changeLog: UcpModelChangeLog = new DefaultUcpModelChangeLog(); // Should be in the wave
+
+    addChange(ChangeLog: Wave): void {
+        this.add2ChangeLog(ChangeLog)
+    }
+
+    private add2ChangeLog(ChangeLogItem: Wave): void {
+        let changeLog = this.changeLog as any;
+        for (let i = 0; i < ChangeLogItem.key.length - 1; i++) {
+            const subKey = ChangeLogItem.key[i];
+            if (!changeLog.hasOwnProperty(subKey)) {
+                changeLog[subKey] = new DefaultUcpModelChangeLog();
+            }
+            changeLog = changeLog[subKey];
+
+        }
+        this.deepChangeLog(ChangeLogItem.to, ChangeLogItem.from, ChangeLogItem.key, ChangeLogItem.time, changeLog);
+    }
+
+    private deepChangeLog(targetData: any, originalData: any, path: string[], time: number, upperLevelChangeLog: UcpModelChangeLog): UcpModelChangeLog | Wave | null {
+
+        if (targetData?._helper?._proxyTools?.isProxy !== true) {
+            if (targetData === originalData) return null;
+            let method;
+            if (originalData == undefined) {
+                method = UcpModelChangeLogMethods.create;
+            } else if (targetData == undefined) {
+                method = UcpModelChangeLogMethods.delete;
+            } else {
+                method = UcpModelChangeLogMethods.set;
+            }
+
+            upperLevelChangeLog[path[path.length - 1]] = new DefaultUcpModelChangeLogItem(
+                [...path],
+                originalData,
+                targetData,
+                method,
+                time
+            );
+        } else {
+
+            let innerChangeLog: UcpModelChangeLog = new DefaultUcpModelChangeLog()
+            upperLevelChangeLog[path[path.length - 1]] = innerChangeLog;
+            let key: string;
+            let value: any;
+            for ([key, value] of Object.entries(targetData)) {
+
+                const currentPath = path.concat(key)
+                let currentValue = (originalData !== undefined ? originalData[key] : undefined);
+
+                //let newValue: UcpModelChangeLog | UcpModelChangeLogItem | null;
+                this.deepChangeLog(value, currentValue, currentPath, time, innerChangeLog);
+
+            }
+
+            // Changelog for the from (Deleted parameter)
+            if (originalData) {
+                Object.keys(originalData).forEach(key => {
+                    if (typeof targetData[key] === 'undefined') {
+
+                        innerChangeLog[key] = new DefaultUcpModelChangeLogItem(
+                            [...path, key],
+                            originalData[key],
+                            value,
+                            UcpModelChangeLogMethods.delete,
+                            time
+                        );
+                    }
+                })
+            }
+        }
+
+        return upperLevelChangeLog;
+
     }
 
 
 }
 
+interface Particle {
+    id: string;
+    changeLog: UcpModelChangeLog,
+    snapshot: any,
+    addChange(ChangeLog: Wave): void;
+}
+
+
 export default class DefaultUcpModel<ModelDataType> implements UcpModel {
+    //@ts-ignore   // Is ignored as it is set in the Constructor but typescript does not understand it
     protected data: ModelDataType;
     protected _ucpComponent: UcpComponent<ModelDataType, any>
+    protected _transactionState: UcpModelTransactionStates = UcpModelTransactionStates.TRANSACTION_CLOSED;
+    protected _history: Particle[] = [];
+
 
 
     constructor(defaultData: any, ucpComponent: UcpComponent<ModelDataType, any>) {
         this._ucpComponent = ucpComponent;
-        const modelSchema = ucpComponent.classDescriptor.class.modelSchema;
-        //@ts-ignore
-        this.data = defaultData;
         this.model = defaultData;
-
     }
 
     protected _createProxy4Data(originalData: any, parent: any, proxyPath: string[] = []) {
@@ -95,9 +179,11 @@ export default class DefaultUcpModel<ModelDataType> implements UcpModel {
 
         const schema = ucpModel.getSchema(proxyPath);
 
-        if (!schema) throw new Error(`Missing the schema for the path ${proxyPath.join('.')}`);
+        if (!schema) {
+            throw new Error(`Missing the schema for the path ${proxyPath.join('.')}`);
+        }
 
-        let type = getSchemaType(schema);
+        let type = getSchemaBottom(schema)._def.typeName;
 
         switch (type) {
             case 'ZodBoolean':
@@ -111,8 +197,9 @@ export default class DefaultUcpModel<ModelDataType> implements UcpModel {
                 throw new Error(`Type ${type} is not implemented`)
         }
 
+        if (typeof originalData !== 'object') throw new Error(`Type ${type} expected. Got ${typeof originalData}`)
 
-        let dataStructure: ucpModelProxy = (type === 'ZodArray' ? [] : {});
+        let dataStructure: { [index: string]: any } = (type === 'ZodArray' ? [] : {});
 
         dataStructure._helper = {
             validate(key: string, value: any): z.SafeParseReturnType<any, any> {
@@ -123,6 +210,7 @@ export default class DefaultUcpModel<ModelDataType> implements UcpModel {
 
                 return parameterSchema.safeParse(value);
             },
+            changeLog: () => { return ucpModel.changeLog },
             _proxyTools: {
                 isProxy: true,
                 myUcpModel: ucpModel,
@@ -208,16 +296,34 @@ export default class DefaultUcpModel<ModelDataType> implements UcpModel {
                         method = UcpModelChangeLogMethods.set;
                     }
 
-                    let action = new DefaultUcpModelChangeLogItem(proxyValue, [...proxyPath, property], from, method);
+                    let changeObject = new DefaultUcpModelChangeLogItem([...proxyPath, property], from, proxyValue, method);
 
 
                     //this._checkForIOR(proxyValue);
                     target[property] = proxyValue;
 
-                    //parent._reportChanges(action)
+                    ucpModel.registerChange(changeObject)
 
 
                 }
+                return true;
+            },
+            deleteProperty: (target: any, property: any) => {
+
+                // Dose not exists
+                if (!target.hasOwnProperty(property)) return true;
+
+                //@ToDo Check if writeable
+
+                let changeObject = new DefaultUcpModelChangeLogItem([...proxyPath, property], target[property], undefined, UcpModelChangeLogMethods.delete);
+                ucpModel.registerChange(changeObject)
+
+                if (Array.isArray(target)) {
+                    target.splice(property, 1);
+                } else {
+                    delete target[property];
+                }
+
                 return true;
             },
             has: (target: any, prop: any) => {
@@ -240,7 +346,7 @@ export default class DefaultUcpModel<ModelDataType> implements UcpModel {
             //   ucpModel.startTransaction();
             // }
 
-            Object.keys(data2Set).forEach(key => {
+            for (const key of Object.keys(data2Set)) {
                 if (key === '_helper') return;
                 let newValue = data2Set[key];
 
@@ -249,7 +355,7 @@ export default class DefaultUcpModel<ModelDataType> implements UcpModel {
                 } else {
                     proxy[key] = newValue;
                 }
-            });
+            };
 
             if (forceOverwrite) {
                 Object.keys(dataStructure).forEach(key => {
@@ -265,13 +371,84 @@ export default class DefaultUcpModel<ModelDataType> implements UcpModel {
         return proxy;
     }
 
+    protected registerChange(change: Wave): void {
+        const state = this._transactionState;
+        switch (state) {
+            case UcpModelTransactionStates.TRANSACTION_CLOSED:
+                this.startTransaction();
+                if (!this.latestParticle) throw new Error("Missing Particle");
+                this.latestParticle.addChange(change);
+                this.processTransaction();
+                break;
+            case UcpModelTransactionStates.TRANSACTION_ROLLBACK:
+                // Nothing to do in this state
+                break;
+            case UcpModelTransactionStates.TRANSACTION_OPEN:
+                this.latestParticle.addChange(change);
+                break;
+
+            default:
+                throw new Error("Not implemented yet " + state);
+
+        }
+    }
+
+    startTransaction(): void {
+        if (this.transactionState === UcpModelTransactionStates.TRANSACTION_CLOSED) {
+            this._history.push(new DefaultParticle());
+            this._transactionState = UcpModelTransactionStates.TRANSACTION_OPEN;
+        } else {
+            throw new Error(`Transaction in wrong state: ${this.transactionState}`);
+        }
+    }
+
+    private deepCopy(source: any): any {
+        return JSON.parse(JSON.stringify(source))
+    }
+
+    processTransaction() {
+
+
+        let schema = this.getSchema();
+
+        let parseResult = schema.safeParse(this.data);
+        if (parseResult.success === false) {
+
+            throw parseResult.error;
+        }
+
+        let particle = this.latestParticle;
+
+        particle.snapshot = this.deepCopy(this.model);
+
+        this._transactionState = UcpModelTransactionStates.TRANSACTION_CLOSED;
+
+    }
+
+    rollbackTransaction() {
+        this._transactionState = UcpModelTransactionStates.TRANSACTION_ROLLBACK;
+        this._history.pop();
+        this.model = this.latestParticle.snapshot
+        this._transactionState = UcpModelTransactionStates.TRANSACTION_CLOSED;
+    }
+
+
+    private get latestParticle(): Particle {
+        return this._history.slice(-1)[0];
+    }
 
     protected getSchema(path: string[] = [], schema?: any): any {
         if (!schema) schema = this._ucpComponent.classDescriptor.class.modelSchema;
         for (const element of path) {
-            const newSchema = schema.shape[element];
-            if (newSchema == undefined) return undefined;
-            schema = newSchema;
+            const bottomSchema = getSchemaBottom(schema);
+            if (bottomSchema._def.typeName === 'ZodArray') {
+                if (Number.isNaN(element)) throw new Error(`Can not Access key ${element} on an Array`);
+                schema = bottomSchema.element;
+            } else {
+                const newSchema = bottomSchema.shape?.[element];
+                if (newSchema == undefined) return undefined;
+                schema = newSchema;
+            }
         }
         return schema;
     }
@@ -282,12 +459,16 @@ export default class DefaultUcpModel<ModelDataType> implements UcpModel {
         this.data = this._createProxy4Data(newValue, this)
     }
 
+    get transactionState() {
+        return this._transactionState;
+    }
+
 
     destroy(): void {
         throw new Error("Method not implemented.");
     }
-    get changeLog(): UcpModelChangeLog {
-        throw new Error("Not implemented yet");
+    get changeLog(): any { // TODO sollte UcpModelChangeLog | undefined sein. Aber das funktioniert nicht
+        return this.latestParticle?.changeLog;
     };
     get toJson(): string {
         throw new Error("Not implemented yet");

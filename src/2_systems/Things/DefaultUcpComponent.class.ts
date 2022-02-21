@@ -17,7 +17,10 @@ const modelSchema = BaseUcpComponent.modelSchema.merge(
         inventory: UcpModelProxySchema.extend({
             name: z.string().optional(),
             itemId: z.number().optional(),
-        }).array().optional()
+        }).array().optional(),
+        subOptions: UcpModelProxySchema.extend({
+            someString: z.string().optional(),
+        }).optional()
     })
 );
 
@@ -31,7 +34,7 @@ class DefaultUcpComponent extends BaseUcpComponent<ModelDataType, MyDefaultUcpCo
         return modelSchema;
     }
 
-    protected ucpModel: UcpModel = new DefaultUcpModel<ModelDataType>(DefaultUcpComponent.modelDefaultData, this);
+    public readonly ucpModel: UcpModel = new DefaultUcpModel<ModelDataType>(DefaultUcpComponent.modelDefaultData, this);
 
 
     static get modelDefaultData() {
