@@ -4,20 +4,43 @@ import UcpModel, { UcpModelChangeLog, UcpModelChangeLogItem, UcpModelChangeLogMe
 import ExtendedPromise from "../JSExtensions/Promise";
 import DefaultIOR from "./DefaultIOR.class";
 
+type validateResult = { success: true; data: any; } | { success: false; error: z.ZodError; }
 
 export const UcpModelProxySchema = z.object({
     _helper: z.object({
         changeLog: z.object({}),
-        validate: z.boolean(),
-        multiSet: z.promise(z.boolean()),
+        validate: z.function().args(z.string(), z.any()).returns(z.object({ success: z.boolean(), data: z.any().optional(), error: z.any() })),
+        multiSet: z.function(),
         _proxyTools: z.object({
-            loadIOR: z.promise(z.boolean()),
-            destroy: z.void(),
+            loadIOR: z.function(),
+            destroy: z.function().returns(z.void()),
             isProxy: z.boolean(),
             myUcpModel: z.any()
         })
-    }).optional()
+    })
 });
+
+type schemaSearchResult = typeof z.ZodType;
+
+function getSchemaType(schema: any): string {
+    if (schema._def.innerType) {
+        return getSchemaType(schema._def.innerType);
+    }
+    return schema._def.typeName;
+}
+
+export const UcpModelSchemaConverter = (schema: any, optional: boolean) => {
+    schema;
+    if (getSchemaType(schema) !== 'ZodObject') return schema;
+
+    if (!schema.shape) return schema;
+    for (let [key, element] of Object.entries(schema.shape)) {
+        schema.setKey(key, UcpModelSchemaConverter(element, optional));
+    }
+    const extendSchema = optional ? UcpModelProxySchema.optional() : UcpModelProxySchema;
+    schema = schema.extend(extendSchema);
+    return schema;
+}
 
 type ucpModelProxy = {
     [index: string]: any
@@ -54,11 +77,11 @@ class DefaultUcpModelChangeLogItem implements UcpModelChangeLogItem {
 
 export default class DefaultUcpModel<ModelDataType> implements UcpModel {
     protected data: ModelDataType;
-    public ucpComponent: UcpComponent<ModelDataType, any>
+    protected _ucpComponent: UcpComponent<ModelDataType, any>
 
 
     constructor(defaultData: any, ucpComponent: UcpComponent<ModelDataType, any>) {
-        this.ucpComponent = ucpComponent;
+        this._ucpComponent = ucpComponent;
         const modelSchema = ucpComponent.classDescriptor.class.modelSchema;
         //@ts-ignore
         this.data = defaultData;
@@ -74,7 +97,7 @@ export default class DefaultUcpModel<ModelDataType> implements UcpModel {
 
         if (!schema) throw new Error(`Missing the schema for the path ${proxyPath.join('.')}`);
 
-        let type = schema._def.typeName;
+        let type = getSchemaType(schema);
 
         switch (type) {
             case 'ZodBoolean':
@@ -88,12 +111,33 @@ export default class DefaultUcpModel<ModelDataType> implements UcpModel {
                 throw new Error(`Type ${type} is not implemented`)
         }
 
+
         let dataStructure: ucpModelProxy = (type === 'ZodArray' ? [] : {});
 
         dataStructure._helper = {
+            validate(key: string, value: any): z.SafeParseReturnType<any, any> {
+                const parameterSchema = ucpModel.getSchema([key], schema)
+                if (!parameterSchema) {
+                    throw new Error(`Key "${key}" is not defined in the schema`);
+                }
+
+                return parameterSchema.safeParse(value);
+            },
             _proxyTools: {
-                isProxy: true
-            }
+                isProxy: true,
+                myUcpModel: ucpModel,
+                destroy: () => {
+                    Object.keys(dataStructure).forEach(key => {
+                        if (dataStructure[key]?._helper?._proxyTools?.isProxy) {
+                            dataStructure[key]?._helper?._proxyTools.destroy();
+                        }
+                        delete dataStructure[key];
+                    });
+                }, loadIOR() {
+                    throw new Error("Not implemented yet");
+                }
+            },
+
         }
 
         const handler = {
@@ -197,10 +241,11 @@ export default class DefaultUcpModel<ModelDataType> implements UcpModel {
             // }
 
             Object.keys(data2Set).forEach(key => {
+                if (key === '_helper') return;
                 let newValue = data2Set[key];
 
-                if (proxy[key] && typeof proxy[key].multiSet === 'function') {
-                    proxy[key].multiSet(newValue, forceOverwrite);
+                if (proxy[key] && typeof proxy[key]._helper?.multiSet === 'function') {
+                    proxy[key]._helper.multiSet(newValue, forceOverwrite);
                 } else {
                     proxy[key] = newValue;
                 }
@@ -212,8 +257,6 @@ export default class DefaultUcpModel<ModelDataType> implements UcpModel {
                 });
             }
 
-            //@ToDo need to do Force and delete all other Parameter
-
             // if (!transactionOpen && !createMode) return ucpModel.processTransaction();
         };
         proxy._helper.multiSet(originalData);
@@ -222,10 +265,11 @@ export default class DefaultUcpModel<ModelDataType> implements UcpModel {
         return proxy;
     }
 
-    protected getSchema(path: string[] = []): any {
-        let schema = this.ucpComponent.classDescriptor.class.modelSchema;
+
+    protected getSchema(path: string[] = [], schema?: any): any {
+        if (!schema) schema = this._ucpComponent.classDescriptor.class.modelSchema;
         for (const element of path) {
-            const newSchema = schema.shape[element]
+            const newSchema = schema.shape[element];
             if (newSchema == undefined) return undefined;
             schema = newSchema;
         }
@@ -237,6 +281,7 @@ export default class DefaultUcpModel<ModelDataType> implements UcpModel {
     set model(newValue: ModelDataType) {
         this.data = this._createProxy4Data(newValue, this)
     }
+
 
     destroy(): void {
         throw new Error("Method not implemented.");

@@ -1,11 +1,11 @@
-import UcpComponent, { UcpComponentStatics } from "../../3_services/UcpComponent.interface";
+import UcpComponent from "../../3_services/UcpComponent.interface";
 import { z } from "zod";
 import UcpModel from "../../3_services/UcpModel.interface";
 import DefaultUcpModel, { UcpModelProxySchema } from "./DefaultUcpModel.class";
 import BaseUcpComponent from "../../1_infrastructure/BaseUcpComponent.class";
 
 
-interface MyDefaultUcpComponent extends UcpComponent<ModelDataTypeOutput, MyDefaultUcpComponent> {
+interface MyDefaultUcpComponent extends UcpComponent<ModelDataType, MyDefaultUcpComponent> {
     myName: string | undefined;
 }
 
@@ -21,18 +21,17 @@ const modelSchema = BaseUcpComponent.modelSchema.merge(
     })
 );
 
-type ModelDataTypeOutput = z.infer<typeof modelSchema>
+type ModelDataType = z.infer<typeof modelSchema>
 
 
-
-class DefaultUcpComponent extends BaseUcpComponent<ModelDataTypeOutput, MyDefaultUcpComponent> implements MyDefaultUcpComponent {
+class DefaultUcpComponent extends BaseUcpComponent<ModelDataType, MyDefaultUcpComponent> implements MyDefaultUcpComponent {
     get myName() { return this.model.myName }
 
     static get modelSchema() {
         return modelSchema;
     }
 
-    protected ucpModel: UcpModel = new DefaultUcpModel<ModelDataTypeOutput>(DefaultUcpComponent.modelDefaultData, this);
+    protected ucpModel: UcpModel = new DefaultUcpModel<ModelDataType>(DefaultUcpComponent.modelDefaultData, this);
 
 
     static get modelDefaultData() {
