@@ -176,6 +176,16 @@ interface Particle {
 }
 
 
+class UcpModelMapProxy extends Map {
+    _helper: any;
+}
+
+class UcpModelArrayProxy extends Array {
+    _helper: any;
+}
+class UcpModelObjectProxy {
+    _helper: any;
+}
 
 export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> implements UcpModel, EventServiceConsumer {
     //@ts-ignore   // Is ignored as it is set in the Constructor but typescript does not understand it
@@ -192,209 +202,50 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
     }
     get eventSupport(): EventService { return DefaultEventService.getSingleton() }
 
-    protected _createProxy4Data(originalData: any, parent: any, proxyPath: string[] = []) {
-        const ucpModel = this;
-        let createMode = true;
+    private _createProxy4Data(originalData: any, parent: any, proxyPath: string[] = []) {
 
-        const schema = ucpModel.getSchema(proxyPath);
+        const schema = this.getSchema(proxyPath);
 
         if (!schema) {
             throw new Error(`Missing the schema for the path ${proxyPath.join('.')}`);
         }
 
+        let dataStructure: any;
+
         let type = getSchemaBottom(schema)._def.typeName;
 
-        let dataStructure: any;
         switch (type) {
             case 'ZodBoolean':
             case 'ZodNumber':
             case 'ZodString':
                 return originalData;
             case 'ZodObject':
-                dataStructure = {};
+                dataStructure = new UcpModelObjectProxy();
                 break;
             case 'ZodArray':
-                dataStructure = [];
+                dataStructure = new UcpModelArrayProxy();
                 break;
-            // case 'ZodMap':
-            //     dataStructure = new Map();
-            //     break;
+            case 'ZodMap':
+                dataStructure = new UcpModelMapProxy();
+                break;
             default:
                 throw new Error(`Type ${type} is not implemented`)
         }
 
-        if (typeof originalData !== 'object') throw new Error(`Type ${type} expected. Got ${typeof originalData}`)
+        if (typeof originalData !== 'object') throw new Error(`Type ${type} expected. Got a ${typeof originalData}`)
 
-        //let dataStructure: { [index: string]: any } = (type === 'ZodArray' ? [] : {});
+        const handlerConfig = { proxyPath: proxyPath, createMode: true };
+        const handler = this.proxyHandlerFactory(handlerConfig);
 
-        dataStructure._helper = {
-            validate(key: string, value: any): z.SafeParseReturnType<any, any> {
-                const parameterSchema = ucpModel.getSchema([key], schema)
-                if (!parameterSchema) {
-                    throw new Error(`Key "${key}" is not defined in the schema`);
-                }
+        let proxyObject = new Proxy(dataStructure, handler);
+        const helperConfig = { proxyPath, innerDataStructure: dataStructure, proxyObject, schema, createMode: true }
+        dataStructure._helper = this.proxyHelperFactory(helperConfig);
 
-                return parameterSchema.safeParse(value);
-            },
-            get changelog() { return ucpModel.getChangelog(proxyPath) },
-            _proxyTools: {
-                isProxy: true,
-                myUcpModel: ucpModel,
-                destroy: () => {
-                    Object.keys(dataStructure).forEach(key => {
-                        if (dataStructure[key]?._helper?._proxyTools?.isProxy) {
-                            dataStructure[key]?._helper?._proxyTools.destroy();
-                        }
-                        delete dataStructure[key];
-                    });
-                }, loadIOR() {
-                    throw new Error("Not implemented yet");
-                }
-            },
+        proxyObject._helper.multiSet(originalData);
 
-        }
-
-        const handler = {
-            get: (target: any, key: any): any => {
-                if (key == "_isModelProxy") return true;
-
-                //ONCE.addStatistic(`${ucpModel.name}.proxyGet.total`);
-
-                const value = target[key];
-                if (value == undefined) return undefined;
-
-                // TODO@BE Change to IOR interface
-                if (value instanceof DefaultIOR) {
-                    return value.load();
-                }
-
-                return value;
-
-            },
-            set: (target: any, property: any, value: any, receiver: any): boolean => {
-
-                if (Array.isArray(target) && property === 'length') {
-                    target[property] = value;
-                }
-
-                // Already the same value
-                if (value === target[property]) {
-                    return true;
-                }
-
-
-                // Allow Promises to be written directly to the Model. No Transaction is started
-                if (ExtendedPromise.isPromise(value)) {
-                    const originalValue = target[property];
-                    target[property] = value;
-                    value.then((x: any) => {
-                        receiver[property] = x;
-                    }
-                    ).catch((e: any) => {
-                        target[property] = originalValue;
-                    });
-                    return true;
-                }
-
-                //@ToDo Check if writeable
-
-                let proxyValue;
-                if (value?._helper?._proxyTools?.isProxy === true) {
-                    if (value._helper._proxyTools.myUcpModel !== ucpModel) {
-                        throw new Error("It is not allowed to put Proxy objects into other Models");
-                    }
-                    proxyValue = value;
-                } else {
-
-                    proxyValue = ucpModel._createProxy4Data(value, receiver, [...proxyPath, property]);
-                }
-
-                // If the is still in creation no reports are send
-                if (createMode) {
-                    target[property] = proxyValue;
-                } else {
-
-                    let from: any;
-                    let method: UcpModelChangeLogMethods = UcpModelChangeLogMethods.create;
-
-                    if (target.hasOwnProperty(property)) {
-                        from = target[property];
-                        method = UcpModelChangeLogMethods.set;
-                    }
-
-                    let changeObject = new DefaultWave([...proxyPath, property], from, proxyValue, method);
-
-
-                    //this._checkForIOR(proxyValue);
-                    target[property] = proxyValue;
-
-                    ucpModel.registerChange(changeObject)
-
-
-                }
-                return true;
-            },
-            deleteProperty: (target: any, property: any) => {
-
-                // Dose not exists
-                if (!target.hasOwnProperty(property)) return true;
-
-                //@ToDo Check if writeable
-
-                let changeObject = new DefaultWave([...proxyPath, property], target[property], undefined, UcpModelChangeLogMethods.delete);
-                ucpModel.registerChange(changeObject)
-
-                if (Array.isArray(target)) {
-                    target.splice(property, 1);
-                } else {
-                    delete target[property];
-                }
-
-                return true;
-            },
-            has: (target: any, prop: any) => {
-                if (target[prop] && prop !== '_helper') { return true; }
-                return false;
-            },
-            ownKeys: (target: any) => {
-                return Reflect.ownKeys(target).filter(key => key !== '_helper');
-            }
-
-        };
-
-        let proxy = new Proxy(dataStructure, handler);
-
-        dataStructure._helper.multiSet = (data2Set: any, forceOverwrite = false) => {
-            // let transactionOpen = false;
-            // if (ucpModel.status == UcpModelV2.STATE.TRANSACTION_OPEN) {
-            //   transactionOpen = true;
-            // } else if (!createMode) {
-            //   ucpModel.startTransaction();
-            // }
-
-            for (const key of Object.keys(data2Set)) {
-                if (key === '_helper') return;
-                let newValue = data2Set[key];
-
-                if (proxy[key] && typeof proxy[key]._helper?.multiSet === 'function') {
-                    proxy[key]._helper.multiSet(newValue, forceOverwrite);
-                } else {
-                    proxy[key] = newValue;
-                }
-            };
-
-            if (forceOverwrite) {
-                Object.keys(dataStructure).forEach(key => {
-                    if (typeof data2Set[key] == "undefined" && key != '_helper') delete proxy[key];
-                });
-            }
-
-            // if (!transactionOpen && !createMode) return ucpModel.processTransaction();
-        };
-        proxy._helper.multiSet(originalData);
-
-        createMode = false;
-        return proxy;
+        handlerConfig.createMode = false;
+        helperConfig.createMode = false;
+        return proxyObject;
     }
 
     protected registerChange(change: Wave): void {
@@ -468,7 +319,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         return this._history.slice(-1)[0];
     }
 
-    protected getSchema(path: string[] = [], schema?: any): any {
+    public getSchema(path: string[] = [], schema?: any): any {
         if (!schema) schema = this._ucpComponent.classDescriptor.class.modelSchema;
         for (const element of path) {
             const bottomSchema = getSchemaBottom(schema);
@@ -487,7 +338,12 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
 
     // any to add default Values....
     set model(newValue: ModelDataType) {
-        this.data = this._createProxy4Data(newValue, this)
+        const proxy = this._createProxy4Data(newValue, this);
+
+        const wave = new DefaultWave([], this.data, proxy, (this.data ? UcpModelChangeLogMethods.set : UcpModelChangeLogMethods.create));
+
+        this.data = proxy;
+        this.registerChange(wave);
     }
 
     get transactionState() {
@@ -528,5 +384,172 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         return JSON.stringify(this.data);
     };
 
+
+    private proxyHelperFactory(config: { proxyPath: string[], innerDataStructure: any, proxyObject: any, schema: any, createMode: boolean }) {
+        const ucpModel = this;
+        return {
+            validate(key: string, value: any): z.SafeParseReturnType<any, any> {
+                const parameterSchema = ucpModel.getSchema([key], config.schema)
+                if (!parameterSchema) {
+                    throw new Error(`Key "${key}" is not defined in the schema`);
+                }
+
+                return parameterSchema.safeParse(value);
+            },
+            get changelog() { return ucpModel.getChangelog(config.proxyPath) },
+            _proxyTools: {
+                isProxy: true,
+                myUcpModel: ucpModel,
+                destroy: () => {
+                    Object.keys(config.innerDataStructure).forEach(key => {
+                        if (config.innerDataStructure[key]?._helper?._proxyTools?.isProxy) {
+                            config.innerDataStructure[key]?._helper?._proxyTools.destroy();
+                        }
+                        delete config.innerDataStructure[key];
+                    });
+                }, loadIOR() {
+                    throw new Error("Not implemented yet");
+                }
+            },
+            multiSet(data2Set: any, forceOverwrite: boolean = false) {
+                let transactionOpen = false;
+                if (ucpModel.transactionState === UcpModelTransactionStates.TRANSACTION_OPEN) {
+                    transactionOpen = true;
+                } else if (!config.createMode) {
+                    ucpModel.startTransaction();
+                }
+
+                for (const key of Object.keys(data2Set)) {
+                    if (key === '_helper') return;
+                    let newValue = data2Set[key];
+
+                    if (config.proxyObject[key] && typeof config.proxyObject[key]._helper?.multiSet === 'function') {
+                        config.proxyObject[key]._helper.multiSet(newValue, forceOverwrite);
+                    } else {
+                        config.proxyObject[key] = newValue;
+                    }
+                };
+
+                if (forceOverwrite) {
+                    Object.keys(config.innerDataStructure).forEach(key => {
+                        if (typeof data2Set[key] == "undefined" && key != '_helper') delete config.proxyObject[key];
+                    });
+                }
+
+                if (!transactionOpen && !config.createMode) ucpModel.processTransaction();
+            }
+
+        }
+    }
+
+    private proxyHandlerFactory(config: { proxyPath: string[], createMode: boolean }) {
+        const ucpModel = this;
+        return {
+            get: (target: any, key: any): any => {
+                if (key == "_isModelProxy") return true;
+
+                //ONCE.addStatistic(`${ucpModel.name}.proxyGet.total`);
+
+                const value = target[key];
+                if (value == undefined) return undefined;
+
+                // TODO@BE Change to IOR interface
+                if (value instanceof DefaultIOR) {
+                    return value.load();
+                }
+
+                return value;
+
+            },
+            set: (target: any, property: any, value: any, receiver: any): boolean => {
+
+                if (Array.isArray(target) && property === 'length') {
+                    target[property] = value;
+                }
+
+                // Already the same value
+                if (value === target[property]) {
+                    return true;
+                }
+
+                // Allow Promises to be written directly to the Model. No Transaction is started
+                if (ExtendedPromise.isPromise(value)) {
+                    const originalValue = target[property];
+                    target[property] = value;
+                    value.then((x: any) => {
+                        receiver[property] = x;
+                    }
+                    ).catch((e: any) => {
+                        target[property] = originalValue;
+                    });
+                    return true;
+                }
+
+                //@ToDo Check if writeable
+
+                let proxyValue;
+                if (value?._helper?._proxyTools?.isProxy === true) {
+                    if (value._helper._proxyTools.myUcpModel !== ucpModel) {
+                        throw new Error("It is not allowed to put Proxy objects into other Models");
+                    }
+                    proxyValue = value;
+                } else {
+
+                    proxyValue = ucpModel._createProxy4Data(value, receiver, [...config.proxyPath, property]);
+                }
+
+                // If the is still in creation no reports are send
+                if (config.createMode) {
+                    target[property] = proxyValue;
+                } else {
+
+                    let from: any;
+                    let method: UcpModelChangeLogMethods = UcpModelChangeLogMethods.create;
+
+                    if (target.hasOwnProperty(property)) {
+                        from = target[property];
+                        method = UcpModelChangeLogMethods.set;
+                    }
+
+                    let changeObject = new DefaultWave([...config.proxyPath, property], from, proxyValue, method);
+
+
+                    //this._checkForIOR(proxyValue);
+                    target[property] = proxyValue;
+
+                    ucpModel.registerChange(changeObject)
+
+
+                }
+                return true;
+            },
+            deleteProperty: (target: any, property: any) => {
+
+                // Dose not exists
+                if (!target.hasOwnProperty(property)) return true;
+
+                //@ToDo Check if writeable
+
+                let changeObject = new DefaultWave([...config.proxyPath, property], target[property], undefined, UcpModelChangeLogMethods.delete);
+                ucpModel.registerChange(changeObject)
+
+                if (Array.isArray(target)) {
+                    target.splice(property, 1);
+                } else {
+                    delete target[property];
+                }
+
+                return true;
+            },
+            has: (target: any, prop: any) => {
+                if (target[prop] && prop !== '_helper') { return true; }
+                return false;
+            },
+            ownKeys: (target: any) => {
+                return Reflect.ownKeys(target).filter(key => key !== '_helper');
+            }
+
+        }
+    }
 
 }

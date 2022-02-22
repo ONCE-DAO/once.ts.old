@@ -1,16 +1,17 @@
 import DefaultUcpComponent from "../../../src/2_systems/Things/DefaultUcpComponent.class";
+import DefaultUcpModel from "../../../src/2_systems/Things/DefaultUcpModel.class";
 import { UcpModelChangeLogMethods, UcpModelEvents, UcpModelTransactionStates } from "../../../src/3_services/UcpModel.interface";
 
 describe("Default Ucp Model", () => {
-    let ucpComponent = new DefaultUcpComponent();
 
     test("int", async () => {
-        ucpComponent = new DefaultUcpComponent();
-        ucpComponent.model.age = 5;
-        expect(ucpComponent.model.age).toBe(5);
+        let ucpComponent = new DefaultUcpComponent();
 
+        expect(ucpComponent.model).toMatchObject(DefaultUcpComponent.modelDefaultData);
 
-        ucpComponent.model = DefaultUcpComponent.modelDefaultData;
+        //@ts-ignore Look into protected
+        expect(ucpComponent.ucpModel._history.length).toBe(1);
+
     })
 
 
@@ -31,6 +32,13 @@ describe("Default Ucp Model", () => {
             ucpComponent.ucpModel.processTransaction();
 
             //@ts-ignore Look into protected
+            expect(ucpComponent.ucpModel._history.length).toBe(2);
+
+
+            expect(ucpComponent.ucpModel.transactionState).toBe(UcpModelTransactionStates.TRANSACTION_CLOSED);
+
+
+            //@ts-ignore Look into protected
             expect(ucpComponent.ucpModel.latestParticle.snapshot.age).toBe(10);
         })
 
@@ -45,6 +53,43 @@ describe("Default Ucp Model", () => {
             ucpComponent.ucpModel.rollbackTransaction();
 
             expect(ucpComponent.model.age).toBe(5);
+        })
+
+        test("Multi Changes in one Transaction", async () => {
+            let ucpComponent = new DefaultUcpComponent();
+            const ucpModel = ucpComponent.ucpModel as DefaultUcpModel<any>;
+            const model = ucpComponent.model;
+
+            model.age = 5;
+            expect(ucpModel.transactionState).toBe(UcpModelTransactionStates.TRANSACTION_CLOSED);
+            expect(ucpModel.changelog).toMatchObject({ "age": { "from": undefined, "key": ["age"], "method": "create", "to": 5 } });
+
+            ucpModel.startTransaction();
+            expect(ucpModel.transactionState).toBe(UcpModelTransactionStates.TRANSACTION_OPEN);
+            //@ts-ignore
+            expect(ucpModel.latestParticle.snapshot).toBe(undefined);
+            //@ts-ignore
+            const transactionId = ucpModel.latestParticle.id;
+
+            model.age = 10;
+            expect(ucpModel.transactionState).toBe(UcpModelTransactionStates.TRANSACTION_OPEN);
+
+            model._helper?.multiSet({ myName: 'test', subOptions: { someString: 'test' } });
+            expect(ucpModel.transactionState).toBe(UcpModelTransactionStates.TRANSACTION_OPEN);
+
+            //@ts-ignore
+            expect(ucpModel.latestParticle.id).toBe(transactionId);
+
+
+            ucpModel.processTransaction();
+            expect(ucpModel.transactionState).toBe(UcpModelTransactionStates.TRANSACTION_CLOSED);
+            expect(ucpModel.changelog).toMatchObject(
+                {
+                    "age": { "from": 5, "key": ["age"], "method": "set", "to": 10 },
+                    "myName": { "from": undefined, "key": ["myName"], "method": "create", "to": "test" }
+                }
+            );
+
         })
 
     })
@@ -105,10 +150,14 @@ describe("Default Ucp Model", () => {
     describe("Helper Functions", () => {
 
         test("_helper._proxyTools.isProxy", async () => {
+            let ucpComponent = new DefaultUcpComponent();
+
             expect(ucpComponent.model._helper?._proxyTools.isProxy).toBe(true);
         })
 
         test("_helper._proxyTools.myUcpModel", async () => {
+            let ucpComponent = new DefaultUcpComponent();
+
             //@ts-ignore
             expect(ucpComponent.model._helper?._proxyTools.myUcpModel).toMatchObject(ucpComponent.ucpModel);
         })
@@ -120,7 +169,7 @@ describe("Default Ucp Model", () => {
 
             ucpComponent.model._helper?._proxyTools.destroy();
 
-            expect(model).toStrictEqual({});
+            expect(model).toEqual({});
 
         })
         // test("_helper._proxyTools.loadIOR", async () => {
@@ -128,11 +177,14 @@ describe("Default Ucp Model", () => {
         // })
         test("_helper.multiSet", async () => {
             let ucpComponent = new DefaultUcpComponent();
+            const ucpModel = ucpComponent.ucpModel;
+            expect(ucpModel.transactionState).toBe(UcpModelTransactionStates.TRANSACTION_CLOSED);
 
             const model = ucpComponent.model;
             expect(ucpComponent.model._helper?.multiSet).toBeInstanceOf(Function);
 
-            ucpComponent.model._helper?.multiSet({ age: 6, name: 'test' });
+            ucpComponent.model._helper?.multiSet({ age: 6, name: 'test', subOptions: { someString: 'test2' } });
+            expect(ucpModel.transactionState).toBe(UcpModelTransactionStates.TRANSACTION_CLOSED);
 
             expect(ucpComponent.model.age).toBe(6);
             expect(ucpComponent.model.name).toBe('test');
@@ -251,7 +303,7 @@ describe("Default Ucp Model", () => {
                 const model = ucpComponent.model;
                 model.subOptions = { someString: "data" };
 
-                expect(model.subOptions).toStrictEqual({ someString: "data" });
+                expect(model.subOptions.someString).toBe("data");
 
 
                 let changelog = ucpComponent.ucpModel.changelog;
@@ -282,7 +334,7 @@ describe("Default Ucp Model", () => {
                 const model = ucpComponent.model;
 
                 //@ts-ignore
-                expect(() => { model.subOptions = 123 }).toThrowError(/Type ZodObject expected. Got number/);
+                expect(() => { model.subOptions = 123 }).toThrowError(/Type ZodObject expected. Got a number/);
 
 
             })
@@ -305,7 +357,7 @@ describe("Default Ucp Model", () => {
                 const model = ucpComponent.model;
                 model.inventory = [];
 
-                expect(model.inventory).toStrictEqual([]);
+                expect(model.inventory).toEqual([]);
 
             })
 
@@ -315,7 +367,7 @@ describe("Default Ucp Model", () => {
                 const model = ucpComponent.model;
                 model.inventory = [];
 
-                expect(model.inventory).toStrictEqual([]);
+                expect(model.inventory).toEqual([]);
 
             })
 
@@ -325,7 +377,7 @@ describe("Default Ucp Model", () => {
                 const model = ucpComponent.model;
                 model.inventory = [{ name: 'test', itemId: 5 }, { name: 'test2', itemId: 35 }];
 
-                expect(model.inventory).toStrictEqual([{ name: 'test', itemId: 5 }, { name: 'test2', itemId: 35 }]);
+                expect(model.inventory).toEqual([{ name: 'test', itemId: 5 }, { name: 'test2', itemId: 35 }]);
 
 
                 let changelog = ucpComponent.ucpModel.changelog;
@@ -354,7 +406,7 @@ describe("Default Ucp Model", () => {
                 model.inventory.push({ name: 'test5', itemId: 35 });
 
                 expect(model.inventory.length).toBe(2);
-                expect(model.inventory).toStrictEqual([{ name: 'test', itemId: 5 }, { name: 'test5', itemId: 35 }]);
+                expect(model.inventory).toEqual([{ name: 'test', itemId: 5 }, { name: 'test5', itemId: 35 }]);
 
 
                 let changelog = ucpComponent.ucpModel.changelog;
@@ -378,10 +430,10 @@ describe("Default Ucp Model", () => {
                 model.inventory.push({ name: 'test5', itemId: 35 });
 
 
-                expect(model.inventory).toStrictEqual([{ name: 'test', itemId: 5 }, { name: 'test5', itemId: 35 }]);
+                expect(model.inventory).toEqual([{ name: 'test', itemId: 5 }, { name: 'test5', itemId: 35 }]);
 
                 model.inventory.pop();
-                expect(model.inventory).toStrictEqual([{ name: 'test', itemId: 5 }]);
+                expect(model.inventory).toEqual([{ name: 'test', itemId: 5 }]);
 
 
                 let changelog = ucpComponent.ucpModel.changelog;
