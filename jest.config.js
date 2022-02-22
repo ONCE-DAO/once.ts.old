@@ -194,7 +194,10 @@ export default {
   // Whether to use watchman for file crawling
   // watchman: true,
 
-  collectCoverageFrom: ["src/**/*.{ts,tsx}"],
+  collectCoverageFrom: [
+    "src/**/*.{ts,tsx}",
+    "!**/*.interface.ts"
+  ],
   coverageThreshold: {
     global: {
       statements: 75,

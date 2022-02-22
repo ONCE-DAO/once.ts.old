@@ -39,25 +39,25 @@ function getSchemaBottom(schema: any): any {
 
 
 type UcpModelSchemaConverterOptions = { optional: boolean }
-export function UcpModelSchemaConverter<T>(schema: T, options: UcpModelSchemaConverterOptions): T {
-    let schemaBottom = getSchemaBottom(schema);
-    let type = schemaBottom._def.typeName
+// export function UcpModelSchemaConverter<T>(schema: T, options: UcpModelSchemaConverterOptions): T {
+//     let schemaBottom = getSchemaBottom(schema);
+//     let type = schemaBottom._def.typeName
 
-    if (type === 'ZodObject') {
-        // //@ts-ignore
-        // if (!schema.shape) return schema;
-        // //@ts-ignore
-        // for (let [key, element] of Object.entries(schema.shape)) {
-        //     //@ts-ignore
-        //     schema.setKey(key, UcpModelSchemaConverter(element, options));
-        // }
-        const extendSchema = options?.optional ? UcpModelProxySchema.optional() : UcpModelProxySchema;
-        //@ts-ignore
-        schema = schema.merge(extendSchema);
-    }
+//     if (type === 'ZodObject') {
+//         // //@ts-ignore
+//         // if (!schema.shape) return schema;
+//         // //@ts-ignore
+//         // for (let [key, element] of Object.entries(schema.shape)) {
+//         //     //@ts-ignore
+//         //     schema.setKey(key, UcpModelSchemaConverter(element, options));
+//         // }
+//         const extendSchema = options?.optional ? UcpModelProxySchema.optional() : UcpModelProxySchema;
+//         //@ts-ignore
+//         schema = schema.merge(extendSchema);
+//     }
 
-    return schema;
-}
+//     return schema;
+// }
 
 
 class DefaultWave implements Wave {
@@ -182,6 +182,24 @@ class UcpModelMapProxy extends Map {
     _helper: any;
 
     clear() {
+        const proxyTools = this._helper._proxyTools;
+        const ucpModel = proxyTools.myUcpModel as DefaultUcpModel<any>;
+
+        let startedTransaction = false;
+        if (ucpModel.transactionState === UcpModelTransactionStates.TRANSACTION_CLOSED) {
+            startedTransaction = true;
+            ucpModel.startTransaction();
+        }
+
+        for (const [key, value] of this) {
+            const wave = new DefaultWave([...proxyTools.proxyPath, key], value, undefined, UcpModelChangeLogMethods.delete);
+            ucpModel._registerChange(wave);
+        }
+
+        if (startedTransaction) {
+            ucpModel.processTransaction();
+        }
+
         return super.clear();
     }
     set(key: any, value: any) {
@@ -489,7 +507,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
                 get myUcpModel() { return ucpModel },
                 destroy: () => {
                     Object.keys(config.innerDataStructure).forEach(key => {
-                        if (config.innerDataStructure[key]?._helper?._proxyTools?.isProxy) {
+                        if (ucpModel._isProxyObject(config.innerDataStructure[key]) === true) {
                             config.innerDataStructure[key]?._helper?._proxyTools.destroy();
                         }
                         delete config.innerDataStructure[key];

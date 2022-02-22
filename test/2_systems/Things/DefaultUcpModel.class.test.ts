@@ -411,6 +411,22 @@ describe("Default Ucp Model", () => {
                 expect(ucpModel.changelog).toMatchObject({ "someMap": { "my Key": { "from": 12345, "key": ["someMap", "my Key"], "method": "delete", "to": undefined } } })
 
             })
+
+            test("Map clear", async () => {
+                model.someMap = new Map();
+                model.someMap.set('my Key', 12345);
+                model.someMap.set('my Key2', 444444);
+
+                model.someMap.clear();
+                expect(model.someMap.get('my Key')).toBe(undefined);
+                expect(ucpModel.changelog).toMatchObject({
+                    "someMap": {
+                        "my Key": { "from": 12345, "key": ["someMap", "my Key"], "method": "delete", "to": undefined },
+                        "my Key2": { "from": 444444, "key": ["someMap", "my Key2"], "method": "delete", "to": undefined }
+                    }
+                });
+
+            })
         })
 
     })

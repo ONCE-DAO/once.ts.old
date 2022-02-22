@@ -1,7 +1,7 @@
 import UcpComponent from "../../3_services/UcpComponent.interface";
 import { string, z } from "zod";
 import UcpModel from "../../3_services/UcpModel.interface";
-import DefaultUcpModel, { UcpModelProxySchema, UcpModelSchemaConverter } from "./DefaultUcpModel.class";
+import DefaultUcpModel, { UcpModelProxySchema } from "./DefaultUcpModel.class";
 import BaseUcpComponent from "../../1_infrastructure/BaseUcpComponent.class";
 
 

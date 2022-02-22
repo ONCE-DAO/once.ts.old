@@ -173,7 +173,9 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
         this._loader = newLoader;
     }
 
-
+    clone(): IOR {
+        return new DefaultIOR().init(this.href);
+    }
 
 
     async load(config?: loadingConfig) {

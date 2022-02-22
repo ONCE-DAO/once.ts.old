@@ -4,9 +4,6 @@ import Url, { urlProtocol } from "../../3_services/Url.interface";
 
 export enum formatType { "normal", "origin", "originPath", "normalizedHref", "path" }
 
-function testDecorator(...any: any[]): void {
-    console.error("Testing: " + any.join(","));
-}
 
 type numberOrUndefined = number | undefined
 @DefaultUrl.classDescriptor.addInterfaces(['Url'])
@@ -172,13 +169,6 @@ export default class DefaultUrl extends BaseThing<DefaultUrl> implements Url {
 
     get isOwnOrigin(): boolean {
         throw new Error("Not implemented yet");
-        /*
-         if (!this.hostName) {
-             return true
-         } else if (this.origin === global?.ONCE?.ENV?.['ONCE_DEFAULT_URL']) {
-             return true;
-         }
-         */
     }
 
     get originPath() { return this._formatUrl([urlProtocol.https, urlProtocol.http, urlProtocol.ws, urlProtocol.wss], formatType.originPath) }
@@ -258,18 +248,8 @@ export default class DefaultUrl extends BaseThing<DefaultUrl> implements Url {
         return (this.protocol && this.protocol.includes(urlProtocol.ior) ? true : false);
     }
 
-    clone() {
-
-        throw new Error("Not implemented yet");
-
-        // let clone = this.type.class.getInstance();
-        // Object.keys(this._private).forEach(key => {
-        //     clone._private[key] = this._private[key];
-        // })
-        // clone.protocol = [...this.protocol];
-        // clone.searchParameters = { ...clone.searchParameters };
-
-        // return clone;
+    clone(): Url {
+        return new DefaultUrl().init(this.href);
     }
 
 }
