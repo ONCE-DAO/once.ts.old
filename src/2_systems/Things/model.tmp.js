@@ -278,12 +278,13 @@ var UcpModelV2 = Namespace.declare(
                         }
 
                         //this._checkForIOR(proxyValue);
-                        target[property] = proxyValue;
+                        let result = Reflect.set(target, property, proxyValue);
 
-                        if (parent._reportChanges(action)) {
-                            //this._checkForIOR(proxyValue);
-                            //target[property] = proxyValue;
-                        }
+                        //target[property] = proxyValue;
+
+                        parent._reportChanges(action)
+                        return result;
+
                     }
                     return true;
                 },

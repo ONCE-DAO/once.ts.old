@@ -48,6 +48,29 @@ describe("Default Ucp Model", () => {
         })
 
     })
+    describe("Model Functions", () => {
+        test("destroy", async () => {
+            let ucpComponent = new DefaultUcpComponent();
+            ucpComponent.model.age = 5;
+
+            let ucpModel = ucpComponent.ucpModel;
+            ucpModel.destroy();
+            expect(ucpModel.model).toBe(undefined);
+            expect(() => { ucpModel.changelog }).toThrowError(/Cannot read properties of undefined/);
+            expect(ucpModel.toJson).toBe(undefined);
+
+        })
+
+        test("toJson", async () => {
+            let ucpComponent = new DefaultUcpComponent();
+            ucpComponent.model.age = 5;
+            ucpComponent.model.inventory = [{ name: 'test', itemId: 5 }, { name: 'test2', itemId: 35 }];
+
+            expect(ucpComponent.ucpModel.toJson).toBe('{"_component":{"name":"DefaultUcpComponent"},"name":"MyDefaultName","age":5,"inventory":[{"name":"test","itemId":5},{"name":"test2","itemId":35}]}');
+
+        })
+    })
+
 
     describe("Events", () => {
         test("Event onModelWillChange", async () => {
@@ -276,10 +299,6 @@ describe("Default Ucp Model", () => {
 
 
         describe("Array", () => {
-
-
-
-
             test("set empty Array", async () => {
                 let ucpComponent = new DefaultUcpComponent();
 
@@ -377,7 +396,9 @@ describe("Default Ucp Model", () => {
             })
 
         })
+
     })
+
 
 
 })

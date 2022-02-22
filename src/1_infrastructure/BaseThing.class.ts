@@ -1,10 +1,9 @@
 import DefaultClassDescriptor from "../2_systems/Things/DefaultClassDescriptor.class";
-import Thing from "../3_services/Thing.interface";
+import Thing, { ThingObjectState } from "../3_services/Thing.interface";
 import ClassDescriptor from "../3_services/ClassDescriptor.interface";
-import EventService from "../3_services/EventService.interface";
-import DefaultEventService from "../2_systems/Things/DefaultEventService.class";
 
 export default abstract class BaseThing<ClassInterface> implements Thing<ClassInterface> {
+  objectState: ThingObjectState = ThingObjectState.ACTIVE;
 
   private static _typeDescriptorStore = new WeakMap();
   static get classDescriptor(): ClassDescriptor {
@@ -47,8 +46,10 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
   }
 
   destroy(): void {
-
+    this.objectState = ThingObjectState.DESTROYED;
   }
+
+
 
 
 }

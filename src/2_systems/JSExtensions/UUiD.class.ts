@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 export default class UUiD {
     static uuidv4() {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {

@@ -35,14 +35,18 @@ function getSchemaBottom(schema: any): any {
     return schema;
 }
 
-export const UcpModelSchemaConverter = (schema: any, optional: boolean) => {
+export function UcpModelSchemaConverter<T>(schema: T, optional: boolean): T {
     if (getSchemaBottom(schema)._def.typeName !== 'ZodObject') return schema;
 
+    //@ts-ignore
     if (!schema.shape) return schema;
+    //@ts-ignore
     for (let [key, element] of Object.entries(schema.shape)) {
+        //@ts-ignore
         schema.setKey(key, UcpModelSchemaConverter(element, optional));
     }
     const extendSchema = optional ? UcpModelProxySchema.optional() : UcpModelProxySchema;
+    //@ts-ignore
     schema = schema.extend(extendSchema);
     return schema;
 }
@@ -68,6 +72,7 @@ class DefaultWave implements Wave {
 
 class DefaultParticle implements Particle {
     id: string;
+    predecessorId: string | undefined;
     snapshot: any;
 
     constructor(id?: string) {
@@ -156,10 +161,12 @@ class DefaultParticle implements Particle {
 
 interface Particle {
     id: string;
+    predecessorId: string | undefined;
     changelog: UcpModelChangelog,
     snapshot: any,
     waveList: Wave[],
     addChange(ChangeLog: Wave): void;
+
 }
 
 
@@ -191,21 +198,28 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
 
         let type = getSchemaBottom(schema)._def.typeName;
 
+        let dataStructure: any;
         switch (type) {
             case 'ZodBoolean':
             case 'ZodNumber':
             case 'ZodString':
                 return originalData;
             case 'ZodObject':
-            case 'ZodArray':
+                dataStructure = {};
                 break;
+            case 'ZodArray':
+                dataStructure = [];
+                break;
+            // case 'ZodMap':
+            //     dataStructure = new Map();
+            //     break;
             default:
                 throw new Error(`Type ${type} is not implemented`)
         }
 
         if (typeof originalData !== 'object') throw new Error(`Type ${type} expected. Got ${typeof originalData}`)
 
-        let dataStructure: { [index: string]: any } = (type === 'ZodArray' ? [] : {});
+        //let dataStructure: { [index: string]: any } = (type === 'ZodArray' ? [] : {});
 
         dataStructure._helper = {
             validate(key: string, value: any): z.SafeParseReturnType<any, any> {
@@ -401,7 +415,10 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
 
     startTransaction(): void {
         if (this.transactionState === UcpModelTransactionStates.TRANSACTION_CLOSED) {
-            this._history.push(new DefaultParticle());
+            let particle = new DefaultParticle();
+
+            particle.predecessorId = this._history[this._history.length - 1]?.id;
+            this._history.push(particle);
             this._transactionState = UcpModelTransactionStates.TRANSACTION_OPEN;
         } else {
             throw new Error(`Transaction in wrong state: ${this.transactionState}`);
@@ -473,8 +490,16 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
 
 
     destroy(): void {
-        throw new Error("Method not implemented.");
+        //@ts-ignore
+        this.model._helper._proxyTools.destroy();
+        //@ts-ignore
+        delete this.data;
+        //@ts-ignore
+        delete this._history;
+        super.destroy();
     }
+
+
     get changelog(): any { // TODO sollte UcpModelChangeLog | undefined sein. Aber das funktioniert nicht
         return this.latestParticle.changelog;
     };
@@ -494,7 +519,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
     }
 
     get toJson(): string {
-        throw new Error("Not implemented yet");
+        return JSON.stringify(this.data);
     };
 
 

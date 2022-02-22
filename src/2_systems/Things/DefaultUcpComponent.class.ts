@@ -1,7 +1,7 @@
 import UcpComponent from "../../3_services/UcpComponent.interface";
 import { z } from "zod";
 import UcpModel from "../../3_services/UcpModel.interface";
-import DefaultUcpModel, { UcpModelProxySchema } from "./DefaultUcpModel.class";
+import DefaultUcpModel, { UcpModelProxySchema, UcpModelSchemaConverter } from "./DefaultUcpModel.class";
 import BaseUcpComponent from "../../1_infrastructure/BaseUcpComponent.class";
 
 
@@ -10,7 +10,7 @@ interface MyDefaultUcpComponent extends UcpComponent<ModelDataType, MyDefaultUcp
 }
 
 const modelSchema = BaseUcpComponent.modelSchema.merge(
-    UcpModelProxySchema.extend({
+    z.object({
         name: z.string(),
         myName: z.string().optional(),
         age: z.number().optional(),
@@ -20,11 +20,13 @@ const modelSchema = BaseUcpComponent.modelSchema.merge(
         }).array().optional(),
         subOptions: UcpModelProxySchema.extend({
             someString: z.string().optional(),
-        }).optional()
+        }).optional(),
     })
 );
 
-type ModelDataType = z.infer<typeof modelSchema>
+const test = UcpModelSchemaConverter(modelSchema, true)
+
+type ModelDataType = z.infer<typeof test>
 
 
 class DefaultUcpComponent extends BaseUcpComponent<ModelDataType, MyDefaultUcpComponent> implements MyDefaultUcpComponent {

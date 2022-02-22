@@ -7,8 +7,11 @@ export default interface Thing<ClassInterface> {
   name: string;
 
   classDescriptor: ClassDescriptor
+  destroy(): void;
+  objectState: ThingObjectState
 }
 
+export enum ThingObjectState { 'ACTIVE' = 'active', 'DESTROYED' = 'destroyed' }
 export interface ThingStatics<StaticClassInterface> extends Class<any> {
   classDescriptor: ClassDescriptor
 }
