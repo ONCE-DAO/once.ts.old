@@ -9,25 +9,33 @@ interface MyDefaultUcpComponent extends UcpComponent<ModelDataType, MyDefaultUcp
     myName: string | undefined;
 }
 
-const modelSchema = BaseUcpComponent.modelSchema.merge(
+const modelSchema =
     z.object({
         name: z.string(),
         myName: z.string().optional(),
         age: z.number().optional(),
-        inventory: UcpModelProxySchema.extend({
+        inventory: z.object({
             name: z.string().optional(),
             itemId: z.number().optional(),
         }).array().optional(),
-        subOptions: UcpModelProxySchema.extend({
+        subOptions: z.object({
             someString: z.string().optional(),
-        }).optional(),
+        }).merge(UcpModelProxySchema).optional(),
     })
-);
+        .merge(BaseUcpComponent.modelSchema).merge(UcpModelProxySchema)
+    ;
 
-const test = UcpModelSchemaConverter(modelSchema, true)
+const convertedModelSchema = modelSchema //.merge(UcpModelProxySchema);
 
-type ModelDataType = z.infer<typeof test>
+// function convert<T extends >(schema: T): T {
+//     schema.merge(UcpModelProxySchema);
+// }
 
+//const convertedModelSchema = UcpModelSchemaConverter(modelSchema, { optional: false })
+
+
+
+type ModelDataType = z.infer<typeof convertedModelSchema>
 
 class DefaultUcpComponent extends BaseUcpComponent<ModelDataType, MyDefaultUcpComponent> implements MyDefaultUcpComponent {
     get myName() { return this.model.myName }

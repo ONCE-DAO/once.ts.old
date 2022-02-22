@@ -14,10 +14,10 @@ export default abstract class BaseUcpComponent<ModelDataType, ClassInterface> ex
     }
 
     static get modelSchema() {
-        return UcpModelProxySchema.extend({
-            _component: UcpModelProxySchema.extend({
+        return z.object({
+            _component: z.object({
                 name: z.string()
-            })
+            }).merge(UcpModelProxySchema)
         })
     }
 

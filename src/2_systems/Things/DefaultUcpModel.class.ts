@@ -35,19 +35,25 @@ function getSchemaBottom(schema: any): any {
     return schema;
 }
 
-export function UcpModelSchemaConverter<T>(schema: T, optional: boolean): T {
-    if (getSchemaBottom(schema)._def.typeName !== 'ZodObject') return schema;
 
-    //@ts-ignore
-    if (!schema.shape) return schema;
-    //@ts-ignore
-    for (let [key, element] of Object.entries(schema.shape)) {
+type UcpModelSchemaConverterOptions = { optional: boolean }
+export function UcpModelSchemaConverter<T>(schema: T, options: UcpModelSchemaConverterOptions): T {
+    let schemaBottom = getSchemaBottom(schema);
+    let type = schemaBottom._def.typeName
+
+    if (type === 'ZodObject') {
+        // //@ts-ignore
+        // if (!schema.shape) return schema;
+        // //@ts-ignore
+        // for (let [key, element] of Object.entries(schema.shape)) {
+        //     //@ts-ignore
+        //     schema.setKey(key, UcpModelSchemaConverter(element, options));
+        // }
+        const extendSchema = options?.optional ? UcpModelProxySchema.optional() : UcpModelProxySchema;
         //@ts-ignore
-        schema.setKey(key, UcpModelSchemaConverter(element, optional));
+        schema = schema.merge(extendSchema);
     }
-    const extendSchema = optional ? UcpModelProxySchema.optional() : UcpModelProxySchema;
-    //@ts-ignore
-    schema = schema.extend(extendSchema);
+
     return schema;
 }
 
