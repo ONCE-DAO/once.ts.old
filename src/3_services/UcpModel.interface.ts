@@ -27,12 +27,12 @@ export type UcpModelChangelog = {
 
 
 export enum UcpModelTransactionStates {
-    TRANSACTION_OPEN,
-    BEFORE_CHANGE,
-    ON_CHANGE,
-    AFTER_CHANGE,
-    TRANSACTION_CLOSED,
-    TRANSACTION_ROLLBACK,
+    TRANSACTION_OPEN = "transactionOpen",
+    BEFORE_CHANGE = "beforeChange",
+    ON_CHANGE = "onChange",
+    AFTER_CHANGE = "afterChange",
+    TRANSACTION_CLOSED = "transactionClosed",
+    TRANSACTION_ROLLBACK = "transactionRollback",
 }
 
 export enum UcpModelEvents {

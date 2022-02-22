@@ -17,7 +17,9 @@ export const UcpModelProxySchema = z.object({
             loadIOR: z.function(),
             destroy: z.function().returns(z.void()),
             isProxy: z.boolean(),
-            myUcpModel: z.any()
+            myUcpModel: z.any(),
+            createMode: z.boolean(),
+            proxyPath: z.string().array(),
         })
     }).optional()
 });
@@ -183,9 +185,57 @@ class UcpModelMapProxy extends Map {
         return super.clear();
     }
     set(key: any, value: any) {
-        return super.set(key, value);
+
+        const proxyTools = this._helper._proxyTools;
+        const ucpModel = proxyTools.myUcpModel as DefaultUcpModel<any>;
+        let proxyValue;
+        if (ucpModel._isProxyObject(value)) {
+            proxyValue = value;
+        } else {
+            proxyValue = ucpModel._createProxy4Data(value, [...proxyTools.proxyPath, key]);
+        }
+
+        // If the is still in creation no reports are send
+        if (this._helper._proxyTools.createMode) {
+            super.set(key, proxyValue);
+        } else {
+
+            let from: any;
+            let method: UcpModelChangeLogMethods = UcpModelChangeLogMethods.create;
+
+            if (this.has(key)) {
+                from = this.get(key);
+                method = UcpModelChangeLogMethods.set;
+            }
+
+            const wave = new DefaultWave([...proxyTools.proxyPath, key], from, proxyValue, method);
+
+
+            super.set(key, proxyValue);
+
+
+            ucpModel._registerChange(wave)
+
+
+        }
+        const result = super.set(key, value);
+
+        return result;
     }
     delete(key: any) {
+        // Dose not exists
+        if (!this.has(key)) return true;
+
+        const proxyTools = this._helper._proxyTools;
+        const ucpModel = proxyTools.myUcpModel as DefaultUcpModel<any>;
+
+
+        //@ToDo Check if writeable
+
+        const wave = new DefaultWave([...proxyTools.proxyPath, key], this.get(key), undefined, UcpModelChangeLogMethods.delete);
+        ucpModel._registerChange(wave)
+
+
         return super.delete(key);
     }
     entries() {
@@ -220,7 +270,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
     }
     get eventSupport(): EventService { return DefaultEventService.getSingleton() }
 
-    private _createProxy4Data(originalData: any, parent: any, proxyPath: string[] = []) {
+    public _createProxy4Data(originalData: any, proxyPath: string[] = []) {
 
         const schema = this.getSchema(proxyPath);
 
@@ -273,7 +323,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         return proxyObject;
     }
 
-    protected registerChange(change: Wave): void {
+    public _registerChange(change: Wave): void {
         const state = this._transactionState;
         switch (state) {
             case UcpModelTransactionStates.TRANSACTION_CLOSED:
@@ -335,6 +385,8 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
     rollbackTransaction() {
         this._transactionState = UcpModelTransactionStates.TRANSACTION_ROLLBACK;
         this._history.pop();
+        //@ts-ignore
+        this.model._helper._proxyTools.destroy();
         this.model = this.latestParticle.snapshot
         this._transactionState = UcpModelTransactionStates.TRANSACTION_CLOSED;
     }
@@ -348,14 +400,24 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         if (!schema) schema = this._ucpComponent.classDescriptor.class.modelSchema;
         for (const element of path) {
             const bottomSchema = getSchemaBottom(schema);
-            if (bottomSchema._def.typeName === 'ZodArray') {
-                if (Number.isNaN(element)) throw new Error(`Can not Access key ${element} on an Array`);
-                schema = bottomSchema.element;
-            } else {
-                const newSchema = bottomSchema.shape?.[element];
-                if (newSchema == undefined) return undefined;
-                schema = newSchema;
+            switch (bottomSchema._def.typeName) {
+                case 'ZodObject':
+                    const newSchema = bottomSchema.shape?.[element];
+                    if (newSchema == undefined) return undefined;
+                    schema = newSchema;
+                    break;
+                case 'ZodArray':
+                    if (Number.isNaN(element)) throw new Error(`Can not Access key ${element} on an Array`);
+                    schema = bottomSchema.element;
+                    break;
+                case 'ZodMap':
+                    schema = bottomSchema._def.valueType;
+                    break;
+                default:
+                    throw new Error(`Unknown type ${bottomSchema._def.typeName} to find the schema`)
+
             }
+
         }
         return schema;
     }
@@ -363,12 +425,12 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
 
     // any to add default Values....
     set model(newValue: ModelDataType) {
-        const proxy = this._createProxy4Data(newValue, this);
+        const proxy = this._createProxy4Data(newValue);
 
         const wave = new DefaultWave([], this.data, proxy, (this.data ? UcpModelChangeLogMethods.set : UcpModelChangeLogMethods.create));
 
         this.data = proxy;
-        this.registerChange(wave);
+        this._registerChange(wave);
     }
 
     get transactionState() {
@@ -424,7 +486,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
             get changelog() { return ucpModel.getChangelog(config.proxyPath) },
             _proxyTools: {
                 isProxy: true,
-                myUcpModel: ucpModel,
+                get myUcpModel() { return ucpModel },
                 destroy: () => {
                     Object.keys(config.innerDataStructure).forEach(key => {
                         if (config.innerDataStructure[key]?._helper?._proxyTools?.isProxy) {
@@ -434,7 +496,9 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
                     });
                 }, loadIOR() {
                     throw new Error("Not implemented yet");
-                }
+                },
+                get createMode() { return config.createMode },
+                get proxyPath() { return config.proxyPath }
             },
             multiSet(data2Set: any, forceOverwrite: boolean = false) {
                 let transactionOpen = false;
@@ -479,6 +543,16 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         return value;
     }
 
+    public _isProxyObject(object: any): boolean {
+        if (object?._helper?._proxyTools?.isProxy === true) {
+            if (object._helper._proxyTools.myUcpModel !== this) {
+                throw new Error("It is not allowed to put Proxy objects into other Models");
+            }
+            return true;
+        }
+        return false;
+    }
+
     private _proxySet(target: any, property: any, value: any, receiver: any, config: { proxyPath: string[], createMode: boolean }): boolean {
         if (Array.isArray(target) && property === 'length') {
             target[property] = value;
@@ -505,14 +579,10 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         //@ToDo Check if writeable
 
         let proxyValue;
-        if (value?._helper?._proxyTools?.isProxy === true) {
-            if (value._helper._proxyTools.myUcpModel !== this) {
-                throw new Error("It is not allowed to put Proxy objects into other Models");
-            }
+        if (this._isProxyObject(value)) {
             proxyValue = value;
         } else {
-
-            proxyValue = this._createProxy4Data(value, receiver, [...config.proxyPath, property]);
+            proxyValue = this._createProxy4Data(value, [...config.proxyPath, property]);
         }
 
         // If the is still in creation no reports are send
@@ -534,7 +604,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
             //this._checkForIOR(proxyValue);
             target[property] = proxyValue;
 
-            this.registerChange(changeObject)
+            this._registerChange(changeObject)
 
 
         }
@@ -548,7 +618,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         //@ToDo Check if writeable
 
         let changeObject = new DefaultWave([...config.proxyPath, property], target[property], undefined, UcpModelChangeLogMethods.delete);
-        this.registerChange(changeObject)
+        this._registerChange(changeObject)
 
         if (Array.isArray(target)) {
             target.splice(property, 1);
