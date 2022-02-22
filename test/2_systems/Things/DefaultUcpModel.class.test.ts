@@ -449,6 +449,40 @@ describe("Default Ucp Model", () => {
 
         })
 
+        describe("Map", () => {
+            test("Init Map", async () => {
+                let ucpComponent = new DefaultUcpComponent();
+
+                const model = ucpComponent.model;
+                model.someMap = new Map();
+                expect(model.someMap.get).toBeInstanceOf(Function)
+            })
+
+            test("Map set", async () => {
+                let ucpComponent = new DefaultUcpComponent();
+
+                const model = ucpComponent.model;
+                model.someMap = new Map();
+                model.someMap.set('my Key', 12345);
+
+                expect(model.someMap.get('my Key')).toBe(12345)
+
+            })
+
+            test("Map delete", async () => {
+                let ucpComponent = new DefaultUcpComponent();
+
+                const model = ucpComponent.model;
+                model.someMap = new Map();
+                model.someMap.set('my Key', 12345);
+                model.someMap.delete('my Key');
+
+
+                expect(model.someMap.get('my Key')).toBe(undefined);
+
+            })
+        })
+
     })
 
 

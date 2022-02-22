@@ -1,5 +1,5 @@
 import UcpComponent from "../../3_services/UcpComponent.interface";
-import { z } from "zod";
+import { string, z } from "zod";
 import UcpModel from "../../3_services/UcpModel.interface";
 import DefaultUcpModel, { UcpModelProxySchema, UcpModelSchemaConverter } from "./DefaultUcpModel.class";
 import BaseUcpComponent from "../../1_infrastructure/BaseUcpComponent.class";
@@ -21,6 +21,7 @@ const modelSchema =
         subOptions: z.object({
             someString: z.string().optional(),
         }).merge(UcpModelProxySchema).optional(),
+        someMap: z.map(z.string(), z.number()).optional()
     })
         .merge(BaseUcpComponent.modelSchema).merge(UcpModelProxySchema)
     ;
