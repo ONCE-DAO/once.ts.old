@@ -133,6 +133,31 @@ describe("Default Ucp Model", () => {
 
 
         })
+
+        test("_helper.changelog", async () => {
+            let ucpComponent = new DefaultUcpComponent();
+
+            const model = ucpComponent.model;
+            model.age = 100;
+            expect(ucpComponent.ucpModel.changelog).toBe(model._helper?.changelog);
+
+            //@ts-ignore
+            expect(ucpComponent.ucpModel.getChangelog()).toBe(model?._helper?.changelog);
+
+        })
+
+        test("_helper.changelog subElement", async () => {
+            let ucpComponent = new DefaultUcpComponent();
+
+            const model = ucpComponent.model;
+
+            model.inventory = [{ name: 'test', itemId: 5 }, { name: 'test2', itemId: 35 }];
+
+            //@ts-ignore
+            expect(ucpComponent.ucpModel.getChangelog(['inventory'])).toBe(model.inventory?._helper?.changelog);
+
+
+        })
     })
 
     describe("Change model", () => {
@@ -146,11 +171,11 @@ describe("Default Ucp Model", () => {
 
                 model.age = 5;
 
-                let changeLog = ucpComponent.ucpModel.changeLog;
+                let changelog = ucpComponent.ucpModel.changelog;
 
-                expect(changeLog?.age?.to).toBe(5);
-                expect(changeLog?.age?.from).toBe(4);
-                expect(changeLog?.age?.method).toBe(UcpModelChangeLogMethods.set);
+                expect(changelog?.age?.to).toBe(5);
+                expect(changelog?.age?.from).toBe(4);
+                expect(changelog?.age?.method).toBe(UcpModelChangeLogMethods.set);
 
             })
 
@@ -164,13 +189,13 @@ describe("Default Ucp Model", () => {
                 model.subOptions = {};
 
                 model.subOptions.someString = "data";
-                let changeLog = ucpComponent.ucpModel.changeLog;
+                let changelog = ucpComponent.ucpModel.changelog;
 
                 expect(model.subOptions.someString).toBe("data");
 
-                expect(changeLog?.subOptions.someString?.to).toBe("data");
-                expect(changeLog?.subOptions.someString?.from).toBe(undefined);
-                expect(changeLog?.subOptions.someString?.method).toBe(UcpModelChangeLogMethods.create);
+                expect(changelog?.subOptions.someString?.to).toBe("data");
+                expect(changelog?.subOptions.someString?.from).toBe(undefined);
+                expect(changelog?.subOptions.someString?.method).toBe(UcpModelChangeLogMethods.create);
 
             })
 
@@ -183,14 +208,14 @@ describe("Default Ucp Model", () => {
                 model.age = 5;
                 delete model.age;
 
-                let changeLog = ucpComponent.ucpModel.changeLog;
+                let changelog = ucpComponent.ucpModel.changelog;
 
                 expect(model.age).toBe(undefined);
 
-                expect(changeLog?.age?.to).toBe(undefined);
-                expect(changeLog?.age?.from).toBe(5);
+                expect(changelog?.age?.to).toBe(undefined);
+                expect(changelog?.age?.from).toBe(5);
 
-                expect(changeLog?.age?.method).toBe(UcpModelChangeLogMethods.delete);
+                expect(changelog?.age?.method).toBe(UcpModelChangeLogMethods.delete);
 
             })
         })
@@ -206,11 +231,11 @@ describe("Default Ucp Model", () => {
                 expect(model.subOptions).toStrictEqual({ someString: "data" });
 
 
-                let changeLog = ucpComponent.ucpModel.changeLog;
+                let changelog = ucpComponent.ucpModel.changelog;
 
-                expect(changeLog?.subOptions.someString?.to).toBe("data");
-                expect(changeLog?.subOptions.someString?.from).toBe(undefined);
-                expect(changeLog?.subOptions.someString?.method).toBe(UcpModelChangeLogMethods.create);
+                expect(changelog?.subOptions.someString?.to).toBe("data");
+                expect(changelog?.subOptions.someString?.from).toBe(undefined);
+                expect(changelog?.subOptions.someString?.method).toBe(UcpModelChangeLogMethods.create);
 
             })
 
@@ -223,8 +248,8 @@ describe("Default Ucp Model", () => {
                 delete model.subOptions;
                 expect(model.subOptions).toBe(undefined);
 
-                let changeLog = ucpComponent.ucpModel.changeLog;
-                expect(changeLog).toMatchObject({ "subOptions": { "from": { "someString": "data" }, "key": ["subOptions"], "method": "delete", "to": undefined } });
+                let changelog = ucpComponent.ucpModel.changelog;
+                expect(changelog).toMatchObject({ "subOptions": { "from": { "someString": "data" }, "key": ["subOptions"], "method": "delete", "to": undefined } });
 
             })
 
@@ -284,8 +309,8 @@ describe("Default Ucp Model", () => {
                 expect(model.inventory).toStrictEqual([{ name: 'test', itemId: 5 }, { name: 'test2', itemId: 35 }]);
 
 
-                let changeLog = ucpComponent.ucpModel.changeLog;
-                expect(changeLog?.inventory).toMatchObject(
+                let changelog = ucpComponent.ucpModel.changelog;
+                expect(changelog?.inventory).toMatchObject(
                     {
                         "0": {
                             "itemId": { "from": undefined, "key": ["inventory", "0", "itemId"], "method": "create", "to": 5 },
@@ -313,8 +338,8 @@ describe("Default Ucp Model", () => {
                 expect(model.inventory).toStrictEqual([{ name: 'test', itemId: 5 }, { name: 'test5', itemId: 35 }]);
 
 
-                let changeLog = ucpComponent.ucpModel.changeLog;
-                expect(changeLog?.inventory).toMatchObject(
+                let changelog = ucpComponent.ucpModel.changelog;
+                expect(changelog?.inventory).toMatchObject(
                     {
                         "1": {
                             "itemId": { "from": undefined, "key": ["inventory", "1", "itemId"], "method": "create", "to": 35 },
@@ -340,8 +365,8 @@ describe("Default Ucp Model", () => {
                 expect(model.inventory).toStrictEqual([{ name: 'test', itemId: 5 }]);
 
 
-                let changeLog = ucpComponent.ucpModel.changeLog;
-                expect(changeLog?.inventory).toMatchObject({
+                let changelog = ucpComponent.ucpModel.changelog;
+                expect(changelog?.inventory).toMatchObject({
                     "1":
                     {
                         "from": { "itemId": 35, "name": "test5" },

@@ -3,7 +3,7 @@ import { EventServiceConsumer } from "./EventService.interface";
 
 export default interface UcpModel extends EventServiceConsumer, Thing<UcpModel> {
     model: any;
-    changeLog: any; // UcpModelChangeLog | undefined
+    changelog: any; // UcpModelChangeLog | undefined
     toJson: string;
     destroy(): void;
     startTransaction(): void;
@@ -21,8 +21,8 @@ export interface Wave {
     time: number
 }
 
-export type UcpModelChangeLog = {
-    [key: string]: UcpModelChangeLog | Wave
+export type UcpModelChangelog = {
+    [key: string]: UcpModelChangelog | Wave
 }
 
 

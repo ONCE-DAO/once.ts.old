@@ -2,7 +2,7 @@ import { z } from "zod";
 import BaseThing from "../../1_infrastructure/BaseThing.class";
 import EventService, { EventServiceConsumer } from "../../3_services/EventService.interface";
 import UcpComponent from "../../3_services/UcpComponent.interface";
-import UcpModel, { UcpModelChangeLog, UcpModelChangeLogMethods, UcpModelEvents, UcpModelTransactionStates, Wave } from "../../3_services/UcpModel.interface";
+import UcpModel, { UcpModelChangelog as UcpModelChangelog, UcpModelChangeLogMethods, UcpModelEvents, UcpModelTransactionStates, Wave } from "../../3_services/UcpModel.interface";
 import ExtendedPromise from "../JSExtensions/Promise";
 import UUiD from "../JSExtensions/UUiD.class";
 import DefaultEventService from "./DefaultEventService.class";
@@ -10,7 +10,7 @@ import DefaultIOR from "./DefaultIOR.class";
 
 export const UcpModelProxySchema = z.object({
     _helper: z.object({
-        changeLog: z.function(),
+        changelog: z.any(), // TODO Replace with Changelog interface
         validate: z.function().args(z.string(), z.any()).returns(z.object({ success: z.boolean(), data: z.any().optional(), error: z.any() })),
         multiSet: z.function(),
         _proxyTools: z.object({
@@ -22,8 +22,8 @@ export const UcpModelProxySchema = z.object({
     }).optional()
 });
 
-class DefaultUcpModelChangeLog implements UcpModelChangeLog {
-    [key: string]: UcpModelChangeLog | Wave;
+class DefaultUcpModelChangeLog implements UcpModelChangelog {
+    [key: string]: UcpModelChangelog | Wave;
 
 }
 
@@ -49,10 +49,10 @@ export const UcpModelSchemaConverter = (schema: any, optional: boolean) => {
 
 
 class DefaultWave implements Wave {
+    from: any;
     to: any;
     key: string[];
     method: UcpModelChangeLogMethods;
-    from: any;
     time: number;
     id: string;
 
@@ -74,7 +74,7 @@ class DefaultParticle implements Particle {
         this.id = id || UUiD.uuidv4();
     }
     readonly waveList: Wave[] = [];
-    public readonly changeLog: UcpModelChangeLog = new DefaultUcpModelChangeLog();
+    public readonly changelog: UcpModelChangelog = new DefaultUcpModelChangeLog();
 
     addChange(WaveItem: Wave): void {
         this.waveList.push(WaveItem);
@@ -82,19 +82,19 @@ class DefaultParticle implements Particle {
     }
 
     private add2ChangeLog(WaveItem: Wave): void {
-        let changeLog = this.changeLog as any;
+        let changelog = this.changelog as any;
         for (let i = 0; i < WaveItem.key.length - 1; i++) {
             const subKey = WaveItem.key[i];
-            if (!changeLog.hasOwnProperty(subKey)) {
-                changeLog[subKey] = new DefaultUcpModelChangeLog();
+            if (!changelog.hasOwnProperty(subKey)) {
+                changelog[subKey] = new DefaultUcpModelChangeLog();
             }
-            changeLog = changeLog[subKey];
+            changelog = changelog[subKey];
 
         }
-        this.deepChangeLog(WaveItem.to, WaveItem.from, WaveItem.key, WaveItem.time, changeLog);
+        this.deepChangeLog(WaveItem.to, WaveItem.from, WaveItem.key, WaveItem.time, changelog);
     }
 
-    private deepChangeLog(targetData: any, originalData: any, path: string[], time: number, upperLevelChangeLog: UcpModelChangeLog): UcpModelChangeLog | Wave | null {
+    private deepChangeLog(targetData: any, originalData: any, path: string[], time: number, upperLevelChangeLog: UcpModelChangelog): UcpModelChangelog | Wave | null {
 
         if (targetData?._helper?._proxyTools?.isProxy !== true) {
             if (targetData === originalData) return null;
@@ -116,7 +116,7 @@ class DefaultParticle implements Particle {
             );
         } else {
 
-            let innerChangeLog: UcpModelChangeLog = new DefaultUcpModelChangeLog()
+            let innerChangeLog: UcpModelChangelog = new DefaultUcpModelChangeLog()
             upperLevelChangeLog[path[path.length - 1]] = innerChangeLog;
             let key: string;
             let value: any;
@@ -156,7 +156,7 @@ class DefaultParticle implements Particle {
 
 interface Particle {
     id: string;
-    changeLog: UcpModelChangeLog,
+    changelog: UcpModelChangelog,
     snapshot: any,
     waveList: Wave[],
     addChange(ChangeLog: Wave): void;
@@ -216,7 +216,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
 
                 return parameterSchema.safeParse(value);
             },
-            changeLog: () => { return ucpModel.changeLog },
+            get changelog() { return ucpModel.getChangelog(proxyPath) },
             _proxyTools: {
                 isProxy: true,
                 myUcpModel: ucpModel,
@@ -416,7 +416,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
 
         let particle = this.latestParticle;
 
-        this.eventSupport.fire(UcpModelEvents.ON_MODEL_WILL_CHANGE, this, this.latestParticle.changeLog);
+        this.eventSupport.fire(UcpModelEvents.ON_MODEL_WILL_CHANGE, this, this.latestParticle.changelog);
         let schema = this.getSchema();
 
         let parseResult = schema.safeParse(this.data);
@@ -425,7 +425,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
             throw parseResult.error;
         }
 
-        this.eventSupport.fire(UcpModelEvents.ON_MODEL_CHANGED, this, this.latestParticle.changeLog);
+        this.eventSupport.fire(UcpModelEvents.ON_MODEL_CHANGED, this, this.latestParticle.changelog);
 
         particle.snapshot = this.deepCopy(this.model);
 
@@ -475,9 +475,24 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
     destroy(): void {
         throw new Error("Method not implemented.");
     }
-    get changeLog(): any { // TODO sollte UcpModelChangeLog | undefined sein. Aber das funktioniert nicht
-        return this.latestParticle?.changeLog;
+    get changelog(): any { // TODO sollte UcpModelChangeLog | undefined sein. Aber das funktioniert nicht
+        return this.latestParticle.changelog;
     };
+
+    getChangelog(path: string[] = []): UcpModelChangelog | undefined {
+        let changelog = this.latestParticle.changelog;
+        for (const key of path) {
+            if (changelog.hasOwnProperty(key)) {
+                //@ts-ignore
+                changelog = changelog[key];
+            } else {
+                return undefined;
+            }
+        }
+        return changelog;
+
+    }
+
     get toJson(): string {
         throw new Error("Not implemented yet");
     };
