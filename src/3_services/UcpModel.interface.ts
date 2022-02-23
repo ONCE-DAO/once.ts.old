@@ -17,7 +17,7 @@ export default interface UcpModel extends EventServiceConsumer, Thing<UcpModel>,
 export enum UcpModelChangeLogMethods { "set" = "set", "delete" = "delete", "create" = "create" }
 
 export type UcpModelChangelog = {
-    [key: string]: UcpModelChangelog | Wave
+    [key: string | number]: UcpModelChangelog | Wave
 }
 
 

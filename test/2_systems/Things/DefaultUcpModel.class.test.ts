@@ -3,6 +3,8 @@ import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class";
 import DefaultUcpComponent from "../../../src/2_systems/Things/DefaultUcpComponent.class";
 import { UcpModelProxyIORSchema } from "../../../src/2_systems/Things/DefaultUcpModel.class";
 import { UcpModelChangeLogMethods, UcpModelEvents, UcpModelTransactionStates } from "../../../src/3_services/UcpModel.interface";
+
+
 let ucpComponent = new DefaultUcpComponent();
 let model = ucpComponent.model;
 let ucpModel = ucpComponent.ucpModel;
@@ -12,13 +14,8 @@ beforeEach(() => {
     ucpModel = ucpComponent.ucpModel;
 });
 
-// function init() {
 
-//     const ucpComponent = new DefaultUcpComponent();
-//     return [ucpComponent, ucpComponent.model ]
-//     model = ucpComponent.model;
-//     ucpModel = ucpModel;
-// }
+
 describe("Default Ucp Model", () => {
 
     test("int", async () => {
@@ -63,6 +60,23 @@ describe("Default Ucp Model", () => {
             ucpModel.rollbackTransaction();
 
             expect(ucpComponent.model.age).toBe(5);
+        })
+
+        test("Rollback without a change", async () => {
+
+            model.age = 5;
+
+            //@ts-ignore check internals
+            expect(ucpModel._history.length).toBe(2);
+
+            ucpModel.startTransaction();
+
+            //@ts-ignore check internals
+            expect(ucpModel._history.length).toBe(3);
+
+            ucpModel.rollbackTransaction();
+
+            expect(model).toBe(ucpModel.model);
         })
 
         test("Multi Changes in one Transaction", async () => {
@@ -159,7 +173,7 @@ describe("Default Ucp Model", () => {
         })
     })
 
-    describe("Helper Functions", () => {
+    describe("Proxy Helper Functions", () => {
 
         test("_helper._proxyTools.isProxy", async () => {
             expect(model._helper?._proxyTools.isProxy).toBe(true);
@@ -462,6 +476,9 @@ describe("Default Ucp Model", () => {
 
                 ucpModel.startTransaction();
                 model.someIORMap.set('ior:google.de', 666);
+
+                //@ts-ignore check internals
+                expect(ucpModel._history[ucpModel._history.length - 2].snapshot.someIORMap.length).toBe(2);
                 ucpModel.rollbackTransaction();
                 model = ucpModel.model;
                 expect(model.someIORMap).not.toBe(undefined);
@@ -489,6 +506,9 @@ describe("Default Ucp Model", () => {
                 model.someNumberMap.set(2, 444444);
 
                 expect(ucpModel.toJSON).toStrictEqual("{\"_component\":{\"name\":\"DefaultUcpComponent\"},\"name\":\"MyDefaultName\",\"someNumberMap\":[[1,12345],[2,444444]]}");
+
+                expect(ucpModel.changelog).toMatchObject({ "someNumberMap": { "2": { "from": undefined, "key": ["someNumberMap", 2], "method": "create", "to": 444444 } } });
+
             })
 
             test("Map to Json with IOR Key", async () => {
@@ -497,6 +517,8 @@ describe("Default Ucp Model", () => {
                 model.someIORMap.set(new DefaultIOR().init("prod.wo-da.de"), 444444);
 
                 expect(ucpModel.toJSON).toStrictEqual("{\"_component\":{\"name\":\"DefaultUcpComponent\"},\"name\":\"MyDefaultName\",\"someIORMap\":[[\"ior:https://test.wo-da.de\",12345],[\"ior://prod.wo-da.de\",444444]]}");
+
+                expect(ucpModel.changelog).toMatchObject({ "someIORMap": { "ior://prod.wo-da.de": { "from": undefined, "key": ["someIORMap", "ior://prod.wo-da.de"], "method": "create", "to": 444444 } } });
             })
         })
 

@@ -301,15 +301,16 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         }
     }
 
-    startTransaction(): void {
+    startTransaction(): boolean {
         if (this.transactionState === UcpModelTransactionStates.TRANSACTION_CLOSED) {
             let particle = new DefaultParticle();
 
             particle.predecessorId = this._history[this._history.length - 1]?.id;
             this._history.push(particle);
             this._transactionState = UcpModelTransactionStates.TRANSACTION_OPEN;
+            return true;
         } else {
-            throw new Error(`Transaction in wrong state: ${this.transactionState}`);
+            return false;
         }
     }
 
@@ -355,12 +356,19 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
 
     }
 
-    rollbackTransaction() {
+    rollbackTransaction(): void {
         this._transactionState = UcpModelTransactionStates.TRANSACTION_ROLLBACK;
-        this._history.pop();
-        //@ts-ignore
-        this.model._helper._proxyTools.destroy();
-        this.model = this.latestParticle.snapshot
+
+        let deletedParticle = this._history.pop();
+        if (deletedParticle) {
+
+            if (deletedParticle.waveList.length > 0) {
+                // TODO@BE Check what the Problem with this interface is
+                //this.model._helper._proxyTools.destroy();
+                //@ts-ignore
+                this.model._helper.multiSet(this.latestParticle.snapshot, true)
+            }
+        }
         this._transactionState = UcpModelTransactionStates.TRANSACTION_CLOSED;
     }
 
@@ -470,19 +478,24 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
                 get schema() { return config.schema }
             },
             multiSet(data2Set: any, forceOverwrite: boolean = false) {
-                let transactionOpen = false;
-                if (ucpModel.transactionState === UcpModelTransactionStates.TRANSACTION_OPEN) {
-                    transactionOpen = true;
-                } else if (!config.createMode) {
-                    ucpModel.startTransaction();
+                let startedTransaction = false;
+                if (!config.createMode) {
+                    startedTransaction = ucpModel.startTransaction();
                 }
 
                 if (config.proxyObject instanceof UcpModelMapProxy) {
+                    let allKeys: { [index: string | number]: boolean } = {};
                     for (const [key, value] of data2Set) {
+                        allKeys[key] = true;
                         config.proxyObject.set(key, value);
                     }
-                } else {
 
+                    if (forceOverwrite) {
+                        for (const [key] of config.innerDataStructure) {
+                            if (allKeys[key] !== true && key != '_helper') config.proxyObject.delete(key);
+                        }
+                    }
+                } else {
 
                     for (const key of Object.keys(data2Set)) {
                         if (key === '_helper') return;
@@ -502,7 +515,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
                     }
                 }
 
-                if (!transactionOpen && !config.createMode) ucpModel.processTransaction();
+                if (startedTransaction === true) ucpModel.processTransaction();
             }
 
         }
