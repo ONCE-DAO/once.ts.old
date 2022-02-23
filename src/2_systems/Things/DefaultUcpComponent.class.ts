@@ -22,12 +22,21 @@ const modelSchema =
         subOptions: z.object({
             someString: z.string().optional(),
         }).merge(UcpModelProxySchema).optional(),
-        someMap: z.map(z.string(), z.number()).optional()
+        someMap: z.map(z.string(), z.number()).optional(),
+        someNumberMap: z.map(z.number(), z.number()).optional(),
+        someIORMap: z.map(UcpModelProxyIORSchema, z.number()).optional()
+
     })
         .merge(BaseUcpComponent.modelSchema).merge(UcpModelProxySchema)
     ;
 
 const convertedModelSchema = modelSchema //.merge(UcpModelProxySchema);
+
+
+const mySchema = z.object({
+    myString: z.string().min(5),
+    myUnion: z.union([z.number(), z.boolean()]),
+});
 
 // function convert<T extends >(schema: T): T {
 //     schema.merge(UcpModelProxySchema);

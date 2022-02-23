@@ -1,4 +1,4 @@
-import { any, string, z } from "zod";
+import { z } from "zod";
 import BaseThing from "../../1_infrastructure/BaseThing.class";
 import EventService, { EventServiceConsumer } from "../../3_services/EventService.interface";
 import Particle from "../../3_services/Particle.interface";
@@ -10,6 +10,7 @@ import DefaultEventService from "./DefaultEventService.class";
 import DefaultIOR from "./DefaultIOR.class";
 import DefaultParticle from "./DefaultParticle.class";
 import DefaultWave from "./DefaultWave.class";
+
 
 export const UcpModelProxySchema = z.object({
     _helper: z.object({
@@ -23,6 +24,7 @@ export const UcpModelProxySchema = z.object({
             myUcpModel: z.any(),
             createMode: z.boolean(),
             proxyPath: z.string().array(),
+            schema: z.any()
         })
     }).optional()
 });
@@ -68,6 +70,27 @@ function getSchemaBottom(schema: any): any {
 
 class UcpModelMapProxy extends Map {
     _helper: any;
+    private _getKey4Any(key: any): any {
+        const schema = getSchemaBottom(this._helper._proxyTools.schema);
+        const keySchema = schema._def.keyType;
+        if (keySchema.description === 'IOR Object') {
+
+            if (typeof key == 'object') {
+                if (key instanceof DefaultIOR) {
+                    return key.href;
+                }
+                if (key.IOR && key.IOR instanceof DefaultIOR) {
+                    return key.IOR.href;
+                }
+            }
+            if (typeof key === 'string' && key.startsWith('ior:')) {
+                return key;
+            }
+            throw new Error("Not an IOR Object " + key)
+        } else {
+            return key;
+        }
+    }
 
     clear() {
         const proxyTools = this._helper._proxyTools;
@@ -101,54 +124,62 @@ class UcpModelMapProxy extends Map {
             proxyValue = ucpModel._createProxy4Data(value, [...proxyTools.proxyPath, key]);
         }
 
+        let internalKey = this._getKey4Any(key)
+
+
         // If the is still in creation no reports are send
         if (this._helper._proxyTools.createMode) {
-            super.set(key, proxyValue);
+            return super.set(internalKey, proxyValue);
         } else {
 
             let from: any;
             let method: UcpModelChangeLogMethods = UcpModelChangeLogMethods.create;
 
-            if (this.has(key)) {
-                from = this.get(key);
+            if (this.has(internalKey)) {
+                from = this.get(internalKey);
                 method = UcpModelChangeLogMethods.set;
             }
 
-            const wave = new DefaultWave([...proxyTools.proxyPath, key], from, proxyValue, method);
+            const wave = new DefaultWave([...proxyTools.proxyPath, internalKey], from, proxyValue, method);
 
 
-            super.set(key, proxyValue);
+            const result = super.set(internalKey, proxyValue);
 
 
             ucpModel._registerChange(wave)
-
+            return result;
 
         }
-        const result = super.set(key, value);
-
-        return result;
     }
+
     delete(key: any) {
+
+        let internalKey = this._getKey4Any(key)
+
+
         // Dose not exists
-        if (!this.has(key)) return true;
+        if (!this.has(internalKey)) return true;
 
         const proxyTools = this._helper._proxyTools;
         const ucpModel = proxyTools.myUcpModel as DefaultUcpModel<any>;
 
 
+
         //@ToDo Check if writeable
 
-        const wave = new DefaultWave([...proxyTools.proxyPath, key], this.get(key), undefined, UcpModelChangeLogMethods.delete);
+        const wave = new DefaultWave([...proxyTools.proxyPath, internalKey], this.get(internalKey), undefined, UcpModelChangeLogMethods.delete);
         ucpModel._registerChange(wave)
 
 
-        return super.delete(key);
+        return super.delete(internalKey);
     }
     entries() {
         return super.entries();
     }
     get(key: any) {
-        return super.get(key);
+        let internalKey = this._getKey4Any(key)
+
+        return super.get(internalKey);
     }
 
 
@@ -286,6 +317,10 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         if (source === undefined) return undefined;
         return JSON.parse(JSON.stringify(source, (key, value) => {
             if (key === '_helper') return undefined
+
+            if (value instanceof UcpModelMapProxy) return [...value]
+            if (value instanceof Map) return [...value]
+
             const toJSON = value?.toJSON || value?.IOR?.toJSON;
             if (typeof toJSON !== 'undefined') return toJSON
 
@@ -431,7 +466,8 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
                     throw new Error("Not implemented yet");
                 },
                 get createMode() { return config.createMode },
-                get proxyPath() { return config.proxyPath }
+                get proxyPath() { return config.proxyPath },
+                get schema() { return config.schema }
             },
             multiSet(data2Set: any, forceOverwrite: boolean = false) {
                 let transactionOpen = false;
@@ -441,21 +477,29 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
                     ucpModel.startTransaction();
                 }
 
-                for (const key of Object.keys(data2Set)) {
-                    if (key === '_helper') return;
-                    let newValue = data2Set[key];
-
-                    if (config.proxyObject[key] && typeof config.proxyObject[key]._helper?.multiSet === 'function') {
-                        config.proxyObject[key]._helper.multiSet(newValue, forceOverwrite);
-                    } else {
-                        config.proxyObject[key] = newValue;
+                if (config.proxyObject instanceof UcpModelMapProxy) {
+                    for (const [key, value] of data2Set) {
+                        config.proxyObject.set(key, value);
                     }
-                };
+                } else {
 
-                if (forceOverwrite) {
-                    Object.keys(config.innerDataStructure).forEach(key => {
-                        if (typeof data2Set[key] == "undefined" && key != '_helper') delete config.proxyObject[key];
-                    });
+
+                    for (const key of Object.keys(data2Set)) {
+                        if (key === '_helper') return;
+                        let newValue = data2Set[key];
+
+                        if (config.proxyObject[key] && typeof config.proxyObject[key]._helper?.multiSet === 'function') {
+                            config.proxyObject[key]._helper.multiSet(newValue, forceOverwrite);
+                        } else {
+                            config.proxyObject[key] = newValue;
+                        }
+                    };
+
+                    if (forceOverwrite) {
+                        Object.keys(config.innerDataStructure).forEach(key => {
+                            if (typeof data2Set[key] == "undefined" && key != '_helper') delete config.proxyObject[key];
+                        });
+                    }
                 }
 
                 if (!transactionOpen && !config.createMode) ucpModel.processTransaction();

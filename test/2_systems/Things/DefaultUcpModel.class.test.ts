@@ -119,6 +119,15 @@ describe("Default Ucp Model", () => {
             expect(ucpModel.toJSON).toBe('{"_component":{"name":"DefaultUcpComponent"},"name":"MyDefaultName","age":5,"inventory":[{"name":"test","itemId":5},{"name":"test2","itemId":35}],"iorObject":"ior:https://test.wo-da.de"}');
 
         })
+
+        test("deepCopy", async () => {
+            //@ts-ignore Access internals
+            const deepCopy = ucpModel.deepCopy;
+
+            let result = deepCopy(new Map([["my", 'test']]));
+
+            expect(result).toStrictEqual([["my", 'test']]);
+        })
     })
     describe("Events", () => {
         test("Event onModelWillChange", async () => {
@@ -431,6 +440,63 @@ describe("Default Ucp Model", () => {
                     }
                 });
 
+            })
+
+            test("multiSet", async () => {
+                model.someIORMap = new Map();
+                model.someIORMap.set('ior:https://test.wo-da.de', 12345);
+
+                model._helper?.multiSet({ someIORMap: [[new DefaultIOR().init("prod.wo-da.de"), 444444]] });
+
+                expect(model.someIORMap?.size).toBe(2);
+                let entries = model.someIORMap?.entries();
+                if (!entries) throw new Error(`missing entries`);
+                expect(entries.next().value).toStrictEqual(["ior:https://test.wo-da.de", 12345]);
+                expect(entries.next().value).toMatchObject(["ior://prod.wo-da.de", 444444]);
+            })
+
+            test("Rollback with IOR Map", async () => {
+                model.someIORMap = new Map();
+                model.someIORMap.set('ior:https://test.wo-da.de', 12345);
+                model.someIORMap.set(new DefaultIOR().init("prod.wo-da.de"), 444444);
+
+                ucpModel.startTransaction();
+                model.someIORMap.set('ior:google.de', 666);
+                ucpModel.rollbackTransaction();
+                model = ucpModel.model;
+                expect(model.someIORMap).not.toBe(undefined);
+
+                expect(model.someIORMap?.size).toBe(2);
+
+                let entries = model.someIORMap?.entries();
+                if (!entries) throw new Error(`missing entries`);
+                expect(entries.next()).toStrictEqual({ "done": false, "value": ["ior:https://test.wo-da.de", 12345] });
+                expect(entries.next()).toStrictEqual({ "done": false, "value": ["ior://prod.wo-da.de", 444444] });
+
+            })
+
+            test("Map to Json with String Key", async () => {
+                model.someMap = new Map();
+                model.someMap.set('my Key', 12345);
+                model.someMap.set('my Key2', 444444);
+
+                expect(ucpModel.toJSON).toStrictEqual("{\"_component\":{\"name\":\"DefaultUcpComponent\"},\"name\":\"MyDefaultName\",\"someMap\":[[\"my Key\",12345],[\"my Key2\",444444]]}");
+            })
+
+            test("Map to Json with Number Key", async () => {
+                model.someNumberMap = new Map();
+                model.someNumberMap.set(1, 12345);
+                model.someNumberMap.set(2, 444444);
+
+                expect(ucpModel.toJSON).toStrictEqual("{\"_component\":{\"name\":\"DefaultUcpComponent\"},\"name\":\"MyDefaultName\",\"someNumberMap\":[[1,12345],[2,444444]]}");
+            })
+
+            test("Map to Json with IOR Key", async () => {
+                model.someIORMap = new Map();
+                model.someIORMap.set('ior:https://test.wo-da.de', 12345);
+                model.someIORMap.set(new DefaultIOR().init("prod.wo-da.de"), 444444);
+
+                expect(ucpModel.toJSON).toStrictEqual("{\"_component\":{\"name\":\"DefaultUcpComponent\"},\"name\":\"MyDefaultName\",\"someIORMap\":[[\"ior:https://test.wo-da.de\",12345],[\"ior://prod.wo-da.de\",444444]]}");
             })
         })
 
