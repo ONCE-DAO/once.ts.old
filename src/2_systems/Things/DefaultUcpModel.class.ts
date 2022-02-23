@@ -178,7 +178,11 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
     EVENTS: any;
 
     get toJSON(): string {
-        return JSON.stringify(this.deepCopy(this.model))
+        let loadOnAccess = this.loadOnAccess;
+        this.loadOnAccess = false;
+        let result = JSON.stringify(this.deepCopy(this.model))
+        this.loadOnAccess = loadOnAccess;
+        return result;
     }
 
     get eventSupport(): EventService { return DefaultEventService.getSingleton() }
@@ -279,6 +283,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
     }
 
     private deepCopy(source: any): any {
+        if (source === undefined) return undefined;
         return JSON.parse(JSON.stringify(source, (key, value) => {
             if (key === '_helper') return undefined
             const toJSON = value?.toJSON || value?.IOR?.toJSON;
@@ -399,11 +404,6 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         return changelog;
 
     }
-
-    get toJson(): string {
-        return JSON.stringify(this.data);
-    };
-
 
     private proxyHelperFactory(config: { proxyPath: string[], innerDataStructure: any, proxyObject: any, schema: any, createMode: boolean }) {
         const ucpModel = this;

@@ -106,16 +106,17 @@ describe("Default Ucp Model", () => {
             ucpModel.destroy();
             expect(ucpModel.model).toBe(undefined);
             expect(() => { ucpModel.changelog }).toThrowError(/Cannot read properties of undefined/);
-            expect(ucpModel.toJson).toBe(undefined);
+            expect(ucpModel.toJSON).toBe(undefined);
 
         })
 
-        test("toJson", async () => {
+        test("toJSON", async () => {
 
             model.age = 5;
             model.inventory = [{ name: 'test', itemId: 5 }, { name: 'test2', itemId: 35 }];
+            model.iorObject = new DefaultIOR().init('https://test.wo-da.de');
 
-            expect(ucpModel.toJson).toBe('{"_component":{"name":"DefaultUcpComponent"},"name":"MyDefaultName","age":5,"inventory":[{"name":"test","itemId":5},{"name":"test2","itemId":35}]}');
+            expect(ucpModel.toJSON).toBe('{"_component":{"name":"DefaultUcpComponent"},"name":"MyDefaultName","age":5,"inventory":[{"name":"test","itemId":5},{"name":"test2","itemId":35}],"iorObject":"ior:https://test.wo-da.de"}');
 
         })
     })
@@ -488,7 +489,7 @@ describe("Default Ucp Model", () => {
             expect(UcpModelProxyIORSchema.description).toBe("IOR Object");
 
             const ior = new DefaultIOR().init("google.de");
-            expect(JSON.stringify(UcpModelProxyIORSchema.parse(ior))).toBe("{\"href\":\"ior://google.de\"}");
+            expect(JSON.stringify(UcpModelProxyIORSchema.parse(ior))).toBe('{"href":"ior://google.de"}');
         })
     })
 })

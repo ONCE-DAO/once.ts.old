@@ -6,7 +6,6 @@ import Wave from "./Wave.interface";
 export default interface UcpModel extends EventServiceConsumer, Thing<UcpModel>, JSONProvider {
     model: any;
     changelog: any; // UcpModelChangeLog | undefined
-    toJson: string;
     destroy(): void;
     startTransaction(): void;
     processTransaction(): void;
