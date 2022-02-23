@@ -14,5 +14,6 @@ export interface OnceEvent {
 }
 
 export interface EventServiceConsumer {
-    eventSupport: EventService
+    eventSupport: EventService;
+    EVENTS: any;
 }

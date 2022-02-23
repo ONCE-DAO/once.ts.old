@@ -1,5 +1,6 @@
-import { Thing } from "..";
 import { EventServiceConsumer } from "./EventService.interface";
+import Thing from "./Thing.interface";
+import Wave from "./Wave.interface";
 
 export default interface UcpModel extends EventServiceConsumer, Thing<UcpModel> {
     model: any;
@@ -13,13 +14,6 @@ export default interface UcpModel extends EventServiceConsumer, Thing<UcpModel> 
 }
 
 export enum UcpModelChangeLogMethods { "set" = "set", "delete" = "delete", "create" = "create" }
-export interface Wave {
-    to: any,
-    key: string[],
-    method: UcpModelChangeLogMethods,
-    from: any,
-    time: number
-}
 
 export type UcpModelChangelog = {
     [key: string]: UcpModelChangelog | Wave

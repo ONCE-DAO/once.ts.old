@@ -4,6 +4,7 @@ import EventServiceInterface from "../../3_services/EventService.interface";
 import DefaultEventService from "./DefaultEventService.class";
 
 export default class DefaultStore extends BaseThing<DefaultStore> implements Store {
+    EVENTS: any;
 
     private registry: { [index: string]: any } = {};
 

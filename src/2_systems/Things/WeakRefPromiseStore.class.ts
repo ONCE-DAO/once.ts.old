@@ -8,6 +8,7 @@ import DefaultEventService from "./DefaultEventService.class";
 type storedObject = { ref?: any, promise?: any };
 
 export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> implements Store {
+    EVENTS: any;
     get eventSupport(): EventServiceInterface { return DefaultEventService.getSingleton() }
 
     discover(): any[] {
