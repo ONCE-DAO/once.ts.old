@@ -24,6 +24,10 @@ export default class DefaultUrl extends BaseThing<DefaultUrl> implements Url {
         return this;
     }
 
+    get toJSON(): string {
+        return this.href;
+    }
+
     get href() { return this._formatUrl() }
     set href(url) { this._parseUrl(url) }
 

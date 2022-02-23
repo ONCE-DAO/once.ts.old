@@ -1,8 +1,9 @@
 import { EventServiceConsumer } from "./EventService.interface";
+import { JSONProvider } from "./JSON.interface";
 import Thing from "./Thing.interface";
 import Wave from "./Wave.interface";
 
-export default interface UcpModel extends EventServiceConsumer, Thing<UcpModel> {
+export default interface UcpModel extends EventServiceConsumer, Thing<UcpModel>, JSONProvider {
     model: any;
     changelog: any; // UcpModelChangeLog | undefined
     toJson: string;
@@ -11,6 +12,7 @@ export default interface UcpModel extends EventServiceConsumer, Thing<UcpModel> 
     processTransaction(): void;
     rollbackTransaction(): void;
     transactionState: UcpModelTransactionStates;
+    loadOnAccess: boolean;
 }
 
 export enum UcpModelChangeLogMethods { "set" = "set", "delete" = "delete", "create" = "create" }

@@ -1,7 +1,7 @@
 import UcpComponent from "../../3_services/UcpComponent.interface";
-import { string, z } from "zod";
+import { z } from "zod";
 import UcpModel from "../../3_services/UcpModel.interface";
-import DefaultUcpModel, { UcpModelProxySchema } from "./DefaultUcpModel.class";
+import DefaultUcpModel, { UcpModelProxyIORSchema, UcpModelProxySchema } from "./DefaultUcpModel.class";
 import BaseUcpComponent from "../../1_infrastructure/BaseUcpComponent.class";
 
 
@@ -14,6 +14,7 @@ const modelSchema =
         name: z.string(),
         myName: z.string().optional(),
         age: z.number().optional(),
+        iorObject: UcpModelProxyIORSchema.optional(),
         inventory: z.object({
             name: z.string().optional(),
             itemId: z.number().optional(),

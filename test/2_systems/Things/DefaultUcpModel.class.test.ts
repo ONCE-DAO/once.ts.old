@@ -1,5 +1,7 @@
+import ExtendedPromise from "../../../src/2_systems/JSExtensions/Promise";
+import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class";
 import DefaultUcpComponent from "../../../src/2_systems/Things/DefaultUcpComponent.class";
-import DefaultUcpModel from "../../../src/2_systems/Things/DefaultUcpModel.class";
+import { UcpModelProxyIORSchema } from "../../../src/2_systems/Things/DefaultUcpModel.class";
 import { UcpModelChangeLogMethods, UcpModelEvents, UcpModelTransactionStates } from "../../../src/3_services/UcpModel.interface";
 let ucpComponent = new DefaultUcpComponent();
 let model = ucpComponent.model;
@@ -123,6 +125,7 @@ describe("Default Ucp Model", () => {
             let result: any;
             const callback = (event: any, data: any) => {
                 result = data;
+                expect(ucpModel.transactionState).toBe(UcpModelTransactionStates.BEFORE_CHANGE);
             }
 
             ucpModel.eventSupport.addEventListener(ucpModel, UcpModelEvents.ON_MODEL_WILL_CHANGE, callback, ucpModel)
@@ -136,6 +139,7 @@ describe("Default Ucp Model", () => {
             let result: any;
             const callback = (event: any, data: any) => {
                 result = data;
+                expect(ucpModel.transactionState).toBe(UcpModelTransactionStates.AFTER_CHANGE);
             }
 
             ucpModel.eventSupport.addEventListener(ucpModel, UcpModelEvents.ON_MODEL_CHANGED, callback, ucpModel)
@@ -429,6 +433,62 @@ describe("Default Ucp Model", () => {
             })
         })
 
-    })
+        describe("IOR", () => {
+            test("set IOR", async () => {
+                const ior = new DefaultIOR().init("https://wo-da.de");
+                model.iorObject = ior;
+                //@ts-ignore Check internals
+                expect(ucpModel.latestParticle.snapshot.iorObject).toBe("ior:https://wo-da.de")
+            })
 
+            test("set IOR as String", async () => {
+                const ior = "https://wo-da.de";
+                model.iorObject = ior;
+                //@ts-ignore Check internals
+                expect(ucpModel.latestParticle.snapshot.iorObject).toBe("ior:https://wo-da.de")
+            })
+
+            test("set Object with IOR", async () => {
+                const ior = new DefaultIOR().init("https://wo-da.de");
+                model.iorObject = { IOR: ior };
+                //@ts-ignore Check internals
+                expect(ucpModel.latestParticle.snapshot.iorObject).toBe("ior:https://wo-da.de")
+            })
+
+            test("loadOnAccess false", async () => {
+                const ior = new DefaultIOR().init("https://wo-da.de");
+                model.iorObject = ior;
+                ucpModel.loadOnAccess = false;
+                expect(model.iorObject).toBe(ior);
+            })
+
+            test("loadOnAccess true", async () => {
+                const ior = new DefaultIOR().init("https://wo-da.de");
+                const loadObject = { name: "dummyObject", IOR: ior };
+                ior.load = async () => { return loadObject };
+
+                model.iorObject = ior;
+                ucpModel.loadOnAccess = true;
+
+                let promise = model.iorObject;
+                expect(ExtendedPromise.isPromise(promise)).toBe(true);
+
+                let object = await promise;
+                expect(object).toBe(loadObject);
+
+            })
+        })
+
+    })
+    describe("Helper", () => {
+
+
+        // Test bis es ein sauberes schema gibt
+        test("IOR Schema", async () => {
+            expect(UcpModelProxyIORSchema.description).toBe("IOR Object");
+
+            const ior = new DefaultIOR().init("google.de");
+            expect(JSON.stringify(UcpModelProxyIORSchema.parse(ior))).toBe("{\"href\":\"ior://google.de\"}");
+        })
+    })
 })

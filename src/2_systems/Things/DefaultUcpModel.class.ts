@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { any, string, z } from "zod";
 import BaseThing from "../../1_infrastructure/BaseThing.class";
 import EventService, { EventServiceConsumer } from "../../3_services/EventService.interface";
 import Particle from "../../3_services/Particle.interface";
@@ -27,7 +27,13 @@ export const UcpModelProxySchema = z.object({
     }).optional()
 });
 
+const iorSchema = z.object({ load: z.function().args(z.any()), href: z.string() });
+export const UcpModelProxyIORSchema = z.union([z.string(), iorSchema, z.object({ IOR: iorSchema })]).describe("IOR Object")
 
+type internalIOR = z.infer<typeof UcpModelProxyIORSchema>
+
+
+//type UcpModelSchemaConverterOptions = { optional: boolean }
 // export function UcpModelSchemaConverter<T>(schema: T, options: UcpModelSchemaConverterOptions): T {
 //     let schemaBottom = getSchemaBottom(schema);
 //     let type = schemaBottom._def.typeName
@@ -60,7 +66,6 @@ function getSchemaBottom(schema: any): any {
 }
 
 
-type UcpModelSchemaConverterOptions = { optional: boolean }
 class UcpModelMapProxy extends Map {
     _helper: any;
 
@@ -163,6 +168,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
     protected _transactionState: UcpModelTransactionStates = UcpModelTransactionStates.TRANSACTION_CLOSED;
     protected _history: Particle[] = [];
 
+    public loadOnAccess: boolean = true;
 
     constructor(defaultData: any, ucpComponent: UcpComponent<ModelDataType, any>) {
         super();
@@ -170,6 +176,11 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         this.model = defaultData;
     }
     EVENTS: any;
+
+    get toJSON(): string {
+        return JSON.stringify(this.deepCopy(this.model))
+    }
+
     get eventSupport(): EventService { return DefaultEventService.getSingleton() }
 
     public _createProxy4Data(originalData: any, proxyPath: string[] = []) {
@@ -180,10 +191,11 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
             throw new Error(`Missing the schema for the path ${proxyPath.join('.')}`);
         }
 
+
+        const bottomSchema = getSchemaBottom(schema);
+        let type = bottomSchema._def.typeName;
+
         let dataStructure: any;
-
-        let type = getSchemaBottom(schema)._def.typeName;
-
         let requireProxy = true;
         switch (type) {
             case 'ZodBoolean':
@@ -200,6 +212,13 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
                 dataStructure = new UcpModelMapProxy();
                 requireProxy = false;
                 break;
+            case 'ZodUnion':
+                if (bottomSchema.description === 'IOR Object') {
+                    if (typeof originalData === 'string') {
+                        return new DefaultIOR().init(originalData);
+                    }
+                    return originalData;
+                }
             default:
                 throw new Error(`Type ${type} is not implemented`)
         }
@@ -260,12 +279,21 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
     }
 
     private deepCopy(source: any): any {
-        return JSON.parse(JSON.stringify(source, (key, value) => { return (key === '_helper' ? undefined : value) }))
+        return JSON.parse(JSON.stringify(source, (key, value) => {
+            if (key === '_helper') return undefined
+            const toJSON = value?.toJSON || value?.IOR?.toJSON;
+            if (typeof toJSON !== 'undefined') return toJSON
+
+            return value;
+        }))
     }
 
     processTransaction() {
 
         let particle = this.latestParticle;
+
+        this._transactionState = UcpModelTransactionStates.BEFORE_CHANGE;
+
 
         this.eventSupport.fire(UcpModelEvents.ON_MODEL_WILL_CHANGE, this, this.latestParticle.changelog);
         let schema = this.getSchema();
@@ -275,6 +303,9 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
 
             throw parseResult.error;
         }
+
+        this._transactionState = UcpModelTransactionStates.AFTER_CHANGE;
+
 
         this.eventSupport.fire(UcpModelEvents.ON_MODEL_CHANGED, this, this.latestParticle.changelog);
 
@@ -437,9 +468,11 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         const value = target[key];
         if (value == undefined) return undefined;
 
-        // TODO@BE Change to IOR interface
+        // TODO@BE Change to runtime interface
         if (value instanceof DefaultIOR) {
-            return value.load();
+            if ([UcpModelTransactionStates.TRANSACTION_CLOSED, UcpModelTransactionStates.TRANSACTION_OPEN].includes(this._transactionState) && this.loadOnAccess === true) {
+                return value.load();
+            }
         }
 
         return value;
@@ -556,4 +589,5 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
     }
 
 }
+
 

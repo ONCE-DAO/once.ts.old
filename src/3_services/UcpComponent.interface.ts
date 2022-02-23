@@ -1,5 +1,6 @@
 import Class from "./Class.interface";
 import IOR from "./IOR.interface";
+import { JSONProvider } from "./JSON.interface";
 import Thing from "./Thing.interface";
 
 export default interface UcpComponent<ModelDataType, ClassInterface> extends Thing<ClassInterface> {
