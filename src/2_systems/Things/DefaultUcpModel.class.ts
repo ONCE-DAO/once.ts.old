@@ -218,9 +218,9 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
 
     get eventSupport(): EventService { return DefaultEventService.getSingleton() }
 
-    public _createProxy4Data(originalData: any, proxyPath: string[] = []) {
+    public _createProxy4Data(originalData: any, proxyPath: string[] = [], schema?: any) {
 
-        const schema = this.getSchema(proxyPath);
+        if (!schema) schema = this.getSchema(proxyPath);
 
         if (!schema) {
             throw new Error(`Missing the schema for the path ${proxyPath.join('.')}`);
@@ -261,7 +261,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         if (typeof originalData !== 'object') throw new Error(`Type ${type} expected. Got a ${typeof originalData}`)
 
         let proxyObject: any;
-        const handlerConfig = { proxyPath: proxyPath, createMode: true };
+        const handlerConfig = { proxyPath: proxyPath, createMode: true, schema };
         if (requireProxy) {
             const handler = this.proxyHandlerFactory(handlerConfig);
             proxyObject = new Proxy(dataStructure, handler);
@@ -509,9 +509,9 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
                     };
 
                     if (forceOverwrite) {
-                        Object.keys(config.innerDataStructure).forEach(key => {
+                        for (const key in Object.keys(config.innerDataStructure)) {
                             if (typeof data2Set[key] == "undefined" && key != '_helper') delete config.proxyObject[key];
-                        });
+                        }
                     }
                 }
 
@@ -545,7 +545,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         return false;
     }
 
-    private _proxySet(target: any, property: any, value: any, receiver: any, config: { proxyPath: string[], createMode: boolean }): boolean {
+    private _proxySet(target: any, property: any, value: any, receiver: any, config: { proxyPath: string[], createMode: boolean, schema: any }): boolean {
         if (Array.isArray(target) && property === 'length') {
             target[property] = value;
         }
@@ -574,7 +574,8 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         if (this._isProxyObject(value)) {
             proxyValue = value;
         } else {
-            proxyValue = this._createProxy4Data(value, [...config.proxyPath, property]);
+
+            proxyValue = this._createProxy4Data(value, [...config.proxyPath, property], this.getSchema([property], config.schema));
         }
 
         // If the is still in creation no reports are send
@@ -621,7 +622,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         return true;
     }
 
-    private proxyHandlerFactory(config: { proxyPath: string[], createMode: boolean }) {
+    private proxyHandlerFactory(config: { proxyPath: string[], createMode: boolean, schema: any }) {
         const ucpModel = this;
         return {
             get: (target: any, key: any): any => {
