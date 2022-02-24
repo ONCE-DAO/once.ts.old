@@ -5,7 +5,7 @@ export default interface Particle {
     id: string;
     predecessorId: string | undefined;
     changelog: UcpModelChangelog,
-    snapshot: any,
+    modelSnapshot: any,
     waveList: Wave[],
     addChange(ChangeLog: Wave): void;
 

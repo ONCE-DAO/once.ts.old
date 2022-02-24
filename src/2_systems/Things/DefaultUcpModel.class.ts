@@ -296,6 +296,9 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
                 throw new Error("Not implemented yet " + state);
 
         }
+
+        this.eventSupport.fire(UcpModelEvents.ON_MODEL_LOCAL_CHANGED, this, waveObject);
+
     }
 
     startTransaction(): boolean {
@@ -332,7 +335,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
 
         this._transactionState = UcpModelTransactionStates.BEFORE_CHANGE;
 
-
+        //TODO: catch error
         this.eventSupport.fire(UcpModelEvents.ON_MODEL_WILL_CHANGE, this, this.latestParticle.changelog);
         let schema = this.getSchema();
 
@@ -347,7 +350,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
 
         this.eventSupport.fire(UcpModelEvents.ON_MODEL_CHANGED, this, this.latestParticle.changelog);
 
-        particle.snapshot = this.deepCopy(this.model);
+        particle.modelSnapshot = this.deepCopy(this.model);
 
         this._transactionState = UcpModelTransactionStates.TRANSACTION_CLOSED;
 
@@ -363,7 +366,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
                 // TODO@BE Check what the Problem with this interface is
                 //this.model._helper._proxyTools.destroy();
                 //@ts-ignore
-                this.model._helper.multiSet(this.latestParticle.snapshot, true)
+                this.model._helper.multiSet(this.latestParticle.modelSnapshot, true)
             }
         }
         this._transactionState = UcpModelTransactionStates.TRANSACTION_CLOSED;

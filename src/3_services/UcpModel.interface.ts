@@ -32,5 +32,6 @@ export enum UcpModelTransactionStates {
 
 export enum UcpModelEvents {
     ON_MODEL_CHANGED = 'onModelChanges',
-    ON_MODEL_WILL_CHANGE = 'onModelWillChange'
+    ON_MODEL_WILL_CHANGE = 'onModelWillChange',
+    ON_MODEL_LOCAL_CHANGED = 'onModelLocalChanges'
 }

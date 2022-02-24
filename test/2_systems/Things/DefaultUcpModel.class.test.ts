@@ -39,14 +39,14 @@ describe("Default Ucp Model", () => {
             model.age = 10;
 
             //@ts-ignore Look into protected
-            expect(ucpModel.latestParticle.snapshot).toBe(undefined);
+            expect(ucpModel.latestParticle.modelSnapshot).toBe(undefined);
             ucpModel.processTransaction();
 
             //@ts-ignore Look into protected
             expect(ucpModel._history.length).toBe(2);
             expect(ucpModel.transactionState).toBe(UcpModelTransactionStates.TRANSACTION_CLOSED);
             //@ts-ignore Look into protected
-            expect(ucpModel.latestParticle.snapshot.age).toBe(10);
+            expect(ucpModel.latestParticle.modelSnapshot.age).toBe(10);
         })
 
         test("Rollback", async () => {
@@ -88,7 +88,7 @@ describe("Default Ucp Model", () => {
             ucpModel.startTransaction();
             expect(ucpModel.transactionState).toBe(UcpModelTransactionStates.TRANSACTION_OPEN);
             //@ts-ignore
-            expect(ucpModel.latestParticle.snapshot).toBe(undefined);
+            expect(ucpModel.latestParticle.modelSnapshot).toBe(undefined);
             //@ts-ignore
             const transactionId = ucpModel.latestParticle.id;
 
@@ -171,6 +171,26 @@ describe("Default Ucp Model", () => {
 
             expect(result).not.toBe(undefined);
         })
+
+        test("Event onModelLocalChanges", async () => {
+
+            let count: number = 0;
+            const callback = (event: any, data: any) => {
+                count++;
+            }
+
+            ucpModel.eventSupport.addEventListener(ucpModel, UcpModelEvents.ON_MODEL_LOCAL_CHANGED, callback, ucpModel);
+
+            model.age = 1;
+
+            ucpModel.startTransaction();
+            model.age = 10;
+            model.age = 2;
+            ucpModel.processTransaction();
+
+            expect(count).toBe(3);
+        })
+
     })
 
     describe("Performance", () => {
@@ -529,7 +549,7 @@ describe("Default Ucp Model", () => {
                 model.someIORMap.set('ior:google.de', 666);
 
                 //@ts-ignore check internals
-                expect(ucpModel._history[ucpModel._history.length - 2].snapshot.someIORMap.length).toBe(2);
+                expect(ucpModel._history[ucpModel._history.length - 2].modelSnapshot.someIORMap.length).toBe(2);
                 ucpModel.rollbackTransaction();
                 model = ucpModel.model;
                 expect(model.someIORMap).not.toBe(undefined);
@@ -578,21 +598,21 @@ describe("Default Ucp Model", () => {
                 const ior = new DefaultIOR().init("https://wo-da.de");
                 model.iorObject = ior;
                 //@ts-ignore Check internals
-                expect(ucpModel.latestParticle.snapshot.iorObject).toBe("ior:https://wo-da.de")
+                expect(ucpModel.latestParticle.modelSnapshot.iorObject).toBe("ior:https://wo-da.de")
             })
 
             test("set IOR as String", async () => {
                 const ior = "https://wo-da.de";
                 model.iorObject = ior;
                 //@ts-ignore Check internals
-                expect(ucpModel.latestParticle.snapshot.iorObject).toBe("ior:https://wo-da.de")
+                expect(ucpModel.latestParticle.modelSnapshot.iorObject).toBe("ior:https://wo-da.de")
             })
 
             test("set Object with IOR", async () => {
                 const ior = new DefaultIOR().init("https://wo-da.de");
                 model.iorObject = { IOR: ior };
                 //@ts-ignore Check internals
-                expect(ucpModel.latestParticle.snapshot.iorObject).toBe("ior:https://wo-da.de")
+                expect(ucpModel.latestParticle.modelSnapshot.iorObject).toBe("ior:https://wo-da.de")
             })
 
             test("loadOnAccess false", async () => {

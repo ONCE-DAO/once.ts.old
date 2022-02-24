@@ -9,7 +9,7 @@ import DefaultWave from "./DefaultWave.class";
 export default class DefaultParticle implements Particle {
     id: string;
     predecessorId: string | undefined;
-    snapshot: any;
+    modelSnapshot: any;
 
     constructor(id?: string) {
         this.id = id || UUiD.uuidv4();
