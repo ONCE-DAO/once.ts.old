@@ -1,8 +1,8 @@
 import UcpComponent from "../../3_services/UcpComponent.interface";
-import { z, ZodFirstPartyTypeKind } from "zod";
 import UcpModel from "../../3_services/UcpModel.interface";
 import DefaultUcpModel, { UcpModelProxyIORSchema, UcpModelProxySchema } from "./DefaultUcpModel.class";
 import BaseUcpComponent from "../../1_infrastructure/BaseUcpComponent.class";
+import { z } from "../JSExtensions/OnceZod";
 
 
 interface MyDefaultUcpComponent extends UcpComponent<ModelDataType, MyDefaultUcpComponent> {
