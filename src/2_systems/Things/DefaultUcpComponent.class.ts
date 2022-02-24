@@ -1,5 +1,5 @@
 import UcpComponent from "../../3_services/UcpComponent.interface";
-import { z } from "zod";
+import { z, ZodFirstPartyTypeKind } from "zod";
 import UcpModel from "../../3_services/UcpModel.interface";
 import DefaultUcpModel, { UcpModelProxyIORSchema, UcpModelProxySchema } from "./DefaultUcpModel.class";
 import BaseUcpComponent from "../../1_infrastructure/BaseUcpComponent.class";
@@ -30,23 +30,26 @@ const modelSchema =
         .merge(BaseUcpComponent.modelSchema).merge(UcpModelProxySchema)
     ;
 
-const convertedModelSchema = modelSchema //.merge(UcpModelProxySchema);
+// const convertedModelSchema = convert(modelSchema) //.merge(UcpModelProxySchema);
 
 
-const mySchema = z.object({
-    myString: z.string().min(5),
-    myUnion: z.union([z.number(), z.boolean()]),
-});
+// const mySchema = z.object({
+//     myString: z.string().min(5),
+//     myUnion: z.union([z.number(), z.boolean()]),
+// });
 
-// function convert<T extends >(schema: T): T {
-//     schema.merge(UcpModelProxySchema);
+// function convert<T extends z.ZodFirstPartySchemaTypes>(schema: T): T {
+//     if ("merge" in schema) {
+//         schema.merge(UcpModelProxySchema);
+//     }
+//     return schema;
 // }
 
 //const convertedModelSchema = UcpModelSchemaConverter(modelSchema, { optional: false })
 
 
 
-type ModelDataType = z.infer<typeof convertedModelSchema>
+type ModelDataType = z.infer<typeof modelSchema>
 
 class DefaultUcpComponent extends BaseUcpComponent<ModelDataType, MyDefaultUcpComponent> implements MyDefaultUcpComponent {
     get myName() { return this.model.myName }

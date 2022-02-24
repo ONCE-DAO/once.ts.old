@@ -60,8 +60,8 @@ export class DefaultUcpModelChangeLog implements UcpModelChangelog {
 }
 
 
-function getSchemaBottom(schema: any): any {
-    if (schema._def.innerType) {
+function getSchemaBottom(schema: z.ZodFirstPartySchemaTypes): z.ZodFirstPartySchemaTypes {
+    if ("innerType" in schema._def) {
         return getSchemaBottom(schema._def.innerType);
     }
     return schema;
@@ -71,9 +71,8 @@ function getSchemaBottom(schema: any): any {
 class UcpModelMapProxy extends Map {
     _helper: any;
     private _getKey4Any(key: any): any {
-        const schema = getSchemaBottom(this._helper._proxyTools.schema);
-        const keySchema = schema._def.keyType;
-        if (keySchema.description === 'IOR Object') {
+        const schema = getSchemaBottom(this._helper._proxyTools.schema) as z.ZodMap;
+        if (schema._def.keyType.description === 'IOR Object') {
 
             if (typeof key == 'object') {
                 if (key instanceof DefaultIOR) {
@@ -218,36 +217,35 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
 
     get eventSupport(): EventService { return DefaultEventService.getSingleton() }
 
-    public _createProxy4Data(originalData: any, proxyPath: string[] = [], schema?: any) {
+    public _createProxy4Data(originalData: any, proxyPath: string[] = [], schema?: z.ZodFirstPartySchemaTypes) {
 
-        if (!schema) schema = this.getSchema(proxyPath);
+        if (schema === undefined) schema = this.getSchema(proxyPath);
 
-        if (!schema) {
+        if (schema instanceof z.ZodUndefined) {
             throw new Error(`Missing the schema for the path ${proxyPath.join('.')}`);
         }
 
-
         const bottomSchema = getSchemaBottom(schema);
-        let type = bottomSchema._def.typeName;
+        const type = bottomSchema._def.typeName;
 
         let dataStructure: any;
         let requireProxy = true;
         switch (type) {
-            case 'ZodBoolean':
-            case 'ZodNumber':
-            case 'ZodString':
+            case z.ZodFirstPartyTypeKind.ZodBoolean:
+            case z.ZodFirstPartyTypeKind.ZodNumber:
+            case z.ZodFirstPartyTypeKind.ZodString:
                 return originalData;
-            case 'ZodObject':
+            case z.ZodFirstPartyTypeKind.ZodObject:
                 dataStructure = new UcpModelObjectProxy();
                 break;
-            case 'ZodArray':
+            case z.ZodFirstPartyTypeKind.ZodArray:
                 dataStructure = new UcpModelArrayProxy();
                 break;
-            case 'ZodMap':
+            case z.ZodFirstPartyTypeKind.ZodMap:
                 dataStructure = new UcpModelMapProxy();
                 requireProxy = false;
                 break;
-            case 'ZodUnion':
+            case z.ZodFirstPartyTypeKind.ZodUnion:
                 if (bottomSchema.description === 'IOR Object') {
                     if (typeof originalData === 'string') {
                         return new DefaultIOR().init(originalData);
@@ -376,28 +374,32 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         return this._history.slice(-1)[0];
     }
 
-    public getSchema(path: string[] = [], schema?: any): any {
-        if (!schema) schema = this._ucpComponent.classDescriptor.class.modelSchema;
+    public getSchema(path: string[] = [], schema?: z.ZodFirstPartySchemaTypes): z.ZodFirstPartySchemaTypes {
+        if (schema === undefined) schema = this._ucpComponent.classDescriptor.class.modelSchema as z.ZodFirstPartySchemaTypes;
         for (const element of path) {
             const bottomSchema = getSchemaBottom(schema);
             switch (bottomSchema._def.typeName) {
-                case 'ZodObject':
-                    const newSchema = bottomSchema.shape?.[element];
-                    if (newSchema == undefined) return undefined;
-                    schema = newSchema;
-                    break;
-                case 'ZodArray':
+                case z.ZodFirstPartyTypeKind.ZodObject:
+                    if ("shape" in bottomSchema) {
+                        const newSchema: z.ZodFirstPartySchemaTypes = bottomSchema.shape?.[element];
+                        if (newSchema == undefined) return z.undefined();
+                        schema = newSchema;
+                        break;
+                    }
+                case z.ZodFirstPartyTypeKind.ZodArray:
                     if (Number.isNaN(element)) throw new Error(`Can not Access key ${element} on an Array`);
-                    schema = bottomSchema.element;
-                    break;
-                case 'ZodMap':
-                    schema = bottomSchema._def.valueType;
-                    break;
+                    if ("element" in bottomSchema) {
+                        schema = bottomSchema.element as z.ZodFirstPartySchemaTypes;
+                        break;
+                    }
+                case z.ZodFirstPartyTypeKind.ZodMap:
+                    if ("valueType" in bottomSchema._def) {
+                        schema = bottomSchema._def.valueType;
+                        break;
+                    }
                 default:
                     throw new Error(`Unknown type ${bottomSchema._def.typeName} to find the schema`)
-
             }
-
         }
         return schema;
     }
