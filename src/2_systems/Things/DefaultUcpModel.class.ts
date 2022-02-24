@@ -194,7 +194,7 @@ class UcpModelArrayProxy extends Array {
 
 export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> implements UcpModel, EventServiceConsumer {
     //@ts-ignore   // Is ignored as it is set in the Constructor but typescript does not understand it
-    protected data: ModelDataType;
+    protected _data: ModelDataType;
     protected _ucpComponent: UcpComponent<ModelDataType, any>
     protected _transactionState: UcpModelTransactionStates = UcpModelTransactionStates.TRANSACTION_CLOSED;
     protected _history: Particle[] = [];
@@ -279,20 +279,19 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         return proxyObject;
     }
 
-    public _registerChange(change: Wave): void {
+    public _registerChange(waveObject: Wave): void {
         const state = this._transactionState;
         switch (state) {
             case UcpModelTransactionStates.TRANSACTION_CLOSED:
                 this.startTransaction();
-                if (!this.latestParticle) throw new Error("Missing Particle");
-                this.latestParticle.addChange(change);
+                this.latestParticle.addChange(waveObject);
                 this.processTransaction();
                 break;
             case UcpModelTransactionStates.TRANSACTION_ROLLBACK:
                 // Nothing to do in this state
                 break;
             case UcpModelTransactionStates.TRANSACTION_OPEN:
-                this.latestParticle.addChange(change);
+                this.latestParticle.addChange(waveObject);
                 break;
 
             default:
@@ -339,7 +338,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         this.eventSupport.fire(UcpModelEvents.ON_MODEL_WILL_CHANGE, this, this.latestParticle.changelog);
         let schema = this.getSchema();
 
-        let parseResult = schema.safeParse(this.data);
+        let parseResult = schema.safeParse(this._data);
         if (parseResult.success === false) {
 
             throw parseResult.error;
@@ -402,15 +401,15 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         }
         return schema;
     }
-    get model(): ModelDataType { return this.data }
+    get model(): ModelDataType { return this._data }
 
     // any to add default Values....
     set model(newValue: ModelDataType) {
         const proxy = this._createProxy4Data(newValue);
 
-        const wave = new DefaultWave([], this.data, proxy, (this.data ? UcpModelChangeLogMethods.set : UcpModelChangeLogMethods.create));
+        const wave = new DefaultWave([], this._data, proxy, (this._data ? UcpModelChangeLogMethods.set : UcpModelChangeLogMethods.create));
 
-        this.data = proxy;
+        this._data = proxy;
         this._registerChange(wave);
     }
 
@@ -423,7 +422,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         //@ts-ignore
         this.model._helper._proxyTools.destroy();
         //@ts-ignore
-        delete this.data;
+        delete this._data;
         //@ts-ignore
         delete this._history;
         super.destroy();
@@ -450,6 +449,9 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
 
     private proxyHelperFactory(config: { proxyPath: string[], innerDataStructure: any, proxyObject: any, schema: any, createMode: boolean }) {
         const ucpModel = this;
+        const proxyPath = config.proxyPath;
+        const innerDataStructure = config.innerDataStructure;
+        const proxyObject = config.proxyObject;
         return {
             validate(key: string, value: any): z.SafeParseReturnType<any, any> {
                 const parameterSchema = ucpModel.getSchema([key], config.schema)
@@ -459,22 +461,22 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
 
                 return parameterSchema.safeParse(value);
             },
-            get changelog() { return ucpModel.getChangelog(config.proxyPath) },
+            get changelog() { return ucpModel.getChangelog(proxyPath) },
             _proxyTools: {
                 isProxy: true,
                 get myUcpModel() { return ucpModel },
                 destroy: () => {
-                    Object.keys(config.innerDataStructure).forEach(key => {
-                        if (ucpModel._isProxyObject(config.innerDataStructure[key]) === true) {
-                            config.innerDataStructure[key]?._helper?._proxyTools.destroy();
+                    Object.keys(innerDataStructure).forEach(key => {
+                        if (ucpModel._isProxyObject(innerDataStructure[key]) === true) {
+                            innerDataStructure[key]?._helper?._proxyTools.destroy();
                         }
-                        delete config.innerDataStructure[key];
+                        delete innerDataStructure[key];
                     });
                 }, loadIOR() {
                     throw new Error("Not implemented yet");
                 },
                 get createMode() { return config.createMode },
-                get proxyPath() { return config.proxyPath },
+                get proxyPath() { return proxyPath },
                 get schema() { return config.schema }
             },
             multiSet(data2Set: any, forceOverwrite: boolean = false) {
@@ -483,16 +485,16 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
                     startedTransaction = ucpModel.startTransaction();
                 }
 
-                if (config.proxyObject instanceof UcpModelMapProxy) {
+                if (proxyObject instanceof UcpModelMapProxy) {
                     let allKeys: { [index: string | number]: boolean } = {};
                     for (const [key, value] of data2Set) {
                         allKeys[key] = true;
-                        config.proxyObject.set(key, value);
+                        proxyObject.set(key, value);
                     }
 
                     if (forceOverwrite) {
-                        for (const [key] of config.innerDataStructure) {
-                            if (allKeys[key] !== true && key != '_helper') config.proxyObject.delete(key);
+                        for (const [key] of innerDataStructure) {
+                            if (allKeys[key] !== true && key != '_helper') proxyObject.delete(key);
                         }
                     }
                 } else {
@@ -501,16 +503,16 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
                         if (key === '_helper') return;
                         let newValue = data2Set[key];
 
-                        if (config.proxyObject[key] && typeof config.proxyObject[key]._helper?.multiSet === 'function') {
-                            config.proxyObject[key]._helper.multiSet(newValue, forceOverwrite);
+                        if (proxyObject[key] && typeof proxyObject[key]._helper?.multiSet === 'function') {
+                            proxyObject[key]._helper.multiSet(newValue, forceOverwrite);
                         } else {
-                            config.proxyObject[key] = newValue;
+                            proxyObject[key] = newValue;
                         }
                     };
 
                     if (forceOverwrite) {
-                        for (const key in Object.keys(config.innerDataStructure)) {
-                            if (typeof data2Set[key] == "undefined" && key != '_helper') delete config.proxyObject[key];
+                        for (const key in Object.keys(innerDataStructure)) {
+                            if (typeof data2Set[key] == "undefined" && key != '_helper') delete proxyObject[key];
                         }
                     }
                 }
@@ -546,7 +548,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
     }
 
     private _proxySet(target: any, property: any, value: any, receiver: any, config: { proxyPath: string[], createMode: boolean, schema: any }): boolean {
-        if (Array.isArray(target) && property === 'length') {
+        if (Array.isArray(target) === true && property === 'length') {
             target[property] = value;
         }
 
@@ -591,13 +593,13 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
                 method = UcpModelChangeLogMethods.set;
             }
 
-            let changeObject = new DefaultWave([...config.proxyPath, property], from, proxyValue, method);
+            let waveObject = new DefaultWave([...config.proxyPath, property], from, proxyValue, method);
 
 
             //this._checkForIOR(proxyValue);
             target[property] = proxyValue;
 
-            this._registerChange(changeObject)
+            this._registerChange(waveObject)
 
 
         }
@@ -610,8 +612,8 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
 
         //@ToDo Check if writeable
 
-        let changeObject = new DefaultWave([...config.proxyPath, property], target[property], undefined, UcpModelChangeLogMethods.delete);
-        this._registerChange(changeObject)
+        let waveObject = new DefaultWave([...config.proxyPath, property], target[property], undefined, UcpModelChangeLogMethods.delete);
+        this._registerChange(waveObject)
 
         if (Array.isArray(target)) {
             target.splice(property, 1);

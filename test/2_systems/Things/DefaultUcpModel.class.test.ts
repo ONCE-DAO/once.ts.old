@@ -173,6 +173,57 @@ describe("Default Ucp Model", () => {
         })
     })
 
+    describe("Performance", () => {
+        test("Get 1000000 Times a Parameter", async () => {
+            model.age = 1;
+            let age = 0;
+            for (let i = 0; i < 1000000; i++) {
+                age += model.age;
+            }
+            expect(age).toEqual(1000000);
+        })
+
+        test("Set 1000 Times a Parameter", async () => {
+            for (let i = 0; i < 1000; i++) {
+                model.age = i;
+            }
+            expect(model.age).toEqual(999);
+        })
+
+        test("Set 1000 Times a Parameter in one Transaction", async () => {
+            ucpModel.startTransaction();
+            for (let i = 0; i < 1000; i++) {
+                model.age = i;
+            }
+            ucpModel.processTransaction();
+
+            expect(model.age).toEqual(999);
+        })
+
+        test("Set 1000 Times a Parameter to identical Value", async () => {
+            for (let i = 0; i < 1000; i++) {
+                model.age = 5;
+            }
+            expect(model.age).toEqual(5);
+        })
+
+        test("Set 1000 a Sub Parameter", async () => {
+            model.subOptions = {};
+            for (let i = 0; i < 1000; i++) {
+                model.subOptions.someString = '' + i;
+            }
+            expect(model.subOptions?.someString).toEqual("999");
+        })
+
+        test("Set 1000 Times a Parameter with multiSet", async () => {
+            for (let i = 0; i < 1000; i++) {
+                if (model._helper)
+                    model._helper.multiSet({ age: i });
+            }
+            expect(model.age).toEqual(999);
+        })
+    })
+
     describe("Proxy Helper Functions", () => {
 
         test("_helper._proxyTools.isProxy", async () => {
