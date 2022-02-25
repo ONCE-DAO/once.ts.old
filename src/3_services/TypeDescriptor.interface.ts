@@ -73,8 +73,8 @@ export abstract class Interface {
 
 export class InterfaceList extends Set<Interface> {}
 
-class ClassDescription extends Constructor  {
-  protected _type: Constructor;
+export class ClassDescription extends Constructor  {
+  protected _jsClass: Constructor ;
   classDescription: ClassDescription
   extends: TSClass | undefined = undefined
 
@@ -87,46 +87,56 @@ class ClassDescription extends Constructor  {
 
   constructor(c: Constructor) {
     super()
-    this._type =new TSClass(c);
-    this.classDescription = this.type as ClassDescription
+    this._jsClass = c;
+    this.classDescription = this as ClassDescription
     this.extends = c.prototype;
   }
 
-  get type(): Constructor {
-      return this._type
+  get class(): TSClass {
+      return (this._jsClass as TSClass)
   }
 
   getSourceCode() {
-    return this.type.toString();
+    return this.class.toString();
   }
 }
 
 export class Metaclass extends ClassDescription {
-    protected _type: TSClass;
+    protected _jsClass: Constructor;
     static store: Map<Constructor,Metaclass>=new Map();
+
     
-    static getClass(c: Constructor) {
-      if (Metaclass.store.has(c))
-        return Metaclass.store.get(c);
-      else {
-        let aClass = new Metaclass(c);
+    static getClass(c: Constructor): Metaclass {
+      let aClass: Metaclass | undefined = undefined;
+
+      if (Metaclass.store.has(c)) {
+        aClass = Metaclass.store.get(c);
+      }
+
+      if (!aClass) {
+        aClass = new TSClass(c);
         Metaclass.store.set(c, aClass);
       }
+
+      return aClass as Metaclass
     }
 
     constructor(c: Constructor) {
         super(c)
-
-        this._type = new TSClass(c);
+        this._jsClass = c;
         this.extends = c.prototype;
     }
     
-    get type(): Constructor {
-      return this._type
+    get class(): TSClass {
+      return (this._jsClass as TSClass) // Metaclass.getClass(this._jsClass) as TSClass//
     }
 
-    get class(): Constructor {
-      return this._type
+    get type(): Metaclass {
+      return (this._jsClass as Metaclass)
+    }
+
+    get className() {
+      return "Metaclass "+this.class.name;
     }
 }
 
@@ -134,6 +144,8 @@ export class Metaclass extends ClassDescription {
 // REFACTOR make sure TSClass comes form the TS framework
 export class TSClass  extends Metaclass implements TypeDescriptor {
   metaclass: Metaclass
+  extends: TSClass;
+  implements: Set<Interface>;
 
   constructor(c: Constructor) {
       super(c)
@@ -141,20 +153,18 @@ export class TSClass  extends Metaclass implements TypeDescriptor {
       this.extends = c.prototype
       //this._type = c
   }
-  extends: TSClass;
-
 
   get className() {
-    return "TS "+this.type.name;
+    return "TS "+this.class.name;
   }
 
-  get class(): TSClass {
+  get type(): TSClass {
     return this
   }
 
 }
 export default interface TypeDescriptor extends ClassDescription{
   extends: TSClass | undefined;
-  class: TSClass;
+  type: TSClass;
 
 }
