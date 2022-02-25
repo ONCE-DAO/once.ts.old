@@ -9,7 +9,6 @@ type storedObject = { ref?: any, promise?: any };
 
 export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> implements Store {
     EVENT_NAMES = StoreEvents;
-    private _eventSupport!: EventService<StoreEvents>;
 
     get eventSupport(): EventService<StoreEvents> {
         if (this._eventSupport === undefined) {

@@ -188,7 +188,7 @@ class UcpModelArrayProxy extends Array {
     _helper: any;
 }
 
-export default class DefaultUcpModel<ModelDataType, UcpComponentInterface> extends BaseThing<UcpModel> implements UcpModel, EventServiceConsumer<UcpModelEvents, typeof UcpModelEvents> {
+export default class DefaultUcpModel<ModelDataType, UcpComponentInterface> extends BaseThing<UcpModel> implements UcpModel {
     readonly ucpComponent: UcpComponent<ModelDataType, UcpComponentInterface>
     public loadOnAccess: boolean = true;
 
@@ -204,10 +204,10 @@ export default class DefaultUcpModel<ModelDataType, UcpComponentInterface> exten
     }
 
     EVENT_NAMES = UcpModelEvents;
-    private _eventSupport!: EventService<UcpModelEvents> | undefined;
-    get eventSupport(): EventService<UcpModelEvents> {
+
+    get eventSupport(): EventService<keyof this["EVENT_NAMES"]> {
         if (this._eventSupport === undefined) {
-            this._eventSupport = new DefaultEventService<UcpModelEvents>(this)
+            this._eventSupport = new DefaultEventService(this)
         }
         return this._eventSupport;
     }

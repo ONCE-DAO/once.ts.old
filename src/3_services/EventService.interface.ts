@@ -13,9 +13,9 @@ export interface OnceEvent {
     addCallback(callbackFunction: Function, targetObject: Thing<any>): void;
 }
 
-export interface EventServiceConsumer<EventEnum, TypeEventEnum> {
-    eventSupport: EventService<EventEnum>;
-    EVENT_NAMES: TypeEventEnum;
+export interface EventServiceConsumer {
+    eventSupport: EventService<any>;
+    EVENT_NAMES: any;
 }
 
 export interface EventServiceStatics extends ThingStatics<EventServiceStatics> {

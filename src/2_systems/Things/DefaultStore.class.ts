@@ -5,11 +5,10 @@ import DefaultEventService from "./DefaultEventService.class";
 import EventService from "../../3_services/EventService.interface";
 
 
-export default class DefaultStore extends BaseThing<DefaultStore> implements Store, EventServiceConsumer<StoreEvents, typeof StoreEvents> {
+export default class DefaultStore extends BaseThing<DefaultStore> implements Store, EventServiceConsumer {
     EVENT_NAMES = StoreEvents;
 
     private registry: { [index: string]: any } = {};
-    private _eventSupport!: EventService<StoreEvents>;
 
     register(key: string, value: any): void {
         this.registry[key] = value;

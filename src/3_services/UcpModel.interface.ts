@@ -3,7 +3,7 @@ import { JSONProvider } from "./JSON.interface";
 import Thing from "./Thing.interface";
 import Wave from "./Wave.interface";
 
-export default interface UcpModel extends EventServiceConsumer<any, any>, Thing<UcpModel>, JSONProvider {
+export default interface UcpModel extends EventServiceConsumer, Thing<UcpModel>, JSONProvider {
     model: any;
     changelog: any; // UcpModelChangeLog | undefined
     destroy(): void;
@@ -31,7 +31,7 @@ export enum UcpModelTransactionStates {
 }
 
 export enum UcpModelEvents {
-    ON_MODEL_CHANGED = 'onModelChanges',
-    ON_MODEL_WILL_CHANGE = 'onModelWillChange',
-    ON_MODEL_LOCAL_CHANGED = 'onModelLocalChanges'
+    ON_MODEL_CHANGED = 'ON_MODEL_CHANGED',
+    ON_MODEL_WILL_CHANGE = 'ON_MODEL_WILL_CHANGE',
+    ON_MODEL_LOCAL_CHANGED = 'ON_MODEL_LOCAL_CHANGED'
 }

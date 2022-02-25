@@ -1,11 +1,19 @@
 import DefaultClassDescriptor from "../2_systems/Things/DefaultClassDescriptor.class";
 import Thing, { ThingObjectState } from "../3_services/Thing.interface";
 import ClassDescriptor from "../3_services/ClassDescriptor.interface";
+import EventService from "../3_services/EventService.interface";
+import DefaultEventService from "../2_systems/Things/DefaultEventService.class";
+
+export enum emptyEventList { }
 
 export default abstract class BaseThing<ClassInterface> implements Thing<ClassInterface> {
   objectState: ThingObjectState = ThingObjectState.ACTIVE;
 
   private static _typeDescriptorStore = new WeakMap();
+
+  EVENT_NAMES = emptyEventList;
+  protected _eventSupport!: EventService<any>;
+
   static get classDescriptor(): ClassDescriptor {
     let result = this._typeDescriptorStore.get(this);
     if (!result) {
