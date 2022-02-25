@@ -1,6 +1,7 @@
 import BaseThing from "../../../src/1_infrastructure/BaseThing.class";
 import { Interface, InterfaceList } from "../../../src/3_services/TypeDescriptor.interface";
 
+
 interface ViewInterface {
     name: String
 }
@@ -64,15 +65,16 @@ class RelatedObjectStore {
 }
 
 
-class UcpComponent {
+class UcpComponent extends BaseThing<UcpComponent> {
 
     private controller:UcpController=new UcpController();
 
     constructor() {
+        super();
         this.addView(ItemView, new DefaultItemView())
     }
     addView(anInterface:Interface, instance: any/* T extends anInteface */) {
-        console.log("InterfaceType: ",anInterface);
+        console.log("InterfaceType: ", anInterface.name );
         this.controller.registerView(anInterface, new DefaultItemView())
     }
     getAllViews() {
@@ -102,8 +104,8 @@ class UcpController {
     }
 }
 
-class Person extends UcpComponent {
-
+export class Person extends UcpComponent {
+    public firstName: String = "Me";
 }
 
 class DefaultItemView implements View {
