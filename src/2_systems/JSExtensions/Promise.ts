@@ -3,14 +3,15 @@
 interface callback { (result: any): void };
 interface timeoutCallback { (promiseHandler: promiseHandler): void };
 
-type promiseHandler = {
+export type promiseHandler = {
     setSuccess: callback,
     setError: callback,
     _resolve?: callback,
     _reject?: callback,
     isCompleted: boolean
     timeoutId?: any,
-    promise?: any
+    promise?: any,
+    metaData?: any
 };
 export default class ExtendedPromise<T> extends Promise<T> {
     constructor(executor: (resolve: any, reject: any) => ExtendedPromise<T>) {

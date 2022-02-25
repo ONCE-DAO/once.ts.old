@@ -32,7 +32,8 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
   }
 
 
-  get name(): string { return this.constructor.name };
+  protected _name: string | undefined;
+  get name(): string { return this._name || this.constructor.name };
   private _id: string | undefined;
   get id() {
     // TODO Preplace with correct ID generator
