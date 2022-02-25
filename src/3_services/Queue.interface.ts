@@ -1,5 +1,10 @@
 type asyncFunction = (...args: any[]) => Promise<any>;
 
+
+export type FunctionPromiseQueueConfig = { timeout?: number, priority?: number }
+
 export default interface FunctionPromiseQueue {
-    enqueue<R>(fun: asyncFunction, timeout: number): Promise<R>
+    enqueue<R>(fun: asyncFunction, config?: FunctionPromiseQueueConfig): Promise<R>
+    init(name: string): this
+    awaitAll(): Promise<any[]>
 }

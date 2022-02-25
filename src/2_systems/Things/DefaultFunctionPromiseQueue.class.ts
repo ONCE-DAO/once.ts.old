@@ -3,9 +3,11 @@ import FunctionPromiseQueue from "../../3_services/Queue.interface";
 import ExtendedPromise, { promiseHandler } from "../JSExtensions/Promise";
 import UUiD from "../JSExtensions/UUiD.class";
 
+
+type FunctionPromiseQueueConfig = { timeout?: number, priority?: number }
 export default class DefaultFunctionPromiseQueue extends BaseThing<FunctionPromiseQueue> implements FunctionPromiseQueue {
 
-    protected _queue: promiseHandler[] = [];
+    protected _queue: promiseHandler[][] = [[]];
     public silentMode: boolean = false;
     private workingOnPromise: boolean = false;
     public debug: boolean = false;
@@ -22,7 +24,9 @@ export default class DefaultFunctionPromiseQueue extends BaseThing<FunctionPromi
         return this;
     }
 
-    async enqueue<R>(fun: () => R, timeout: number = 0): Promise<Awaited<R>> {
+    async enqueue<R>(fun: () => R, config?: FunctionPromiseQueueConfig): Promise<Awaited<R>> {
+        const priority = config?.priority || 0;
+        const timeout = config?.timeout || 0;
 
         const queue = this;
 
@@ -58,24 +62,40 @@ export default class DefaultFunctionPromiseQueue extends BaseThing<FunctionPromi
             console.warn(`Enqueue into ${this.name} Function: ${fun.name} ID: ${promiseHandler.metaData.id}`);
         }
         promiseHandler.metaData = { function: fun };
-        this._queue.push(promiseHandler);
+        if (this._queue[priority] === undefined) this._queue[priority] = [];
+        this._queue[priority].push(promiseHandler);
         this.dequeue();
         return promiseHandler.promise;
     }
 
-    // Await all Renderings
-    // async then(onSuccess) {
-    //     let result = [];
-    //     while (this._private.queue.length > 0 || this._private.runningHandler) {
-    //         result = [...result, await this._private.runningHandler.promise];
-    //         result = [...result, await Promise.all(this._private.queue.map(ph => ph.promise))]
-    //     }
-    //     onSuccess(result);
-    // }
+    async awaitAll(): Promise<any[]> {
+        let result: any[] = [];
+        let all = this.getAllQueuedObjects();
+        while (all.length > 0 || this._runningHandler) {
+            if (this._runningHandler) {
+                result = [...result, await this._runningHandler.promise];
+            }
+            result = [...result, await Promise.all(all.map(ph => ph.promise))]
+            all = this.getAllQueuedObjects();
+        }
+        return result;
+    }
+
+    private getNextQueueObject(): promiseHandler | undefined {
+        for (let queue of this._queue) {
+            let object = queue.shift();
+            if (object) return object;
+        }
+        return undefined;
+    }
+
+    private getAllQueuedObjects(): promiseHandler[] {
+        return this._queue.flat(1);
+    }
 
     async dequeue() {
         if (this.workingOnPromise === true) return false;
-        const item = this._queue.shift();
+        const item = this.getNextQueueObject();
         if (item === undefined) {
             this._runningHandler = undefined;
             return false;
