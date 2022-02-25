@@ -51,6 +51,8 @@ const modelSchema =
 
 type ModelDataType = z.infer<typeof modelSchema>
 
+
+
 class DefaultUcpComponent extends BaseUcpComponent<ModelDataType, MyDefaultUcpComponent> implements MyDefaultUcpComponent {
     get myName() { return this.model.myName }
 
@@ -58,7 +60,7 @@ class DefaultUcpComponent extends BaseUcpComponent<ModelDataType, MyDefaultUcpCo
         return modelSchema;
     }
 
-    public readonly ucpModel: UcpModel = new DefaultUcpModel<ModelDataType>(DefaultUcpComponent.modelDefaultData, this);
+    public readonly ucpModel: UcpModel = new DefaultUcpModel<ModelDataType, MyDefaultUcpComponent>(DefaultUcpComponent.modelDefaultData, this);
 
 
     static get modelDefaultData() {

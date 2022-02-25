@@ -152,7 +152,7 @@ describe("Default Ucp Model", () => {
                 expect(ucpModel.transactionState).toBe(UcpModelTransactionStates.BEFORE_CHANGE);
             }
 
-            ucpModel.eventSupport.addEventListener(ucpModel, UcpModelEvents.ON_MODEL_WILL_CHANGE, callback, ucpModel)
+            ucpModel.eventSupport.addEventListener(UcpModelEvents.ON_MODEL_WILL_CHANGE, callback, ucpModel)
             model.age = 10;
 
             expect(result).not.toBe(undefined);
@@ -166,7 +166,7 @@ describe("Default Ucp Model", () => {
                 expect(ucpModel.transactionState).toBe(UcpModelTransactionStates.AFTER_CHANGE);
             }
 
-            ucpModel.eventSupport.addEventListener(ucpModel, UcpModelEvents.ON_MODEL_CHANGED, callback, ucpModel)
+            ucpModel.eventSupport.addEventListener(UcpModelEvents.ON_MODEL_CHANGED, callback, ucpModel)
             model.age = 10;
 
             expect(result).not.toBe(undefined);
@@ -179,7 +179,7 @@ describe("Default Ucp Model", () => {
                 count++;
             }
 
-            ucpModel.eventSupport.addEventListener(ucpModel, UcpModelEvents.ON_MODEL_LOCAL_CHANGED, callback, ucpModel);
+            ucpModel.eventSupport.addEventListener(UcpModelEvents.ON_MODEL_LOCAL_CHANGED, callback, ucpModel);
 
             model.age = 1;
 

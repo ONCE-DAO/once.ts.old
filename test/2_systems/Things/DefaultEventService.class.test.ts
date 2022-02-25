@@ -5,10 +5,14 @@ import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class";
 import EventService from "../../../src/3_services/EventService.interface";
 
 
+enum TestEventNames { "MY_EVENT_NAME" = "myEventName" }
+
 describe("Default Event Service", () => {
-    let es: EventService;
+    let es: EventService<TestEventNames>;
     test("init", async () => {
-        es = new DefaultEventService().init();
+        let ior1 = new DefaultIOR().init("google.de");
+
+        es = new DefaultEventService(ior1).init();
         expect(es).toBeInstanceOf(DefaultEventService);
     })
 
@@ -18,15 +22,15 @@ describe("Default Event Service", () => {
     test("addEventListener", async () => {
 
         let callbackFunction = (event: any, sourceObject: any, data: any) => { result = data; return "Done" }
-        es.addEventListener(ior1, "someName", callbackFunction, ior2);
+        es.addEventListener(TestEventNames.MY_EVENT_NAME, callbackFunction, ior2);
 
-        expect(es.getEvents(ior1).someName).toBeInstanceOf(DefaultEvent);
+        expect(es.getEvents()[TestEventNames.MY_EVENT_NAME]).toBeInstanceOf(DefaultEvent);
     })
 
     test("fire source result", async () => {
 
 
-        let fireResult = es.fire("someName", ior1, "myData");
+        let fireResult = es.fire(TestEventNames.MY_EVENT_NAME, "myData");
 
         expect(extendedPromise.isPromise(fireResult)).toBe(true);
         let awaitedFireResult = await fireResult;
@@ -53,16 +57,16 @@ describe("Default Event Service", () => {
             result2 = data;
             return "Done2";
         }
-        es.addEventListener(ior1, "someName", callbackFunction, ior3);
+        es.addEventListener(TestEventNames.MY_EVENT_NAME, callbackFunction, ior3);
 
-        expect(es.getEvents(ior1).someName).toBeInstanceOf(DefaultEvent);
+        expect(es.getEvents()[TestEventNames.MY_EVENT_NAME]).toBeInstanceOf(DefaultEvent);
 
         //@ts-ignore
-        expect(es.getEvents(ior1).someName.getCallbackFunctions().length).toBe(2);
+        expect(es.getEvents()[TestEventNames.MY_EVENT_NAME].getCallbackFunctions().length).toBe(2);
 
     })
     test("fire with 2 Target Functions", async () => {
-        let fireResult = es.fire("someName", ior1, "myData");
+        let fireResult = es.fire(TestEventNames.MY_EVENT_NAME, "myData");
 
         expect(extendedPromise.isPromise(fireResult)).toBe(true);
         let awaitedFireResult = await fireResult;
@@ -73,8 +77,8 @@ describe("Default Event Service", () => {
     test("callback Function Parameters", async () => {
         expect(result).toBe("myData");
         expect(result2).toBe("myData");
-        expect(callingEvent).toBe(es.getEvents(ior1).someName);
-        expect(callingObject).toBe(ior1);
+        expect(callingEvent).toBe(es.getEvents()[TestEventNames.MY_EVENT_NAME]);
+        expect(callingObject).toStrictEqual(ior1);
     })
 
 })

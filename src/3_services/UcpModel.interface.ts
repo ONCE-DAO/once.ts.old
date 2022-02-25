@@ -3,7 +3,7 @@ import { JSONProvider } from "./JSON.interface";
 import Thing from "./Thing.interface";
 import Wave from "./Wave.interface";
 
-export default interface UcpModel extends EventServiceConsumer, Thing<UcpModel>, JSONProvider {
+export default interface UcpModel extends EventServiceConsumer<any, any>, Thing<UcpModel>, JSONProvider {
     model: any;
     changelog: any; // UcpModelChangeLog | undefined
     destroy(): void;

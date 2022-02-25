@@ -51,5 +51,4 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
 
 
 
-
 }

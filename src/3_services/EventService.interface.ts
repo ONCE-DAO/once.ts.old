@@ -1,10 +1,10 @@
-import Thing from "./Thing.interface";
+import Thing, { ThingStatics } from "./Thing.interface";
 
-export default interface EventService extends Thing<EventService> {
-    addEventListener(eventSourceObject: Thing<any>, eventName: string, callbackFunction: Function, eventTargetObject: Thing<any>): void;
-    removeEventListener(eventTargetObject: Thing<any>, eventSourceObject?: Thing<any>, eventName?: string): void;
-    getEvents(eventSourceObject: Thing<any>): { [index: string]: OnceEvent };
-    fire(eventName: string, eventSource: Thing<any>, ...args: any[]): Promise<any[]>;
+export default interface EventService<EventEnum> extends Thing<EventService<any>> {
+    addEventListener(eventName: EventEnum, callbackFunction: Function, eventTargetObject: Thing<any>): void;
+    removeEventListener(eventTargetObject: Thing<any>, eventName?: EventEnum): void;
+    getEvents(): { [index: string]: OnceEvent };
+    fire(eventName: EventEnum, ...args: any[]): Promise<any[]>;
 }
 
 export interface OnceEvent {
@@ -13,7 +13,11 @@ export interface OnceEvent {
     addCallback(callbackFunction: Function, targetObject: Thing<any>): void;
 }
 
-export interface EventServiceConsumer {
-    eventSupport: EventService;
-    EVENTS: any;
+export interface EventServiceConsumer<EventEnum, TypeEventEnum> {
+    eventSupport: EventService<EventEnum>;
+    EVENT_NAMES: TypeEventEnum;
+}
+
+export interface EventServiceStatics extends ThingStatics<EventServiceStatics> {
+    constructor(eventSourceObject: Thing<any>): EventService<any>
 }

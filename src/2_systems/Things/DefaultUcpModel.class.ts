@@ -93,7 +93,7 @@ class UcpModelMapProxy extends Map {
 
     clear() {
         const proxyTools = this._helper._proxyTools;
-        const ucpModel = proxyTools.myUcpModel as DefaultUcpModel<any>;
+        const ucpModel = proxyTools.myUcpModel as DefaultUcpModel<any, any>;
 
         let startedTransaction = false;
         if (ucpModel.transactionState === UcpModelTransactionStates.TRANSACTION_CLOSED) {
@@ -115,7 +115,7 @@ class UcpModelMapProxy extends Map {
     set(key: any, value: any) {
 
         const proxyTools = this._helper._proxyTools;
-        const ucpModel = proxyTools.myUcpModel as DefaultUcpModel<any>;
+        const ucpModel = proxyTools.myUcpModel as DefaultUcpModel<any, any>;
         let proxyValue;
         if (ucpModel._isProxyObject(value)) {
             proxyValue = value;
@@ -155,19 +155,16 @@ class UcpModelMapProxy extends Map {
 
         let internalKey = this._getKey4Any(key)
 
-
         // Dose not exists
         if (!this.has(internalKey)) return true;
 
         const proxyTools = this._helper._proxyTools;
-        const ucpModel = proxyTools.myUcpModel as DefaultUcpModel<any>;
-
-
+        const ucpModel = proxyTools.myUcpModel as DefaultUcpModel<any, any>;
 
         //@ToDo Check if writeable
 
         const wave = new DefaultWave([...proxyTools.proxyPath, internalKey], this.get(internalKey), undefined, UcpModelChangeLogMethods.delete);
-        ucpModel._registerChange(wave)
+        ucpModel._registerChange(wave);
 
 
         return super.delete(internalKey);
@@ -191,21 +188,29 @@ class UcpModelArrayProxy extends Array {
     _helper: any;
 }
 
-export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> implements UcpModel, EventServiceConsumer {
-    //@ts-ignore   // Is ignored as it is set in the Constructor but typescript does not understand it
-    protected _data: ModelDataType;
-    protected _ucpComponent: UcpComponent<ModelDataType, any>
+export default class DefaultUcpModel<ModelDataType, UcpComponentInterface> extends BaseThing<UcpModel> implements UcpModel, EventServiceConsumer<UcpModelEvents, typeof UcpModelEvents> {
+    readonly ucpComponent: UcpComponent<ModelDataType, UcpComponentInterface>
+    public loadOnAccess: boolean = true;
+
+    protected _data!: ModelDataType;
     protected _transactionState: UcpModelTransactionStates = UcpModelTransactionStates.TRANSACTION_CLOSED;
     protected _history: Particle[] = [];
 
-    public loadOnAccess: boolean = true;
 
     constructor(defaultData: any, ucpComponent: UcpComponent<ModelDataType, any>) {
         super();
-        this._ucpComponent = ucpComponent;
+        this.ucpComponent = ucpComponent;
         this.model = defaultData;
     }
-    EVENTS: any;
+
+    EVENT_NAMES = UcpModelEvents;
+    private _eventSupport!: EventService<UcpModelEvents> | undefined;
+    get eventSupport(): EventService<UcpModelEvents> {
+        if (this._eventSupport === undefined) {
+            this._eventSupport = new DefaultEventService<UcpModelEvents>(this)
+        }
+        return this._eventSupport;
+    }
 
     get toJSON(): string {
         let loadOnAccess = this.loadOnAccess;
@@ -215,7 +220,6 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         return result;
     }
 
-    get eventSupport(): EventService { return DefaultEventService.getSingleton() }
 
     public _createProxy4Data(originalData: any, proxyPath: string[] = [], schema?: z.ZodFirstPartySchemaTypes) {
 
@@ -297,7 +301,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
 
         }
 
-        this.eventSupport.fire(UcpModelEvents.ON_MODEL_LOCAL_CHANGED, this, waveObject);
+        this.eventSupport.fire(UcpModelEvents.ON_MODEL_LOCAL_CHANGED, waveObject);
 
     }
 
@@ -336,7 +340,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         this._transactionState = UcpModelTransactionStates.BEFORE_CHANGE;
 
         //TODO: catch error
-        this.eventSupport.fire(UcpModelEvents.ON_MODEL_WILL_CHANGE, this, this.latestParticle.changelog);
+        this.eventSupport.fire(UcpModelEvents.ON_MODEL_WILL_CHANGE, this.latestParticle.changelog);
         let schema = this.getSchema();
 
         let parseResult = schema.safeParse(this._data);
@@ -348,7 +352,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
         this._transactionState = UcpModelTransactionStates.AFTER_CHANGE;
 
 
-        this.eventSupport.fire(UcpModelEvents.ON_MODEL_CHANGED, this, this.latestParticle.changelog);
+        this.eventSupport.fire(UcpModelEvents.ON_MODEL_CHANGED, this.latestParticle.changelog);
 
         particle.modelSnapshot = this.deepCopy(this.model);
 
@@ -378,7 +382,7 @@ export default class DefaultUcpModel<ModelDataType> extends BaseThing<UcpModel> 
     }
 
     public getSchema(path: string[] = [], schema?: z.ZodFirstPartySchemaTypes): z.ZodFirstPartySchemaTypes {
-        if (schema === undefined) schema = this._ucpComponent.classDescriptor.class.modelSchema as z.ZodFirstPartySchemaTypes;
+        if (schema === undefined) schema = this.ucpComponent.classDescriptor.class.modelSchema as z.ZodFirstPartySchemaTypes;
         for (const element of path) {
             const bottomSchema = getSchemaBottom(schema);
             switch (bottomSchema._def.typeName) {

@@ -1,5 +1,5 @@
 import EventService from "../../3_services/EventService.interface";
-import Store from "../../3_services/Store.interface";
+import Store, { StoreEvents } from "../../3_services/Store.interface";
 import BaseThing from "../../1_infrastructure/BaseThing.class";
 import ExtendedPromise from "../JSExtensions/Promise";
 import EventServiceInterface from "../../3_services/EventService.interface";
@@ -8,9 +8,15 @@ import DefaultEventService from "./DefaultEventService.class";
 type storedObject = { ref?: any, promise?: any };
 
 export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> implements Store {
-    EVENTS: any;
-    get eventSupport(): EventServiceInterface { return DefaultEventService.getSingleton() }
+    EVENT_NAMES = StoreEvents;
+    private _eventSupport!: EventService<StoreEvents>;
 
+    get eventSupport(): EventService<StoreEvents> {
+        if (this._eventSupport === undefined) {
+            this._eventSupport = new DefaultEventService(this);
+        }
+        return this._eventSupport;
+    }
     discover(): any[] {
         let result = [];
         for (const [key, objectRef] of Object.entries(this.registry)) {

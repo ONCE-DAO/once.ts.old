@@ -1,6 +1,6 @@
 import EventService, { EventServiceConsumer } from "./EventService.interface";
 
-export default interface Store extends EventServiceConsumer {
+export default interface Store extends EventServiceConsumer<any, any> {
 
     register(key: any, value: any): any
 
