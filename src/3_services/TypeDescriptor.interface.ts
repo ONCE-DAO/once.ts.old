@@ -67,7 +67,9 @@ class Method extends FunctionBehavior {
   
 }
 
-export abstract class Interface {}
+export abstract class Interface {
+  name: String = typeof this
+}
 
 export class InterfaceList extends Set<Interface> {}
 
@@ -99,14 +101,17 @@ class ClassDescription extends Constructor  {
   }
 }
 
-class Metaclass extends ClassDescription {
+export class Metaclass extends ClassDescription {
     protected _type: TSClass;
-    static store: Map<Constructor,TSClass>=new Map();
+    static store: Map<Constructor,Metaclass>=new Map();
+    
     static getClass(c: Constructor) {
       if (Metaclass.store.has(c))
         return Metaclass.store.get(c);
-      else
-        Metaclass.store.set(c, new TSClass(c));
+      else {
+        let aClass = new Metaclass(c);
+        Metaclass.store.set(c, aClass);
+      }
     }
 
     constructor(c: Constructor) {
@@ -127,15 +132,14 @@ class Metaclass extends ClassDescription {
 
 // TODO 
 // REFACTOR make sure TSClass comes form the TS framework
-export class TSClass extends ClassDescription implements TypeDescriptor {
-  metaclass: Metaclass;
-  protected _type: Constructor;
+export class TSClass  extends Metaclass implements TypeDescriptor {
+  metaclass: Metaclass
 
   constructor(c: Constructor) {
       super(c)
-      this.metaclass = new Metaclass(this);
+      this.metaclass = this as Metaclass;
       this.extends = c.prototype
-      this._type = c
+      //this._type = c
   }
   extends: TSClass;
 
