@@ -145,7 +145,7 @@ export class Metaclass extends ClassDescription {
 export class TSClass  extends Metaclass implements TypeDescriptor {
   metaclass: Metaclass
   extends: TSClass;
-  implements: Set<Interface>;
+  //implements: Set<Interface>;
 
   constructor(c: Constructor) {
       super(c)
