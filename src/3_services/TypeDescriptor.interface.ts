@@ -165,7 +165,7 @@ export class TSClass  extends ClassDescription implements TypeDescriptor {
   }
 
   get className() {
-    return "TS "+this.jsClass.name;
+    return "TSClass "+this.jsClass.name;
   }
 
   get type(): TSClass {
