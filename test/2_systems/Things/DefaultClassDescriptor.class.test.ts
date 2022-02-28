@@ -23,6 +23,7 @@ describe("DefaultClassDescriptor", () => {
 
     let interfaceList = ['Url']
     @DefaultClassDescriptor.addInterfaces(interfaceList)
+    // @ts-ignore
     class TestClass1 extends DefaultUrl implements Url {
 
     }

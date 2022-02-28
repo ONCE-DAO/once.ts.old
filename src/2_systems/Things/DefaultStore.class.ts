@@ -1,12 +1,14 @@
-import EventServiceInterface from "../../3_services/EventService.interface";
-import Store from "../../3_services/Store.interface";
+import Store, { StoreEvents } from "../../3_services/Store.interface";
 import BaseThing from "../../1_infrastructure/BaseThing.class";
+import EventServiceInterface, { EventServiceConsumer } from "../../3_services/EventService.interface";
+import DefaultEventService from "./DefaultEventService.class";
+import EventService from "../../3_services/EventService.interface";
 
-export default class DefaultStore extends BaseThing<DefaultStore> implements Store {
 
-    eventSupport: EventServiceInterface | undefined;
+export default class DefaultStore extends BaseThing<DefaultStore> implements Store, EventServiceConsumer {
+    EVENT_NAMES = StoreEvents;
+
     private registry: { [index: string]: any } = {};
-    private eventService: EventServiceInterface | undefined;
 
     register(key: string, value: any): void {
         this.registry[key] = value;
@@ -24,5 +26,10 @@ export default class DefaultStore extends BaseThing<DefaultStore> implements Sto
         this.registry = {};
     }
 
-
+    get eventSupport(): EventService<StoreEvents> {
+        if (this._eventSupport === undefined) {
+            this._eventSupport = new DefaultEventService(this);
+        }
+        return this._eventSupport;
+    }
 }

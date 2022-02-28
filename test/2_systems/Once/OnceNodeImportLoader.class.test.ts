@@ -6,9 +6,10 @@ import {
 import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class";
 
 
-test("load", async () => {
+test("resolve", async () => {
 
-    let loadedDefaultIOR = (await (load("ior:esm:git:tla.EAM.Once"))).DefaultIOR;
-    expect(loadedDefaultIOR).toEqual(DefaultIOR);
+    const defaultResolve = (x: string) => { return { url: x } }
+    let result = (await (resolve("ior:esm:git:tla.EAM.Once", { conditions: [''], importAssertions: {}, parentURL: '' }, defaultResolve)));
+    expect(result.url).toBe('../../')
 
 })

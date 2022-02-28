@@ -27,6 +27,7 @@
   ],
   "jest.jestCommandLine": "npm run test --",
   "cSpell.words": [
-    "deref"
+    "deref",
+    "uuidv"
   ]
 }

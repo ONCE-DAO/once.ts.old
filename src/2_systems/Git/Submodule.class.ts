@@ -30,8 +30,8 @@ export default class DefaultSubmodule implements Submodule {
   private distFolder: string | undefined;
 
   // COmponents
-  get distPath(){
-const p = join(this.fullPath)
+  get distPath() {
+    const p = join(this.fullPath)
     return p
   }
 
@@ -149,7 +149,7 @@ const p = join(this.fullPath)
 
       try {
         unlinkSync(current);
-      } catch {} //HACK REMOVE PB
+      } catch { } //HACK REMOVE PB
       if (existsSync(dist)) {
         rmSync(dist, { recursive: true });
       }
@@ -179,7 +179,7 @@ const p = join(this.fullPath)
     branch?: string;
   }): Promise<Submodule> {
     this.devPath = config.path;
-    this.distFolder = join('..','..','dist')
+    this.distFolder = join('..', '..', 'dist')
     this.url = config.url;
     this.branch = config.branch;
     return this;

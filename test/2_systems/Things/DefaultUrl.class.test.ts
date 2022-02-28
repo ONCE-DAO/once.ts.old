@@ -17,6 +17,23 @@ describe("Url Class", () => {
     expect(url.hostName).toEqual("test.wo-da.de");
   });
 
+  test("set hostName", async () => {
+    let url = new DefaultUrl().init("google.de");
+    url.hostName = "test.wo-da.de";
+
+    expect(url.hostName).toEqual("test.wo-da.de");
+    expect(url.href).toEqual("test.wo-da.de");
+
+  })
+
+  test("clone", async () => {
+    let url = new DefaultUrl().init("https://google.de/some/test?asdf=123");
+    let url2 = url.clone();
+    expect(url2.href).toEqual(url.href);
+    expect(url2).not.toBe(url);
+
+  })
+
 
   var validate = [];
   validate.push({

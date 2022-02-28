@@ -1,6 +1,6 @@
-import EventService from "./EventService.interface";
+import EventService, { EventServiceConsumer } from "./EventService.interface";
 
-export default interface Store {
+export default interface Store extends EventServiceConsumer {
 
     register(key: any, value: any): any
 
@@ -11,13 +11,10 @@ export default interface Store {
     discover(): any[]
 
     clear(): void
-
-    //TODO@BE Remove undefined later on
-    eventSupport: EventService | undefined
 }
 
 export enum StoreEvents {
-    ON_REGISTER,
-    ON_REMOVE,
-    ON_CLEAR
+    ON_REGISTER = "ON_REGISTER",
+    ON_REMOVE = "ON_REMOVE",
+    ON_CLEAR = "ON_CLEAR"
 }

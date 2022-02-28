@@ -1,10 +1,13 @@
+import Class from "./Class.interface";
 import IOR from "./IOR.interface";
 
-export type loadingConfig = { usedByClass: any } | undefined;
+export enum loaderReturnValue { "default", "path" }
+
+export type loadingConfig = { usedByClass?: Class<any>, returnValue?: loaderReturnValue } | undefined;
 
 export interface Loader {
 
-  load(ior: IOR, config: loadingConfig): Promise<any>
+  load(ior: IOR, config?: loadingConfig): Promise<any>
   canHandle(ior: IOR): number
 
 }

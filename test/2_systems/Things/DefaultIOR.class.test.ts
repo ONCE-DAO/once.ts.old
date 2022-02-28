@@ -1,6 +1,18 @@
 import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class";
 
 describe("IOR Class", () => {
+
+
+  test("clone", async () => {
+    let url = new DefaultIOR().init("https://google.de/some/test?asdf=123");
+    let url2 = url.clone();
+    expect(url2.href).toEqual(url.href);
+    expect(url2).not.toBe(url);
+
+  })
+
+
+
   let validate = [];
 
   validate.push({
@@ -32,6 +44,7 @@ describe("IOR Class", () => {
       id: "131cac9f-ceb3-401f-a866-73f7a691fed7",
       isLoaded: false,
       udeUniquePath: 'ior:/ior/131cac9f-ceb3-401f-a866-73f7a691fed7',
+      basePath: '/ior'
     },
   });
 

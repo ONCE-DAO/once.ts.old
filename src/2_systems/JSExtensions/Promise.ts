@@ -12,8 +12,8 @@ type promiseHandler = {
     timeoutId?: any,
     promise?: any
 };
-export default class extendedPromise<T> extends Promise<T> {
-    constructor(executor: (resolve: any, reject: any) => extendedPromise<T>) {
+export default class ExtendedPromise<T> extends Promise<T> {
+    constructor(executor: (resolve: any, reject: any) => ExtendedPromise<T>) {
         super((resolve, reject) => {
             return executor(resolve, reject);
         });

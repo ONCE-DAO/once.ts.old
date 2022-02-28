@@ -1,0 +1,21 @@
+@startuml UcpDomeinEntityLoaderObjects
+class DefaultUcpComponent implements UcpComponent
+class DefaultUcpModel implements UcpModel {
+    history: Particle[]
+}
+class DefaultParticle implements Particle {
+    snapshot: any
+    waveList: Wave[]
+}
+class DefaultWave implements Wave {
+    from: any;
+    to: any;
+    key: string[];
+    method: UcpModelChangeLogMethods;
+    time: number;
+    id: string;
+}
+DefaultUcpComponent ||-right- DefaultUcpModel
+DefaultUcpModel }o-right- DefaultParticle
+DefaultParticle }|-right- DefaultWave
+@enduml

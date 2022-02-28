@@ -2,6 +2,7 @@ import Once from "./Once.interface";
 
 export default interface Submodule {
   path: string | undefined;
+  devPath: string | undefined;
   url: string | undefined;
   branch: string | undefined;
   distPath: string;

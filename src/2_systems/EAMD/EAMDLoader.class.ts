@@ -1,5 +1,5 @@
 import IOR from "../../3_services/IOR.interface";
-import Loader, { LoaderStatic, loadingConfig } from "../../3_services/Loader.interface";
+import Loader, { loaderReturnValue, LoaderStatic, loadingConfig } from "../../3_services/Loader.interface";
 import { urlProtocol } from "../../3_services/Url.interface";
 import BaseLoader from "../../1_infrastructure/BaseLoader.class";
 
@@ -15,27 +15,33 @@ export const EAMDLoader: LoaderStatic = class EAMDLoader extends BaseLoader impl
 
     if (this.canHandle(ior) !== 1 || !ior.namespace) throw new Error("Can not load this IOR");
 
+    let modulePath: string;
     if (ior.namespace === 'tla.EAM.Once') {
-      return await import("../../exports");
+      modulePath = "../../";
+    } else {
+
+      if (!global.ONCE) throw new Error("Missing ONCE");
+      if (!global.ONCE.eamd) throw new Error("Missing EAMD in ONCE");
+
+      let eamdRepos = await global.ONCE?.eamd?.discover() as Object;
+
+      //@ts-ignore
+      const repoPath = eamdRepos[ior.namespace];
+      if (repoPath === undefined) {
+        throw new Error("Missing Mapping from Namespace to Repository")
+      }
+
+      if (!global.ONCE.eamd.eamdRepository) throw new Error("Missing eamdRepository");
+
+      let submodules = await global.ONCE.eamd.eamdRepository.getAndInstallSubmodule(ior, repoPath);
+
+      modulePath = global.ONCE.eamd.eamdDirectory + '/' + submodules.devPath + "/../../dist/current/src/";
     }
-
-    if (!global.ONCE) throw new Error("Missing ONCE");
-    if (!global.ONCE.eamd) throw new Error("Missing EAMD in ONCE");
-
-    let eamdRepos = await global.ONCE?.eamd?.discover() as Object;
-
-    //@ts-ignore
-    const repoPath = eamdRepos[ior.namespace];
-    if (repoPath === undefined) {
-      throw new Error("Missing Mapping from Namespace to Repository")
+    if (config?.returnValue === loaderReturnValue.path) {
+      return modulePath;
+    } else {
+      return await import(modulePath);
     }
-
-    if (!global.ONCE.eamd.eamdRepository) throw new Error("Missing eamdRepository");
-
-    let submodules = await global.ONCE.eamd.eamdRepository.getAndInstallSubmodule(ior, repoPath);
-
-
-    return "../../../../../../../../../" + submodules.path + "/../../dist/current/src/exports.js";
   }
 
   canHandle(ior: IOR): number {

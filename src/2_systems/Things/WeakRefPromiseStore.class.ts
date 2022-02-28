@@ -1,12 +1,21 @@
-import EventServiceInterface from "../../3_services/EventService.interface";
-import Store from "../../3_services/Store.interface";
+import EventService from "../../3_services/EventService.interface";
+import Store, { StoreEvents } from "../../3_services/Store.interface";
 import BaseThing from "../../1_infrastructure/BaseThing.class";
-import extendedPromise from "../JSExtensions/Promise";
+import ExtendedPromise from "../JSExtensions/Promise";
+import EventServiceInterface from "../../3_services/EventService.interface";
+import DefaultEventService from "./DefaultEventService.class";
 
 type storedObject = { ref?: any, promise?: any };
 
 export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> implements Store {
+    EVENT_NAMES = StoreEvents;
 
+    get eventSupport(): EventService<StoreEvents> {
+        if (this._eventSupport === undefined) {
+            this._eventSupport = new DefaultEventService(this);
+        }
+        return this._eventSupport;
+    }
     discover(): any[] {
         let result = [];
         for (const [key, objectRef] of Object.entries(this.registry)) {
@@ -41,10 +50,8 @@ export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> 
 
         return result;
     }
-    eventSupport: EventServiceInterface | undefined;
     private registry: { [index: string]: storedObject } = {};
     private mapRegistry: Map<any, storedObject> = new Map();
-    private eventService: EventServiceInterface | undefined;
     private _weakRefActive: boolean = true;
 
     private get weakRefAvailable() {
@@ -68,7 +75,7 @@ export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> 
     register(key: any, value: any) {
 
         let objectRef: storedObject;
-        const isPromise = extendedPromise.isPromise(value);
+        const isPromise = ExtendedPromise.isPromise(value);
         if (isPromise) {
             objectRef = { promise: value };
         } else {

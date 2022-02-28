@@ -27,12 +27,13 @@ describe("EAMD Loader", () => {
 
     expect(EAMDLoader.canHandle(ior2)).toBe(0);
   });
+  // TODO@PB Transform .js into .mjs
 
-  test(`load once.cli`, async () => {
-    if (!global.ONCE) await OnceNodeServer.start();
-    let loadedONCE = await DefaultIOR.load("ior:esm:git:tla.EAM.Once.ts");
-    expect(typeof loadedONCE).toBe("string");
-  }, 100000000);
+  // test(`load once.cli`, async () => {
+  //   if (!global.ONCE) await OnceNodeServer.start();
+  //   let loadedONCE = await DefaultIOR.load("ior:esm:git:tla.EAM.Once.ts");
+  //   expect(typeof loadedONCE).toBe("string");
+  // }, 100000000);
 
   // test(`import load Thing from Namespace`, async () => {
 

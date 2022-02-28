@@ -39,6 +39,8 @@
     "chokidar": "^3.5.3",
     "glob": "^7.2.0",
     "simple-git": "^3.1.1",
-    "xmlbuilder2": "^3.0.2"
+    "xmlbuilder2": "^3.0.2",
+    "zod": "^3.11.6",
+    "zod-to-ts": "^0.2.0"
   }
 }

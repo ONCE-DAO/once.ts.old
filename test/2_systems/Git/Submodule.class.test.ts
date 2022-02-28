@@ -8,7 +8,5 @@ test("getDistPath", async () => {
   const subModule = await DefaultSubmodule.getInstance().init({
     path: "Components/tla/EAM/once.ts/dev/once.ts@main",
   });
-  expect(subModule.distPath).toBe(
-    "Components/tla/EAM/once.ts/dist/0.0.1-SNAPSHOT-once.ts@main"
-  );
+  expect(subModule.distPath.match("/EAMD.ucp/Components/tla/EAM/once.ts/dev/once.ts")).toBeTruthy();
 });
