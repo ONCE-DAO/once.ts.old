@@ -38,7 +38,9 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
   //get name(): string { return this._name || this.constructor.name };
 
 
-  static get type(): Metaclass {
+  //static get type(): Metaclass {
+
+  static get type(): TSClass {
     return Metaclass.getClass(this);
     // let result = this._typeDescriptorStore.get(this);
     // if (!result) {
@@ -53,13 +55,13 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
   get type(): Metaclass {
     //TODO@MD Check how to do it better
     // @ts-ignore
-    return (this.constructor as Metaclass).type;
+    return (this.constructor as Metaclass).type.metaclass;
   }
   
   get tsClass(): TSClass {
     //TODO@MD Check how to do it better
     // @ts-ignore
-    return Metaclass.getClass(this) as TSClass;
+    return Metaclass.getClass(this.constructor) as TSClass;
   }
 
   static _typeDescriptor: any;

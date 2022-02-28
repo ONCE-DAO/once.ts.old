@@ -65,7 +65,7 @@ class RelatedObjectStore {
 }
 
 
-class UcpComponent extends BaseThing<UcpComponent> {
+export class UcpComponent extends BaseThing<UcpComponent> {
 
     private controller:UcpController=new UcpController();
 

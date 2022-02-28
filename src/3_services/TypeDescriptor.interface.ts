@@ -9,11 +9,14 @@ class FunctionBehavior extends Function implements Behaviour {
   }
 }
 
-class Constructor extends Function {
-
+abstract class Constructor extends Function {
+//  abstract get __proto__(): Constructor
 }
 
 class ConstructorBehaviour extends Constructor  implements Behaviour {
+  // get __proto__(): Constructor {
+  //   return this.__proto__
+  // }
   get type(): Constructor {
     return this.constructor as Constructor;
   }
@@ -92,22 +95,22 @@ export class ClassDescription extends Constructor  {
     this.extends = c.prototype;
   }
 
-  get class(): TSClass {
-      return (this._jsClass as TSClass)
+  get jsClass(): Constructor {
+    return this._jsClass 
   }
 
   getSourceCode() {
-    return this.class.toString();
+    return this.jsClass.toString();
   }
 }
 
 export class Metaclass extends ClassDescription {
     protected _jsClass: Constructor;
-    static store: Map<Constructor,Metaclass>=new Map();
+    static store: Map<Constructor,TSClass>=new Map();
 
     
-    static getClass(c: Constructor): Metaclass {
-      let aClass: Metaclass | undefined = undefined;
+    static getClass(c: Constructor): TSClass {
+      let aClass: TSClass | undefined = undefined;
 
       if (Metaclass.store.has(c)) {
         aClass = Metaclass.store.get(c);
@@ -118,7 +121,7 @@ export class Metaclass extends ClassDescription {
         Metaclass.store.set(c, aClass);
       }
 
-      return aClass as Metaclass
+      return aClass
     }
 
     constructor(c: Constructor) {
@@ -136,26 +139,31 @@ export class Metaclass extends ClassDescription {
     }
 
     get className() {
-      return "Metaclass "+this.class.name;
+      return "Metaclass "+this.jsClass.name;
     }
 }
 
 // TODO 
 // REFACTOR make sure TSClass comes form the TS framework
-export class TSClass  extends Metaclass implements TypeDescriptor {
+export class TSClass  extends ClassDescription implements TypeDescriptor {
   metaclass: Metaclass
   extends: TSClass;
   //implements: Set<Interface>;
 
   constructor(c: Constructor) {
       super(c)
-      this.metaclass = this as Metaclass;
-      this.extends = c.prototype
+      this.metaclass = new Metaclass(c);
+      //@ts-ignore
+      this.extends = Metaclass.getClass(c.__proto__)
       //this._type = c
   }
 
+  get jsClass() {
+    return this._jsClass 
+  }
+
   get className() {
-    return "TS "+this.class.name;
+    return "TS "+this.jsClass.name;
   }
 
   get type(): TSClass {
