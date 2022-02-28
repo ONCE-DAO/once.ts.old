@@ -93,7 +93,7 @@ export class ClassDescription extends Constructor  {
     this._jsClass = c;
     this.classDescription = this as ClassDescription
     // @ts-ignore
-    this.extends = c.__proto__;
+    //this.extends = c.__proto__;
   }
 
   get jsClass(): Constructor {
@@ -128,7 +128,8 @@ export class Metaclass extends ClassDescription {
     constructor(c: Constructor) {
         super(c)
         this._jsClass = c;
-        this.extends = c.prototype;
+        // @ts-ignore
+        this.extends = c.__proto__;
     }
     
     get class(): TSClass {
@@ -155,7 +156,7 @@ export class TSClass  extends ClassDescription implements TypeDescriptor {
       super(c)
       this.metaclass = new Metaclass(c);
       //@ts-ignore
-      this.extends = Metaclass.getClass(c.__proto__)
+      this.extends = c.__proto__ //Metaclass.getClass(c.__proto__)
       //this._type = c
   }
 
