@@ -1,5 +1,5 @@
 import { Metaclass, TSClass, ClassDescription } from '../../../src/3_services/TypeDescriptor.interface';
-import { Person } from "../UCP/UcpComponentSupport";
+import { Person, UcpComponent } from "../UCP/UcpComponentSupport";
 
 
 
@@ -13,11 +13,16 @@ describe("UcpComponentSupport", () => {
     //expect(person.type).toBe(undefined);
     expect(person.type).toBeInstanceOf(Metaclass);
     expect(person.type.class).toBe(Person);
+    expect(person.type.extends).toBe(UcpComponent);
     let aClass: Metaclass = person.type;
     expect(person.type.className).toBe("Metaclass Person");
     
     expect(person.tsClass).toBeInstanceOf(ClassDescription);
+    expect(person.tsClass).toBeInstanceOf(TSClass);
+    expect(person.tsClass.jsClass).toBe(Person);
     expect(person.tsClass.className).toBe("TS Person");
   })
   
 });
+
+
