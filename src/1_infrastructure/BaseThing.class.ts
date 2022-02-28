@@ -17,8 +17,13 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
   protected _eventSupport!: EventService<any>;
 
   static get classDescriptor(): ClassDescriptor {
-    if (this === BaseThing) {
-      throw new Error("Can only be called on the Class")
+    let result = this._typeDescriptorStore.get(this);
+    if (!result) {
+      // HACK
+      // @ts-ignore
+      // It is abstract, but TS does not understand that
+      result = new DefaultClassDescriptor().init(this);
+      this._typeDescriptorStore.set(this, result);
     }
     // @ts-ignore
     return ClassDescriptor.getClassDescriptor4Class(this);
@@ -26,6 +31,7 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
 
   get classDescriptor(): ClassDescriptor {
     //TODO@MD Check how to do it better
+    // HACK
     // @ts-ignore
     return this.constructor.classDescriptor;
   }
@@ -54,12 +60,14 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
 
   get type(): Metaclass {
     //TODO@MD Check how to do it better
+    // HACK
     // @ts-ignore
     return (this.constructor as Metaclass).type.metaclass;
   }
   
   get tsClass(): TSClass {
     //TODO@MD Check how to do it better
+    // HACK
     // @ts-ignore
     return Metaclass.getClass(this.constructor) as TSClass;
   }
