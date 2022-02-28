@@ -20,7 +20,7 @@ describe("UcpComponentSupport", () => {
     expect(person.tsClass).toBeInstanceOf(ClassDescription);
     expect(person.tsClass).toBeInstanceOf(TSClass);
     expect(person.tsClass.jsClass).toBe(Person);
-    expect(person.tsClass.className).toBe("TS Person");
+    expect(person.tsClass.className).toBe("TSClass Person");
   })
   
 });
