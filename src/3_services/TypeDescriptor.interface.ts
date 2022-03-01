@@ -92,8 +92,9 @@ export class ClassDescription extends Constructor  {
     super()
     this._jsClass = c;
     this.classDescription = this as ClassDescription
+    // HACK
     // @ts-ignore
-    //this.extends = c.__proto__;
+    this.extends = c.__proto__;
   }
 
   get jsClass(): Constructor {
