@@ -3,7 +3,6 @@ import Thing, { ThingObjectState } from "../3_services/Thing.interface";
 import ClassDescriptor from "../3_services/ClassDescriptor.interface";
 
 import EventService from "../3_services/EventService.interface";
-import DefaultEventService from "../2_systems/Things/DefaultEventService.class";
 import { Metaclass, TSClass } from '../3_services/TypeDescriptor.interface';
 
 export enum emptyEventList { }
@@ -11,21 +10,15 @@ export enum emptyEventList { }
 export default abstract class BaseThing<ClassInterface> implements Thing<ClassInterface> {
   objectState: ThingObjectState = ThingObjectState.ACTIVE;
 
-  private static _typeDescriptorStore = new WeakMap();
-
   EVENT_NAMES = emptyEventList;
   protected _eventSupport!: EventService<any>;
 
   static get classDescriptor(): ClassDescriptor {
-    let result = this._typeDescriptorStore.get(this);
-    if (!result) {
-      // HACK
-      // @ts-ignore
-      // It is abstract, but TS does not understand that
-      result = new DefaultClassDescriptor().init(this);
-      this._typeDescriptorStore.set(this, result);
+    if (this === BaseThing) {
+      throw new Error("Can only be called on the Class")
     }
-    return result;
+    // @ts-ignore
+    return DefaultClassDescriptor.getClassDescriptor4Class(this);
   }
 
   get classDescriptor(): ClassDescriptor {
@@ -34,6 +27,7 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
     // @ts-ignore
     return this.constructor.classDescriptor;
   }
+
 
 
   static get type(): TSClass {
@@ -54,8 +48,9 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
     return Metaclass.getClass(this.constructor) as TSClass;
   }
 
+  protected _name: string | undefined;
+  get name(): string { return this._name || this.constructor.name };
 
-  get name(): string { return this.constructor.name };
   private _id: string | undefined;
   get id() {
     // TODO Preplace with correct ID generator

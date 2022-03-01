@@ -1,12 +1,13 @@
 import BaseThing from "../../1_infrastructure/BaseThing.class";
 import Url, { urlProtocol } from "../../3_services/Url.interface";
+import DefaultClassDescriptor from "./DefaultClassDescriptor.class";
 
 
 export enum formatType { "normal", "origin", "originPath", "normalizedHref", "path" }
 
 
 type numberOrUndefined = number | undefined
-@DefaultUrl.classDescriptor.addInterfaces(['Url'])
+@DefaultClassDescriptor.addInterfaces(['Url'])
 export default class DefaultUrl extends BaseThing<DefaultUrl> implements Url {
     hostNames: string[] = [];
     ports: numberOrUndefined[] = [];

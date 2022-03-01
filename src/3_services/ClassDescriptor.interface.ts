@@ -1,8 +1,20 @@
 export default interface ClassDescriptor {
   extends: any[];
   class: any;
-  addSomething(...args: any[]): any;
-  addInterfaces(...args: any[]): any;
+  addInterfaces(interfaceList: string[]): this;
 
-  implements: any[];
+  implements: InterfaceDescriptor[];
+  add(object: any): this
+
+}
+
+
+export interface InterfaceDescriptor {
+  name: string;
+  implementations: ClassDescriptor[];
+  extends: InterfaceDescriptor[];
+  addImplementation(classDescriptor: ClassDescriptor): InterfaceDescriptor;
+  addExtension(listOfInterfaces: string[]): InterfaceDescriptor;
+  add(object: any): this
+  allExtendedInterfaces: InterfaceDescriptor[];
 }
