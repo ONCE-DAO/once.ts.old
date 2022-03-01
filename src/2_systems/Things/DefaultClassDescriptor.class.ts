@@ -11,12 +11,21 @@ export default class DefaultClassDescriptor implements ClassDescriptor {
         if (!this._class) return [];
         if (this._extends.length == 0) {
             let myClass = this._class;
-            //@ts-ignore
-            while (myClass.__proto__) {
-                //@ts-ignore
-                myClass = myClass.__proto__;
+
+            let myPrototype = myClass.prototype;
+            let myType = Object.getPrototypeOf(myClass);
+            
+            while (Object.getPrototypeOf(myClass)) {
+                myClass = Object.getPrototypeOf(myClass);
                 this._extends.push(myClass);
             }
+
+            // //@ts-ignore
+            // while (myClass.__proto__) {
+            //     //@ts-ignore
+            //     myClass = myClass.__proto__;
+            //     this._extends.push(myClass);
+            // }
         }
         return this._extends;
     };
