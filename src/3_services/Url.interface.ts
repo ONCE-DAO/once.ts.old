@@ -1,3 +1,4 @@
+import { getCommentRange } from "typescript";
 import { JSONProvider } from "./JSON.interface";
 
 export enum urlProtocol {
@@ -15,6 +16,7 @@ export enum urlProtocol {
 
 type numberOrUndefined = number | undefined
 
+//@xxxxx.declareInterface(): InterfaceDescriptor
 export interface Url extends JSONProvider {
 
   href: string;

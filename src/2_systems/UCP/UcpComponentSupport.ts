@@ -1,5 +1,5 @@
-import BaseThing from "../../../src/1_infrastructure/BaseThing.class";
-import { Interface, InterfaceList } from "../../../src/3_services/TypeDescriptor.interface";
+import BaseThing from "../../1_infrastructure/BaseThing.class";
+import { Interface, InterfaceList } from "../../3_services/TypeDescriptor.interface";
 
 
 interface ViewInterface {
@@ -106,6 +106,10 @@ class UcpController {
 
 export class Person extends UcpComponent {
     public firstName: String = "Me";
+    static helloWorld() {
+        console.log("Hello World");
+        return 3;
+    }
 }
 
 class DefaultItemView implements View {
