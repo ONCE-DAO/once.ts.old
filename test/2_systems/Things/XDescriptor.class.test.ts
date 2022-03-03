@@ -36,6 +36,9 @@ describe("ClassDescriptor", () => {
       myUrl: string;
     }
 
+    @ClassDescriptor.setFilePath(__filename)
+    @ClassDescriptor.componentExport({ silent: true })
+    //@ts-ignore
     class TestClass1 extends DefaultUrl implements MyUrl, MyString2 {
       myUrl: string = "";
       myString: string = "";
@@ -50,6 +53,11 @@ describe("ClassDescriptor", () => {
       expect(x.classDescriptor.implements[1].interfaceName).toEqual('MyString2');
 
     })
+
+    test("File Location", async () => {
+      expect(TestClass1.classDescriptor.filename).toBe(__filename);
+    })
+
 
     test("Interface Descriptor getInterfaceByName", () => {
 

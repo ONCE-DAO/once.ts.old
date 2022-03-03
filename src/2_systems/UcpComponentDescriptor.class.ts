@@ -2,7 +2,6 @@ import { readFileSync, writeFileSync } from "fs";
 import { basename, join } from "path";
 import { NpmPackage } from "./NpmPackage.class";
 import { create } from "xmlbuilder2";
-import ClassDescriptor from "./Things/DefaultClassDescriptor.class";
 import Thing from "../3_services/Thing.interface";
 
 export default class UcpComponentDescriptor {
@@ -11,6 +10,7 @@ export default class UcpComponentDescriptor {
 
   // TODO: specify better
   units: any[] = [];
+  exportList: any[] = [];
 
   static getDescriptorName(packagePath: string, packageName: string, packageVersion: string | undefined) {
     return `${packagePath}${packageName}[${packageVersion || 'latest'}]`;
@@ -85,6 +85,11 @@ export default class UcpComponentDescriptor {
   }
   initBasics(packagePath: string, packageName: string, packageVersion: string | undefined): UcpComponentDescriptor {
     //throw new Error("Method not implemented.");
+
+    this.name = packageName;
+    this.version = packageVersion;
+    this.srcPath = packagePath;
+
     let name = UcpComponentDescriptor.getDescriptorName(packagePath, packageName, packageVersion);
     UcpComponentDescriptor._componentDescriptorStore[name] = this;
     return this;

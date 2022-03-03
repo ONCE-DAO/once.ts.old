@@ -3,8 +3,10 @@ import UcpComponentDescriptor from "../UcpComponentDescriptor.class";
 
 export default class ClassDescriptor {
 
+
     private static _classDescriptorStore = new WeakMap<Class<any>, ClassDescriptor>();
     ucpComponentDescriptor: UcpComponentDescriptor | undefined;
+    filename: string | undefined;
 
     static getClassDescriptor4Class(aClass: Class<any>): ClassDescriptor {
         let descriptor = this._classDescriptorStore.get(aClass);
@@ -72,6 +74,52 @@ export default class ClassDescriptor {
 
             (aClass.classDescriptor as ClassDescriptor).addInterfaces(packagePath, packageName, packageVersion, interfaceName);
         }
+    }
+
+    static setFilePath(filename: string): Function {
+        return (aClass: any, name: string, x: any): void => {
+            (aClass.classDescriptor as ClassDescriptor).setFilePath(filename);
+        }
+
+    }
+
+    setFilePath(filename: string) {
+        this.filename = filename;
+    }
+
+    // Adds Object to export list
+    static componentExport(config?: { silent?: boolean }): Function {
+        return (aClass: any, name: string, x: any): void => {
+
+            try {
+                (aClass.classDescriptor as ClassDescriptor).componentExport = true;
+            } catch (e) {
+                if (config?.silent !== true) {
+                    throw e;
+                } else {
+                    console.error(e);
+                }
+            }
+        }
+    }
+
+    set componentExport(newValue: boolean) {
+
+        if (!this.ucpComponentDescriptor) {
+            throw new Error("Missing ucpComponentDescriptor in classDescriptor (Missing UcpComponentDescriptor.register)" + this.class.name)
+        }
+
+        const exportList = this.ucpComponentDescriptor.exportList;
+        if (newValue === true) {
+            exportList.push(this)
+        } else {
+            exportList.splice(exportList.indexOf(this), 1)
+        }
+    }
+
+    get componentExport(): boolean {
+        if (!this.ucpComponentDescriptor) throw new Error("Missing ucpComponentDescriptor in classDescriptor " + this.class.name)
+        return this.ucpComponentDescriptor.exportList.includes(this);
     }
 }
 
