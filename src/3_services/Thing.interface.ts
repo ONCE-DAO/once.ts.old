@@ -1,5 +1,5 @@
+import ClassDescriptor from "../2_systems/Things/DefaultClassDescriptor.class";
 import Class from "./Class.interface";
-import ClassDescriptor from "./ClassDescriptor.interface";
 
 export default interface Thing<ClassInterface> {
   id: string;

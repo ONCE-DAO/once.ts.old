@@ -1,7 +1,6 @@
-import DefaultClassDescriptor from "../2_systems/Things/DefaultClassDescriptor.class";
 import Thing, { ThingObjectState } from "../3_services/Thing.interface";
-import ClassDescriptor from "../3_services/ClassDescriptor.interface";
 import EventService from "../3_services/EventService.interface";
+import ClassDescriptor from "../2_systems/Things/DefaultClassDescriptor.class";
 
 export enum emptyEventList { }
 
@@ -16,7 +15,7 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
       throw new Error("Can only be called on the Class")
     }
     // @ts-ignore
-    return DefaultClassDescriptor.getClassDescriptor4Class(this);
+    return ClassDescriptor.getClassDescriptor4Class(this);
   }
 
   get classDescriptor(): ClassDescriptor {
