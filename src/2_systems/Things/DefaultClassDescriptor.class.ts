@@ -17,13 +17,17 @@ export default class ClassDescriptor {
         return descriptor;
     }
 
-    get implements() {
+    get allInterfaces() {
         let result: InterfaceDescriptor[] = [...this._interfaces];
         for (const interfaceObject of this._interfaces) {
             const extendedInterfaces = interfaceObject.allExtendedInterfaces;
             if (extendedInterfaces.length > 0) result.push(...extendedInterfaces);
         }
         return result
+    }
+
+    implements(interfaceObject: InterfaceDescriptor) {
+        return this.allInterfaces.includes(interfaceObject);
     }
 
     private _class: Class<any> | undefined;

@@ -48,15 +48,17 @@ describe("ClassDescriptor", () => {
     test("Interface Registration", async () => {
 
       let x = new TestClass1();
-      expect(x.classDescriptor.implements[0].interfaceName).toEqual('MyUrl');
-      expect(x.classDescriptor.implements[1].interfaceName).toEqual('MyString');
-      expect(x.classDescriptor.implements[1].interfaceName).toEqual('MyString2');
+      expect(x.classDescriptor.allInterfaces[0].interfaceName).toEqual('MyUrl');
+      expect(x.classDescriptor.allInterfaces[1].interfaceName).toEqual('MyString');
+      expect(x.classDescriptor.allInterfaces[1].interfaceName).toEqual('MyString2');
 
     })
 
     test("File Location", async () => {
       expect(TestClass1.classDescriptor.filename).toBe(__filename);
     })
+
+
 
 
     test("Interface Descriptor getInterfaceByName", () => {
@@ -93,6 +95,16 @@ describe("ClassDescriptor", () => {
       expect(x.classDescriptor.ucpComponentDescriptor.units.includes(TestClass1)).toBe(true);
 
 
+    })
+
+    test("ClassDescriptor implements", async () => {
+      const interfaceDescriptor = InterfaceDescriptor.getInterfaceByName(InterfaceDescriptor.uniqueName("tla.EAM", "once.ts", "0.0.1", "MyUrl"));
+      expect(interfaceDescriptor).toBeInstanceOf(InterfaceDescriptor);
+
+      if (interfaceDescriptor) {
+
+        expect(TestClass1.classDescriptor.implements(interfaceDescriptor)).toBe(true);
+      }
     })
   });
 
