@@ -1,6 +1,6 @@
 {
   "name": "once.ts",
-  "namespace": "tla.EAM",
+  "package": "tla.EAM",
   "version": "0.0.1",
   "main": "index.js",
   "type": "module",
@@ -20,6 +20,11 @@
     "build:version:before": "echo 'NOTHING'",
     "build:version": "tsc -p tsconfig.build.json",
     "build:version:after": "echo 'NOTHING'",
+    "update:thinglish-transformer": "npm-run-all update:remove:thinglish-transformer update:reinstall:thinglish-transformer",
+    "update:remove:thinglish-transformer": "rm -Rf node_modules/thinglish-transformer/",
+    "update:reinstall:thinglish-transformer": "npm i",
+    "update:thinglish-transformer:local:marcel": "cp /Users/marcel/tmp/dev/thinglish.transformer/dist/transformer.js ./node_modules/thinglish-transformer/dist/transformer.js",
+    "rebuild": "npx tsc",
     "test": "jest"
   },
   "devDependencies": {
