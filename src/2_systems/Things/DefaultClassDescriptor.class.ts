@@ -1,26 +1,33 @@
 import Class from "../../3_services/Class.interface";
-import ClassDescriptor, { InterfaceDescriptor } from "../../3_services/ClassDescriptor.interface";
+import UcpComponentDescriptor from "../UcpComponentDescriptor.class";
 
-export default class DefaultClassDescriptor implements ClassDescriptor {
+export default class ClassDescriptor {
 
-    private static _classDescriptorStore = new WeakMap<Class<any>, DefaultClassDescriptor>();
+
+    private static _classDescriptorStore = new WeakMap<Class<any>, ClassDescriptor>();
+    ucpComponentDescriptor: UcpComponentDescriptor | undefined;
+    filename: string | undefined;
 
     static getClassDescriptor4Class(aClass: Class<any>): ClassDescriptor {
         let descriptor = this._classDescriptorStore.get(aClass);
         if (descriptor === undefined) {
-            descriptor = new DefaultClassDescriptor().init(aClass);
+            descriptor = new ClassDescriptor().init(aClass);
             this._classDescriptorStore.set(aClass, descriptor);
         }
         return descriptor;
     }
 
-    get implements() {
+    get allInterfaces() {
         let result: InterfaceDescriptor[] = [...this._interfaces];
         for (const interfaceObject of this._interfaces) {
             const extendedInterfaces = interfaceObject.allExtendedInterfaces;
             if (extendedInterfaces.length > 0) result.push(...extendedInterfaces);
         }
         return result
+    }
+
+    implements(interfaceObject: InterfaceDescriptor) {
+        return this.allInterfaces.includes(interfaceObject);
     }
 
     private _class: Class<any> | undefined;
@@ -58,49 +65,81 @@ export default class DefaultClassDescriptor implements ClassDescriptor {
         return this;
     }
 
-    addInterfaces(interfaceList: string[]): this {
-        for (let interfaceName of interfaceList) {
-            let interfaceDescriptorInstance = DefaultInterfaceDescriptor.getInterfaceByName(interfaceName)
-            if (interfaceDescriptorInstance === undefined) {
-                interfaceDescriptorInstance = new DefaultInterfaceDescriptor(interfaceName);
-            }
-            this.add(interfaceDescriptorInstance);
-        }
+    addInterfaces(packagePath: string, packageName: string, packageVersion: string | undefined, interfaceName: string): this {
+        let interfaceDescriptor = InterfaceDescriptor.register(packagePath, packageName, packageVersion, interfaceName);
+        this.add(interfaceDescriptor);
         return this;
     }
 
-    add(object: any): this {
-        if (object instanceof DefaultInterfaceDescriptor) {
-            this._interfaces.push(object)
+    add(object: InterfaceDescriptor | UcpComponentDescriptor): ClassDescriptor {
+        if (object instanceof InterfaceDescriptor) {
+            this._interfaces.push(object);
             object.addImplementation(this);
+        } else if (object instanceof UcpComponentDescriptor) {
+            this.ucpComponentDescriptor = object;
         }
+
         return this;
     }
 
-    static addInterfaces(interfaceList: any[]): Function {
+    static addInterfaces(packagePath: string, packageName: string, packageVersion: string | undefined, interfaceName: string): Function {
         return (aClass: any, name: string, x: any): void => {
 
-            aClass.classDescriptor.addInterfaces(interfaceList);
+            (aClass.classDescriptor as ClassDescriptor).addInterfaces(packagePath, packageName, packageVersion, interfaceName);
         }
+    }
+
+    static setFilePath(filename: string): Function {
+        return (aClass: any, name: string, x: any): void => {
+            (aClass.classDescriptor as ClassDescriptor).setFilePath(filename);
+        }
+
+    }
+
+    setFilePath(filename: string) {
+        this.filename = filename;
+    }
+
+    // Adds Object to export list
+    static componentExport(config?: { silent?: boolean }): Function {
+        return (aClass: any, name: string, x: any): void => {
+
+            try {
+                (aClass.classDescriptor as ClassDescriptor).componentExport = true;
+            } catch (e) {
+                if (config?.silent !== true) {
+                    throw e;
+                } else {
+                    console.error(e);
+                }
+            }
+        }
+    }
+
+    set componentExport(newValue: boolean) {
+
+        if (!this.ucpComponentDescriptor) {
+            throw new Error("Missing ucpComponentDescriptor in classDescriptor (Missing UcpComponentDescriptor.register)" + this.class.name)
+        }
+
+        const exportList = this.ucpComponentDescriptor.exportList;
+        if (newValue === true) {
+            exportList.push(this)
+        } else {
+            exportList.splice(exportList.indexOf(this), 1)
+        }
+    }
+
+    get componentExport(): boolean {
+        if (!this.ucpComponentDescriptor) throw new Error("Missing ucpComponentDescriptor in classDescriptor " + this.class.name)
+        return this.ucpComponentDescriptor.exportList.includes(this);
     }
 }
 
-export class DefaultInterfaceDescriptor implements InterfaceDescriptor {
-    private static _interfaceStore: { [i: string]: InterfaceDescriptor } = {};
+export class InterfaceDescriptor {
+    private static readonly _interfaceStore: { [i: string]: InterfaceDescriptor } = {};
     readonly extends: InterfaceDescriptor[] = [];
-
-    static getOrCreateInterfaceByName(name: string): InterfaceDescriptor {
-        const existingInterface = this.getInterfaceByName(name);
-        if (existingInterface) return existingInterface;
-        return new this(name);
-    }
-
-    static getInterfaceByName(name: string): InterfaceDescriptor | undefined {
-        if (this._interfaceStore[name]) {
-            return this._interfaceStore[name];
-        }
-        return undefined;
-    }
+    readonly implementations: ClassDescriptor[] = [];
 
     get allExtendedInterfaces(): InterfaceDescriptor[] {
         let result: InterfaceDescriptor[] = [];
@@ -112,36 +151,59 @@ export class DefaultInterfaceDescriptor implements InterfaceDescriptor {
         return result;
     }
 
-    readonly name: string;
-    readonly implementations: ClassDescriptor[] = [];
-
-    constructor(name: string) {
-        this.name = name;
-        if (DefaultInterfaceDescriptor._interfaceStore[name]) throw new Error("Interface with the name already exists '" + name + "'");
-        DefaultInterfaceDescriptor._interfaceStore[name] = this;
-    }
-
     addImplementation(classDescriptor: ClassDescriptor): this {
         this.implementations.push(classDescriptor);
         return this
     }
 
-    addExtension(listOfInterfaces: string[]): InterfaceDescriptor {
-        for (let interfaceName of listOfInterfaces) {
-            let interfaceDescriptorInstance = DefaultInterfaceDescriptor.getInterfaceByName(interfaceName)
-            if (interfaceDescriptorInstance === undefined) {
-                interfaceDescriptorInstance = new DefaultInterfaceDescriptor(interfaceName);
-            }
-            this.add(interfaceDescriptorInstance);
+
+    // addExtension(listOfInterfaces: string[]): InterfaceDescriptor {
+    //     for (let interfaceName of listOfInterfaces) {
+    //         let interfaceDescriptorInstance = InterfaceDescriptor.getInterfaceByName(interfaceName)
+    //         if (interfaceDescriptorInstance === undefined) {
+    //             interfaceDescriptorInstance = new InterfaceDescriptor(interfaceName);
+    //         }
+    //         this.add(interfaceDescriptorInstance);
+    //     }
+    //     return this;
+    // }
+
+    add(object: any): this {
+        if (object instanceof InterfaceDescriptor) {
+            this.extends.push(object)
         }
         return this;
     }
 
-    add(object: any): this {
-        if (object instanceof DefaultInterfaceDescriptor) {
-            this.extends.push(object)
+
+    static getInterfaceByName(uniqueName: string): InterfaceDescriptor | undefined {
+        if (this._interfaceStore[uniqueName]) {
+            return this._interfaceStore[uniqueName];
         }
-        return this;
+        return undefined;
+    }
+
+    static register(packagePath: string, packageName: string, packageVersion: string | undefined, interfaceName: string): InterfaceDescriptor {
+        const uniqueName = this.uniqueName(packagePath, packageName, packageVersion, interfaceName);
+        if (InterfaceDescriptor._interfaceStore[uniqueName]) {
+            return InterfaceDescriptor._interfaceStore[uniqueName];
+        }
+        return new InterfaceDescriptor(packagePath, packageName, packageVersion, interfaceName);
+    }
+
+
+    static uniqueName(packagePath: string, packageName: string, packageVersion: string | undefined, interfaceName: string): string {
+        return `${packagePath}${packageName}[${packageVersion || 'latest'}]/${interfaceName}`
+    }
+
+    get uniqueName(): string {
+        return InterfaceDescriptor.uniqueName(this.packagePath, this.packageName, this.packageVersion, this.interfaceName);
+    }
+
+    constructor(public packagePath: string, public packageName: string, public packageVersion: string | undefined, public interfaceName: string) {
+        const uniqueName = this.uniqueName
+        if (InterfaceDescriptor._interfaceStore[uniqueName]) throw new Error("Interface with the name already exists '" + uniqueName + "'");
+        InterfaceDescriptor._interfaceStore[uniqueName] = this;
     }
 
 }
