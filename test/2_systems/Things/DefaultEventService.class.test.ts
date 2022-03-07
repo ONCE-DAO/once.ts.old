@@ -5,6 +5,7 @@ import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class";
 import EventService from "../../../src/3_services/EventService.interface";
 
 
+
 enum TestEventNames { "MY_EVENT_NAME" = "myEventName" }
 
 describe("Default Event Service", () => {
