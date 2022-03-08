@@ -1,5 +1,4 @@
 import Thing, { ThingObjectState } from "../3_services/Thing.interface";
-//import ClassDescriptor from "../3_services/ClassDescriptor.interface";
 
 import EventService from "../3_services/EventService.interface";
 import { Metaclass, TSClass } from '../3_services/TypeDescriptor.interface';
@@ -40,7 +39,7 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
     // @ts-ignore
     return (this.constructor as Metaclass).type.metaclass;
   }
-  
+
   get tsClass(): TSClass {
     //TODO@MD Check how to do it better
     // HACK
