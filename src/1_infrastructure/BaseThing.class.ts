@@ -64,7 +64,7 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
     // @ts-ignore
     return (this.constructor as Metaclass).type.metaclass;
   }
-  
+
   get tsClass(): TSClass {
     //TODO@MD Check how to do it better
     // HACK
