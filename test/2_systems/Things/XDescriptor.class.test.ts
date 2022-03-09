@@ -36,7 +36,6 @@ describe("ClassDescriptor", () => {
       myUrl: string;
     }
 
-    @ClassDescriptor.setFilePath(__filename)
     @ClassDescriptor.componentExport({ silent: true })
     //@ts-ignore
     class TestClass1 extends DefaultUrl implements MyUrl, MyString2 {
@@ -48,14 +47,20 @@ describe("ClassDescriptor", () => {
     test("Interface Registration", async () => {
 
       let x = new TestClass1();
-      expect(x.classDescriptor.allInterfaces[0].interfaceName).toEqual('MyUrl');
+
+      let allInterfaces = x.classDescriptor.allInterfaces;
+      expect(x.classDescriptor.allInterfaces[0].interfaceName).toEqual('MyString2');
+      expect(x.classDescriptor.allInterfaces[1].interfaceName).toEqual('MyUrl');
+
+      expect(allInterfaces.length).toEqual(3);
       expect(x.classDescriptor.allInterfaces[1].interfaceName).toEqual('MyString');
       expect(x.classDescriptor.allInterfaces[1].interfaceName).toEqual('MyString2');
 
     })
 
     test("File Location", async () => {
-      expect(TestClass1.classDescriptor.filename).toBe(__filename);
+      //@ts-ignore
+      expect(TestClass1.classDescriptor.filename).toBe(import.meta.url);
     })
 
 
@@ -75,20 +80,21 @@ describe("ClassDescriptor", () => {
     })
 
     test("Interface Descriptor extends", () => {
+
       const interfaceDescriptor = InterfaceDescriptor.getInterfaceByName(InterfaceDescriptor.uniqueName("tla.EAM", "once.ts", "0.0.1", "MyUrl"));
+
       const myStringDescriptor = InterfaceDescriptor.getInterfaceByName(InterfaceDescriptor.uniqueName("tla.EAM", "once.ts", "0.0.1", "MyString"));
       expect(interfaceDescriptor?.extends).toMatchObject([myStringDescriptor]);
     })
 
     test("Ucp Component Descriptor", () => {
       let x = new TestClass1();
-
       expect(x.classDescriptor.ucpComponentDescriptor).toBeInstanceOf(UcpComponentDescriptor);
 
     })
     test("Class in Ucp Component Descriptor", () => {
       let x = new TestClass1();
-
+      x
       expect(x.classDescriptor.ucpComponentDescriptor).toBeInstanceOf(UcpComponentDescriptor);
 
       //@ts-ignore

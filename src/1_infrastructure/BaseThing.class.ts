@@ -14,7 +14,8 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
 
   static get classDescriptor(): ClassDescriptor {
     if (this === BaseThing) {
-      throw new Error("Can only be called on the Class")
+      // @ts-ignore This should never happen
+      return undefined;
     }
     // @ts-ignore
     return ClassDescriptor.getClassDescriptor4Class(this);
