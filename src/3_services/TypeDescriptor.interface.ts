@@ -10,10 +10,10 @@ class FunctionBehavior extends Function implements Behaviour {
 }
 
 abstract class Constructor extends Function {
-//  abstract get __proto__(): Constructor
+  //  abstract get __proto__(): Constructor
 }
 
-class ConstructorBehaviour extends Constructor  implements Behaviour {
+class ConstructorBehaviour extends Constructor implements Behaviour {
   // get __proto__(): Constructor {
   //   return this.__proto__
   // }
@@ -32,7 +32,7 @@ class PropertyBehavior implements Behaviour {
     return this.constructor as Constructor;
   }
 
-  init(aName:String, aClass: TSClass) {
+  init(aName: String, aClass: TSClass) {
     this._name = aName;
   }
 
@@ -67,17 +67,17 @@ class CollectionBehavior implements Behaviour {
 
 
 class Method extends FunctionBehavior {
-  
+
 }
 
 export abstract class Interface {
   name: String = typeof this
 }
 
-export class InterfaceList extends Set<Interface> {}
+export class InterfaceList extends Set<Interface> { }
 
-export class ClassDescription extends Constructor  {
-  protected _jsClass: Constructor ;
+export class ClassDescription extends Constructor {
+  protected _jsClass: Constructor;
   classDescription: ClassDescription
   extends: TSClass | undefined = undefined
 
@@ -85,7 +85,7 @@ export class ClassDescription extends Constructor  {
 
   relationships: RelationshipBehavior[] = []
   collections: CollectionBehavior[] = []
-  
+
   methods: Method[] = []
 
   constructor(c: Constructor) {
@@ -98,7 +98,7 @@ export class ClassDescription extends Constructor  {
   }
 
   get jsClass(): Constructor {
-    return this._jsClass 
+    return this._jsClass
   }
 
   getSourceCode() {
@@ -107,68 +107,68 @@ export class ClassDescription extends Constructor  {
 }
 
 export class Metaclass extends ClassDescription {
-    protected _jsClass: Constructor;
-    static store: Map<Constructor,TSClass>=new Map();
+  protected _jsClass: Constructor;
+  static store: Map<Constructor, TSClass> = new Map();
 
-    
-    static getClass(c: Constructor): TSClass {
-      let aClass: TSClass | undefined = undefined;
 
-      if (Metaclass.store.has(c)) {
-        aClass = Metaclass.store.get(c);
-      }
+  static getClass(c: Constructor): TSClass {
+    let aClass: TSClass | undefined = undefined;
 
-      if (!aClass) {
-        aClass = new TSClass(c);
-        Metaclass.store.set(c, aClass);
-      }
-
-      return aClass
+    if (Metaclass.store.has(c)) {
+      aClass = Metaclass.store.get(c);
     }
 
-    constructor(c: Constructor) {
-        super(c)
-        this._jsClass = c;
-        // HACK
-        // @ts-ignore
-        this.extends = c.__proto__;
-    }
-    
-    get class(): TSClass {
-      return (this._jsClass as TSClass) // Metaclass.getClass(this._jsClass) as TSClass//
+    if (!aClass) {
+      aClass = new TSClass(c);
+      Metaclass.store.set(c, aClass);
     }
 
-    get type(): Metaclass {
-      return (this._jsClass as Metaclass)
-    }
+    return aClass
+  }
 
-    get className() {
-      return "Metaclass "+this.jsClass.name;
-    }
+  constructor(c: Constructor) {
+    super(c)
+    this._jsClass = c;
+    // HACK
+    // @ts-ignore
+    this.extends = c.__proto__;
+  }
+
+  get class(): TSClass {
+    return (this._jsClass as TSClass) // Metaclass.getClass(this._jsClass) as TSClass//
+  }
+
+  get type(): Metaclass {
+    return (this._jsClass as Metaclass)
+  }
+
+  get className() {
+    return "Metaclass " + this.jsClass.name;
+  }
 }
 
 // TODO 
 // REFACTOR make sure TSClass comes form the TS framework
-export class TSClass  extends ClassDescription implements TypeDescriptor {
+export class TSClass extends ClassDescription implements TypeDescriptor {
   metaclass: Metaclass
   extends: TSClass;
   //implements: Set<Interface>;
 
   constructor(c: Constructor) {
-      super(c)
-      this.metaclass = new Metaclass(c);
-      // HACK
-      // @ts-ignore
-      this.extends = c.__proto__ //Metaclass.getClass(c.__proto__)
-      //this._type = c
+    super(c)
+    this.metaclass = new Metaclass(c);
+    // HACK
+    // @ts-ignore
+    this.extends = c.__proto__ //Metaclass.getClass(c.__proto__)
+    //this._type = c
   }
 
   get jsClass() {
-    return this._jsClass 
+    return this._jsClass
   }
 
   get className() {
-    return "TSClass "+this.jsClass.name;
+    return "TSClass " + this.jsClass.name;
   }
 
   get type(): TSClass {
@@ -176,7 +176,7 @@ export class TSClass  extends ClassDescription implements TypeDescriptor {
   }
 
 }
-export default interface TypeDescriptor extends ClassDescription{
+export default interface TypeDescriptor extends ClassDescription {
   extends: TSClass | undefined;
   type: TSClass;
 

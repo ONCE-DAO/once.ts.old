@@ -28,6 +28,7 @@
   "jest.jestCommandLine": "npm run test --",
   "cSpell.words": [
     "deref",
+    "thinglish",
     "uuidv"
   ]
 }

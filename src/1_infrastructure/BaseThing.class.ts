@@ -17,6 +17,7 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
   protected _eventSupport!: EventService<any>;
 
   static get classDescriptor(): ClassDescriptor {
+<<<<<<< HEAD
     let result = this._typeDescriptorStore.get(this);
     if (!result) {
       // HACK
@@ -24,6 +25,11 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
       // It is abstract, but TS does not understand that
       result = new DefaultClassDescriptor().init(this);
       this._typeDescriptorStore.set(this, result);
+=======
+    if (this === BaseThing) {
+      // @ts-ignore This should never happen
+      return undefined;
+>>>>>>> bcaa30b (Fix ClassDescriptor tests)
     }
     // @ts-ignore
     return ClassDescriptor.getClassDescriptor4Class(this);
