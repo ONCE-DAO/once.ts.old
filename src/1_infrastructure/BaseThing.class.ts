@@ -36,8 +36,8 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
   protected _name: string | undefined;
 
   //type: any;
-  get name(): string { return this.constructor.name };
-  //get name(): string { return this._name || this.constructor.name };
+  //get name(): string { return this.constructor.name };
+  get name(): string { return this._name || this.constructor.name };
 
 
   //static get type(): Metaclass {
