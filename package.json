@@ -26,9 +26,9 @@
     "update:thinglish-transformer:local:marcel": "cp /Users/marcel/tmp/dev/thinglish.transformer/dist/transformer.js ./node_modules/thinglish-transformer/dist/transformer.js",
     "update:thinglish-transformer:local:bene": "cp /home/beckstein/thinglishTransformer/thinglish.transformer/dist/transformer.js ./node_modules/thinglish-transformer/dist/transformer.js",
     "rebuild": "npx tsc",
-    "test": "jest --clearCache;  jest",
+    "testBasic": "jest --clearCache;  jest",
     "start": "node --experimental-specifier-resolution=node someFile",
-    "testBasic": "jest --clearCache ; NODE_OPTIONS=--experimental-vm-modules jest"
+    "test": "jest --clearCache ; NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "devDependencies": {
     "@alex_neo/jest-expect-message": "^1.0.5",
