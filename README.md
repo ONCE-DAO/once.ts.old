@@ -65,6 +65,20 @@ in launch.json
 git pull --recurse-submodules
 ```
 
+# Simple use
+
+```
+npm i
+npx tsc
+npm t
+```
+
+for a quick update of the transpiler from the other local project 
+```
+npm run update:thinglish-transformer:local:marcel
+npm run update:thinglish-transformer:local:bene
+```
+
 
 ## Trouble Shooting
 
@@ -74,5 +88,7 @@ io.orta.jest.toggle-coverage
 not found
 ```
 
-Shift Control P: Jest: Start All Runners
-Shift Control P: Jest: Toggle Coverage
+- Shift Control P: Jest: Start All Runners
+- Shift Control P: Jest: Toggle Coverage
+
+

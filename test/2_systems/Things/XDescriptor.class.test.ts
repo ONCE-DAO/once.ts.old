@@ -58,10 +58,10 @@ describe("ClassDescriptor", () => {
 
     })
 
-    test("File Location", async () => {
-      //@ts-ignore
-      expect(TestClass1.classDescriptor.filename).toBe(import.meta.url);
-    })
+    // test("File Location", async () => {
+    //   //@ts-ignore
+    //   expect(TestClass1.classDescriptor.filename).toBe(import.meta.url);
+    // })
 
 
 

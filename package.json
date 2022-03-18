@@ -28,7 +28,7 @@
     "rebuild": "npx tsc",
     "testBasic": "jest --clearCache;  jest",
     "start": "node --experimental-specifier-resolution=node someFile",
-    "test": "jest --clearCache ; NODE_OPTIONS=--experimental-vm-modules jest"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "devDependencies": {
     "@alex_neo/jest-expect-message": "^1.0.5",
