@@ -2,7 +2,7 @@ import Thing, { ThingObjectState } from "../3_services/Thing.interface";
 import EventService from "../3_services/EventService.interface";
 import TypeDescriptor from "../3_services/TypeDescriptor.interface";
 import DefaultClassDescriptor from "../2_systems/Things/DefaultClassDescriptor.class";
-import ClassDescriptor from "../3_services/ClassDescriptor.interface";
+import ClassDescriptor from "../2_systems/Things/DefaultClassDescriptor.class";
 import WeakRefPromiseStore from "../2_systems/Things/WeakRefPromiseStore.class";
 import Store from "../3_services/Store.interface";
 import Class from "../3_services/Class.interface";
@@ -17,19 +17,9 @@ export default abstract class BaseThing<ClassInterface> implements Thing<ClassIn
   protected _eventSupport!: EventService<any>;
 
   static get classDescriptor(): ClassDescriptor {
-<<<<<<< HEAD
-    let result = this._typeDescriptorStore.get(this);
-    if (!result) {
-      // HACK
-      // @ts-ignore
-      // It is abstract, but TS does not understand that
-      result = new DefaultClassDescriptor().init(this);
-      this._typeDescriptorStore.set(this, result);
-=======
     if (this === BaseThing) {
       // @ts-ignore This should never happen
       return undefined;
->>>>>>> bcaa30b (Fix ClassDescriptor tests)
     }
     // @ts-ignore
     return ClassDescriptor.getClassDescriptor4Class(this);
