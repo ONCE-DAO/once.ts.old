@@ -38,7 +38,7 @@ describe("ClassDescriptor", () => {
 
     @ClassDescriptor.componentExport({ silent: true })
     //@ts-ignore
-    class TestClass1 extends DefaultUrl implements MyUrl, MyString2 {
+    class TestClass1 extends DefaultUrl implements MyUrl, MyString, MyString2 {
       myUrl: string = "";
       myString: string = "";
 
@@ -50,11 +50,11 @@ describe("ClassDescriptor", () => {
 
       let allInterfaces = x.classDescriptor.allInterfaces;
       expect(x.classDescriptor.allInterfaces[0].interfaceName).toEqual('MyString2');
-      expect(x.classDescriptor.allInterfaces[1].interfaceName).toEqual('MyUrl');
+      expect(x.classDescriptor.allInterfaces[1].interfaceName).toEqual('MyString');
+      expect(x.classDescriptor.allInterfaces[2].interfaceName).toEqual('MyUrl');
 
       expect(allInterfaces.length).toEqual(3);
-      expect(x.classDescriptor.allInterfaces[1].interfaceName).toEqual('MyString');
-      expect(x.classDescriptor.allInterfaces[1].interfaceName).toEqual('MyString2');
+
 
     })
 
