@@ -77,6 +77,8 @@ for a quick update of the transpiler from the other local project
 ```
 npm run update:thinglish-transformer:local:marcel
 npm run update:thinglish-transformer:local:bene
+
+npm run test@marcel
 ```
 
 
