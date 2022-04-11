@@ -20,13 +20,13 @@ class ClassDescriptor {
         return descriptor;
     }
 
-    get allInterfaces() {
+    get allInterfaces(): InterfaceDescriptor[] {
         let result: InterfaceDescriptor[] = [...this._interfaces];
         for (const interfaceObject of this._interfaces) {
             const extendedInterfaces = interfaceObject.allExtendedInterfaces;
             if (extendedInterfaces.length > 0) result.push(...extendedInterfaces);
         }
-        return result
+        return [...new Set(result)]
     }
 
     implements(interfaceObject: InterfaceDescriptor) {
@@ -94,6 +94,10 @@ class ClassDescriptor {
         this.packagePath = packagePath;
         this.packageName = packageName;
         this.packageVersion = packageVersion;
+
+        let ucpComponentDescriptor = UcpComponentDescriptor.getDescriptor(packagePath, packageName, packageVersion);
+        ucpComponentDescriptor.register(this.class);
+
     }
 
 
