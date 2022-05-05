@@ -32,7 +32,7 @@
 
     "test@marcel": "npm-run-all rebuild update:thinglish-transformer:local:marcel test",
     "update:thinglish-transformer:local:marcel": "cp /Users/marcel/tmp/dev/thinglish.transformer/dist/transformer.js ./node_modules/thinglish-transformer/dist/transformer.js",
-    "update:thinglish-transformer:local:bene": "cp /home/beckstein/thinglishTransformer/thinglish.transformer/dist/transformer.js ./node_modules/thinglish-transformer/dist/transformer.js"
+    "update:thinglish-transformer:local:bene": "cp ../thinglish.transformer/dist/transformer.js ./node_modules/thinglish-transformer/dist/transformer.js"
 
 
   },

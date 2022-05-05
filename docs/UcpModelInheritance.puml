@@ -1,0 +1,73 @@
+@startuml
+
+class DefaultURL
+class DefaultScenario
+
+class HttpServer
+class ONCE_Server
+
+Object EAMD.ucp
+Object Scenario
+Object com {
+ getter => url: com
+ domainLevel1: com
+}
+Object shiftphones {
+  getter => url: shiftphones.com
+  modelParent: com_ID
+  domainLevel1: => parentLink
+  domainLevel2: shiftphones
+}
+Object shifter {
+  getter => url: shifter.shiftphones.com
+  modelParent: shiftphones_ID
+  domainLevel1: => parentLink
+  domainLevel2: => parentLink
+  domainLevel3: shiftphones
+}
+
+
+Object once {
+  getter => url: https://shifter.shiftphones.com:8443/once
+  modelParent: shifter_ID
+  domainLevel1: => parentLink
+  domainLevel2: => parentLink
+  domainLevel3: => parentLink
+  port: => 8443
+  protocol: => parentLink
+  path1: once
+
+  getter => ONCE_DEFAULT_URL: "XXXX"
+
+  discover => Function Return other Scenarios below or the same level
+
+  rootDir => Function (Discover or store)
+  
+}
+ 
+EAMD.ucp -> Scenario: dir_path
+Scenario -> com : dir_path
+com -> shiftphones: dir_path
+shiftphones -> shifter: dir_path
+shifter -> once: dir_path
+
+
+com -> shiftphones: GUI update\nNotification
+shiftphones -> shifter: GUI update\nNotification
+shifter -> once: GUI update\nNotification
+
+com <- shiftphones: class extends
+shiftphones <- shifter: class extends
+shifter <- once: class extends
+
+
+DefaultScenario ---left---|> DefaultURL
+
+
+DefaultScenario .down.> com
+DefaultScenario .down.> shiftphones
+DefaultScenario .down.> shifter
+HttpServer ---left---|> DefaultScenario
+ONCE_Server -down.> once
+ONCE_Server---left---|>  HttpServer
+@enduml
