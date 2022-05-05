@@ -18,24 +18,7 @@
         "--experimental-loader",
         "${workspaceFolder}/dist/src/2_systems/Once/OnceNodeImportLoader.class.js"
       ],
-      "preLaunchTask": "tsc: build - tsconfig.json",
-      "outFiles": [
-        "${workspaceFolder}/dist/**/*.js"
-      ],
-      "console": "integratedTerminal"
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Install Once debugger",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "program": "${workspaceFolder}/src/1_infrastructure/OnceInstall.script.ts",
-      "runtimeArgs": [
-        "--inspect-brk"
-      ],
-      "preLaunchTask": "tsc: build - tsconfig.json",
+      // "preLaunchTask": "tsc: build - tsconfig.json",
       "outFiles": [
         "${workspaceFolder}/dist/**/*.js"
       ],
