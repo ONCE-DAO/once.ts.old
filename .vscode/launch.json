@@ -16,7 +16,7 @@
         "--inspect-brk",
         "--experimental-modules",
         "--experimental-loader",
-        "${workspaceFolder}/dist/src/2_systems/Once/OnceNodeImportLoader.class.js"
+        "${workspaceFolder}/dist/2_systems/Once/OnceNodeImportLoader.class.js"
       ],
       "preLaunchTask": "tsc: build - tsconfig.json",
       "outFiles": [
