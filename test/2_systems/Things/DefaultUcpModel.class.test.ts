@@ -1,4 +1,5 @@
 import ExtendedPromise from "../../../src/2_systems/JSExtensions/Promise";
+import UUiD from "../../../src/2_systems/JSExtensions/UUiD.class";
 import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class";
 import DefaultUcpComponent from "../../../src/2_systems/Things/DefaultUcpComponent.class";
 import { UcpModelProxyIORSchema } from "../../../src/2_systems/Things/DefaultUcpModel.class";
@@ -141,6 +142,16 @@ describe("Default Ucp Model", () => {
             let result = deepCopy(new Map([["my", 'test']]));
 
             expect(result).toStrictEqual([["my", 'test']]);
+        })
+
+        test("toUDEStructure", async () => {
+            ucpComponent.model.age = 1;
+            const data = ucpModel.toUDEStructure();
+
+            expect(data.data.age).toEqual(1);
+            expect(data.data.name).toEqual("MyDefaultName");
+
+            expect(UUiD.isUuidv4(data.version)).toBe(true);
         })
     })
     describe("Events", () => {

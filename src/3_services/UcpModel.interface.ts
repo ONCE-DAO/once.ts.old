@@ -12,7 +12,15 @@ export default interface UcpModel extends EventServiceConsumer, Thing<UcpModel>,
     rollbackTransaction(): void;
     transactionState: UcpModelTransactionStates;
     loadOnAccess: boolean;
+    toUDEStructure(particleSnapshot?: any): ModelUDEStructure;
+    version: string;
 }
+
+export type ModelUDEStructure = {
+    data: any,
+    version: string,
+    predecessorVersion: string | undefined
+};
 
 export enum UcpModelChangeLogMethods { "set" = "set", "delete" = "delete", "create" = "create" }
 

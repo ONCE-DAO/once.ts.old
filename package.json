@@ -24,17 +24,13 @@
     "update:remove:thinglish-transformer": "rm -Rf node_modules/thinglish-transformer/",
     "update:reinstall:thinglish-transformer": "npm i",
     "rebuild": "npx tsc",
-    "testBasic": "jest --clearCache;  jest",
-    "start": "node --experimental-specifier-resolution=node --loader ./dist/2_systems/Once.class.js dist/2_systems/Once.class.js",
+    "testBasic": "npx tsc; cp -r dist/src/* src/ ; jest --clearCache; node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "start": "node --experimental-specifier-resolution=node --loader ./dist/src/2_systems/Once.class.js dist/src/2_systems/Once.class.js",
     "build4test": "npm-run-all rebuild update:thinglish-transformer test",
-
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-
     "test@marcel": "npm-run-all rebuild update:thinglish-transformer:local:marcel test",
     "update:thinglish-transformer:local:marcel": "cp /Users/marcel/tmp/dev/thinglish.transformer/dist/transformer.js ./node_modules/thinglish-transformer/dist/transformer.js",
     "update:thinglish-transformer:local:bene": "cp ../thinglish.transformer/dist/transformer.js ./node_modules/thinglish-transformer/dist/transformer.js"
-
-
   },
   "devDependencies": {
     "@alex_neo/jest-expect-message": "^1.0.5",

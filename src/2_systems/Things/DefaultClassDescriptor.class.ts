@@ -3,7 +3,6 @@ import UcpComponentDescriptor from "../UcpComponentDescriptor.class";
 
 class ClassDescriptor {
 
-
     private static _classDescriptorStore = new WeakMap<Class<any>, ClassDescriptor>();
     ucpComponentDescriptor: UcpComponentDescriptor | undefined;
     filename: string | undefined;
@@ -97,7 +96,27 @@ class ClassDescriptor {
 
         let ucpComponentDescriptor = UcpComponentDescriptor.getDescriptor(packagePath, packageName, packageVersion);
         ucpComponentDescriptor.register(this.class);
+        this.registerAllInterfaces();
 
+    }
+
+    private registerAllInterfaces(): void {
+        const allInterfaces = this.interfaceList;
+        for (const aInterface of allInterfaces) {
+            aInterface.addImplementation(this);
+        }
+    }
+
+    get interfaceList(): InterfaceDescriptorInterface[] {
+        let interfaceList: InterfaceDescriptorInterface[] = [];
+        for (const aClass of this.extends) {
+            // @ts-ignore
+            if (aClass.classDescriptor) {
+                // @ts-ignore
+                interfaceList = [...interfaceList, ...aClass.classDescriptor.allInterfaces];
+            }
+        }
+        return interfaceList;
     }
 
 
@@ -224,7 +243,6 @@ export class InterfaceDescriptor {
         return new InterfaceDescriptor(packagePath, packageName, packageVersion, interfaceName);
     }
 
-
     static uniqueName(packagePath: string, packageName: string, packageVersion: string | undefined, interfaceName: string): string {
         return `${packagePath}.${packageName}[${packageVersion || 'latest'}]/${interfaceName}`
     }
@@ -239,8 +257,12 @@ export class InterfaceDescriptor {
             throw new Error("Interface with the name already exists '" + uniqueName + "'");
         }
         InterfaceDescriptor._interfaceStore[uniqueName] = this;
+        return this;
     }
 
 }
+
+
+type InterfaceDescriptorInterface = InstanceType<typeof InterfaceDescriptor>
 
 export default ClassDescriptor

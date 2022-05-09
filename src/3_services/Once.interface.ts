@@ -8,6 +8,7 @@ export default interface Once extends Thing<Once> {
   mode: OnceMode;
   state: OnceState;
   start(): void;
+  scenarioPath: string;
 }
 
 declare global {

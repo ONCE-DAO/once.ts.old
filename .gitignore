@@ -3,3 +3,6 @@ dist
 tsconfig.build.json
 coverage
 .DS_Store
+src/**/*.d.ts
+src/**/*.js
+src/**/*.d.ts.map
