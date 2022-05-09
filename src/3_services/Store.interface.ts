@@ -4,11 +4,11 @@ export default interface Store extends EventServiceConsumer {
 
     register(key: any, value: any): any
 
-    remove(key: any): void
+    remove(key: any): void;
 
-    lookup(key: any): any
+    lookup(key: any): any;
 
-    discover(): any[]
+    discover(): any;
 
     clear(): void
 }

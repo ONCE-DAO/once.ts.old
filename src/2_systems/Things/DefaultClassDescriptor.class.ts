@@ -108,7 +108,7 @@ class ClassDescriptor {
     }
 
     get interfaceList(): InterfaceDescriptorInterface[] {
-        let interfaceList: InterfaceDescriptorInterface[] = [];
+        let interfaceList: InterfaceDescriptorInterface[] = this.allInterfaces;
         for (const aClass of this.extends) {
             // @ts-ignore
             if (aClass.classDescriptor) {
@@ -258,6 +258,17 @@ export class InterfaceDescriptor {
         }
         InterfaceDescriptor._interfaceStore[uniqueName] = this;
         return this;
+    }
+
+    static getInterfaceByNameHack(interfaceName: string): InterfaceDescriptor | undefined {
+        // HACK Wird ersetzt durch Components und Interface Integration
+        if (!ONCE) throw new Error("Missing ONCE");
+        const packagePath = ONCE.classDescriptor.packagePath as string;
+        const packageName = ONCE.classDescriptor.packageName as string;
+        const packageVersion = ONCE.classDescriptor.packageVersion;
+        const aInterfaceName = InterfaceDescriptor.uniqueName(packagePath, packageName, packageVersion, interfaceName);
+        return InterfaceDescriptor.getInterfaceByName(aInterfaceName);
+
     }
 
 }

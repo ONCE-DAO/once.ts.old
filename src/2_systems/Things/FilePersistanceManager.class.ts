@@ -5,8 +5,6 @@ import { UcpModelChangelog } from "../../3_services/UcpModel.interface";
 
 class FilePersistanceManager extends BasePersistanceManager {
 
-    private ucpComponent: UcpComponent<any, any>;
-
     static canHandle(ucpComponent: UcpComponent<any, any>): number {
         if (ONCE && ONCE.mode === OnceMode.NODE_JS) {
             return 1;
@@ -14,10 +12,6 @@ class FilePersistanceManager extends BasePersistanceManager {
         return 0;
     }
 
-    constructor(ucpComponent: UcpComponent<any, any>) {
-        super();
-        this.ucpComponent = ucpComponent;
-    }
 
     get IOR() { return this.ucpComponent.IOR }
 
