@@ -17,6 +17,9 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
     // TODO@BE refactor to versionString
     public namespaceVersion: string | undefined = undefined;
 
+    public namespaceObject: string | undefined = undefined;
+
+
     // static async load<T extends Thing>(url: string, name: string): Promise<{ new(): T } | undefined> {
     //     try {
     //         const imported: any = await import(url)
@@ -79,10 +82,11 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
     }
 
     private _parsePackageAndVersion(url: string): string {
-        let packageMatch = url.match(/^([^:\[]+)(\[([\^\.\da-zA-Z#]+)\])?$/);
+        let packageMatch = url.match(/^([^:\[]+)(\[([\^\.\da-zA-Z#]+)\])?(\/(.+))?$/);
         if (packageMatch) {
             this.namespace = packageMatch[1];
             this.namespaceVersion = packageMatch[3];
+            this.namespaceObject = packageMatch[5]
             url = url.substring(packageMatch[0].length)
         }
         return url;
@@ -107,6 +111,8 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
         url += protocol.join(':') + ':';
         url += this.namespace;
         if (this.namespaceVersion) url += `[${this.namespaceVersion}]`
+
+        if (this.namespaceObject) url += `/${this.namespaceObject}`
 
         return url;
     }

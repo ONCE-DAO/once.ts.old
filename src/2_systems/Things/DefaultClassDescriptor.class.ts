@@ -47,7 +47,7 @@ class ClassDescriptor {
 
     //TODO Change that to Component export path
     get classPackageString(): string {
-        return `${this.packagePath}${this.packageName}[${this.packageVersion}]/${this.packageFilename}#${this.className}`
+        return `${this.packagePath}.${this.packageName}[${this.packageVersion}]/${this.className}`
     }
 
     private _class: Class<any> | undefined;

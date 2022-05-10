@@ -18,6 +18,9 @@ class EAMDLoader extends BaseLoader implements Loader {
     let modulePath: string;
     if (ior.namespace === 'tla.EAM.Once') {
       modulePath = "../../";
+    } else if (ior.namespace === 'tla.EAM.once.ts') {
+      modulePath = "../../";
+
     } else {
 
       if (!global.ONCE) throw new Error("Missing ONCE");
@@ -40,7 +43,14 @@ class EAMDLoader extends BaseLoader implements Loader {
     if (config?.returnValue === loaderReturnValue.path) {
       return modulePath;
     } else {
-      return await import(modulePath);
+      const result = await import(modulePath);
+
+      if (ior.namespaceObject !== undefined) {
+        if (!result[ior.namespaceObject]) throw new Error(`Missing Object '${ior.namespaceObject}' in import`)
+        return result[ior.namespaceObject];
+      } else {
+        return result;
+      }
     }
   }
 

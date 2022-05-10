@@ -79,7 +79,7 @@ export default abstract class BaseUcpComponent<ModelDataType, ClassInterface> ex
             this._IOR = new DefaultIOR();
 
             // TODO Replace localhost
-            let href = 'localhost/' + this.classDescriptor.classPackageString;
+            let href = 'ior:esm:git:' + this.classDescriptor.classPackageString;
             this._IOR.init(href);
         }
         return this._IOR;

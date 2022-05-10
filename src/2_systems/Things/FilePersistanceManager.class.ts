@@ -71,7 +71,12 @@ export class FilePersistanceManager extends BasePersistanceManager {
 
     async retrieve(ior?: IOR): Promise<UDEObject> {
         let fileName = await this.fileName(ior);
-        return JSON.parse(fs.readFileSync(fileName, 'utf-8'));
+        const data = JSON.parse(fs.readFileSync(fileName, 'utf-8'));
+
+        if (this.ucpComponent) {
+            this.ucpComponent.model = data.data;
+        }
+        return data;
     }
 
     async update(): Promise<void> {

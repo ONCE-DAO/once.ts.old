@@ -117,6 +117,21 @@ describe("IOR Class", () => {
     },
   });
 
+  validate.push({
+    url: "ior:esm:git:tla.EAM.Namespace[#sdsgzudhsudhusidh]/someClassName",
+    result: {
+      protocol: ["ior", "esm", "git"],
+      hostName: undefined,
+      pathName: undefined,
+      origin: undefined,
+      isLoaded: false,
+      namespace: "tla.EAM.Namespace",
+      namespaceVersion: "#sdsgzudhsudhusidh",
+      namespaceObject: "someClassName",
+      href: "ior:esm:git:tla.EAM.Namespace[#sdsgzudhsudhusidh]/someClassName"
+    },
+  });
+
   // validate.push({
   //   url: "ior:esm:github:tla.EAM.OnceService.Once.express#/ONCE-DAO/Once.express",
   //   result: {
