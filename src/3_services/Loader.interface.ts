@@ -1,5 +1,6 @@
 import Class from "./Class.interface";
 import IOR from "./IOR.interface";
+import { ThingStatics } from "./Thing.interface";
 
 export enum loaderReturnValue { "default", "path" }
 
@@ -11,10 +12,10 @@ export interface Loader {
   canHandle(ior: IOR): number
 
 }
-
-export interface LoaderStatic {
+export interface LoaderStatic extends ThingStatics<LoaderStatic> {
   canHandle(ior: IOR): number
   factory(ior: IOR): Loader
+  new(...args: any[]): Loader;
 }
 
 export default Loader;

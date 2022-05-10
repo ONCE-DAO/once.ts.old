@@ -4,6 +4,7 @@ import { RootEAMD } from "../EAMD/RootEAMD.class";
 import { UserEAMD } from "../EAMD/UserEAMD.class";
 import { BaseNodeOnce } from "../../1_infrastructure/BaseNodeOnce.class";
 import DefaultSubmodule from "../Git/Submodule.class";
+import { FilePersistanceManager } from "../Things/FilePersistanceManager.class";
 
 export default class OnceNodeServer extends BaseNodeOnce implements Once {
 
@@ -41,6 +42,10 @@ export default class OnceNodeServer extends BaseNodeOnce implements Once {
 
     console.log("ONCE STARTED AS NODE_JS");
     const once = new OnceNodeServer(await this.initEAMD());
+
+    //HACK: Should be dynamic
+    await import("../Things/FilePersistanceManager.class");
+
 
     // if (once.eamd && once.eamd.eamdRepository) {
     //   const submodules = await once.eamd.eamdRepository.getSubmodules();

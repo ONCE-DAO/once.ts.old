@@ -3,6 +3,7 @@ import Loader, { loadingConfig } from "../../3_services/Loader.interface";
 import IOR from "../../3_services/IOR.interface";
 import { urlProtocol } from "../../3_services/Url.interface";
 import DefaultLoader from "./DefaultLoader.class";
+import UUiD from "../JSExtensions/UUiD.class";
 
 
 
@@ -187,5 +188,11 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
             }
         }).catch(error => { });
         return loadingPromiseOrObject;
+    }
+
+    static createUdeIor(): IOR {
+        //TODO Need to change that later
+        const IOR = new DefaultIOR().init('ior:ude://localhost/UDE/' + UUiD.uuidv4());
+        return IOR;
     }
 }

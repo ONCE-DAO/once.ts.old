@@ -6,6 +6,7 @@ export interface IOR extends Url {
   load(config: loadingConfig): Promise<any>
   namespace: string | undefined;
   namespaceVersion: string | undefined;
+  id: string | undefined;
 }
 
 export default IOR;

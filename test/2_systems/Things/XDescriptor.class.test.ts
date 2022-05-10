@@ -48,12 +48,17 @@ describe("ClassDescriptor", () => {
 
       let x = new TestClass1();
 
-      let allInterfaces = x.classDescriptor.allInterfaces;
-      expect(x.classDescriptor.allInterfaces[0].interfaceName).toEqual('MyString2');
-      expect(x.classDescriptor.allInterfaces[1].interfaceName).toEqual('MyString');
-      expect(x.classDescriptor.allInterfaces[2].interfaceName).toEqual('MyUrl');
+      let allInterfaces = x.classDescriptor.implementedInterfaces;
+      let interfaceNameList = allInterfaces.map(x => x.interfaceName);
 
-      expect(allInterfaces.length).toEqual(3);
+      expect(interfaceNameList.includes('MyString2')).toBeTruthy();
+      expect(interfaceNameList.includes('MyString')).toBeTruthy();
+      expect(interfaceNameList.includes('MyUrl')).toBeTruthy();
+      expect(interfaceNameList.includes('Url')).toBeTruthy();
+      expect(interfaceNameList.includes('JSONProvider')).toBeTruthy();
+
+
+      expect(allInterfaces.length).toEqual(5);
 
 
     })

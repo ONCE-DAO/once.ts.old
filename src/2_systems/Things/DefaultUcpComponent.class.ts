@@ -3,6 +3,7 @@ import UcpModel from "../../3_services/UcpModel.interface";
 import DefaultUcpModel, { UcpModelProxyIORSchema, UcpModelProxySchema } from "./DefaultUcpModel.class";
 import BaseUcpComponent from "../../1_infrastructure/BaseUcpComponent.class";
 import { z } from "zod";
+import ClassDescriptor from "./DefaultClassDescriptor.class";
 
 
 
@@ -53,8 +54,8 @@ const modelSchema =
 type ModelDataType = z.infer<typeof modelSchema>
 
 
-
-class DefaultUcpComponent extends BaseUcpComponent<ModelDataType, MyDefaultUcpComponent> implements MyDefaultUcpComponent {
+@ClassDescriptor.componentExport({ silent: true })
+export default class DefaultUcpComponent extends BaseUcpComponent<ModelDataType, MyDefaultUcpComponent> implements MyDefaultUcpComponent {
     get myName() { return this.model.myName }
 
     static get modelSchema() {
@@ -74,6 +75,5 @@ class DefaultUcpComponent extends BaseUcpComponent<ModelDataType, MyDefaultUcpCo
 
 //const DefaultUcpComponentExport: UcpComponentStatics<ModelDataType, MyDefaultUcpComponent> = DefaultUcpComponent;
 
-export default DefaultUcpComponent;
 
 

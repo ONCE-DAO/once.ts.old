@@ -1,16 +1,24 @@
 import Class from "./Class.interface";
+import IOR from "./IOR.interface";
 import UcpComponent from "./UcpComponent.interface";
-import { UcpModelChangelog } from "./UcpModel.interface";
+import { ModelUDEStructure, UcpModelChangelog } from "./UcpModel.interface";
 
 export default interface PersistanceManager {
 
-  create(): void;
-  retrieve(): void;
-  update(): void;
-  delete(): void;
-  load(): void;
+  create(): Promise<void>;
+  retrieve(ior?: IOR): Promise<UDEObject>;
+  update(): Promise<void>;
+  delete(): Promise<void>;
   onModelChanged(changeObject: UcpModelChangelog): void;
   onNotification(changeObject: UcpModelChangelog): void;
+}
+
+export type UDEObject = ModelUDEStructure & {
+  iorId: string,
+  type: 'Entity',
+  entityIOR: string
+  objectIor: string
+  time: number
 }
 
 // TODO@BE Need to use it

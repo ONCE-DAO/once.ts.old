@@ -38,6 +38,7 @@ export interface Url extends JSONProvider {
   fileName: string | undefined;
   fileType: string | undefined;
   fileTypes: string[];
+  init(href: string): this;
 }
 
 

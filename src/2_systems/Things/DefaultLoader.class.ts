@@ -1,18 +1,27 @@
 import BaseLoader from "../../1_infrastructure/BaseLoader.class";
 import IOR from "../../3_services/IOR.interface";
-import { LoaderStatic } from "../../3_services/Loader.interface";
+import Loader, { LoaderStatic } from "../../3_services/Loader.interface";
 import EAMDLoader from "../EAMD/EAMDLoader.class";
+import { InterfaceDescriptor } from "./DefaultClassDescriptor.class";
+import UDELoader from "./UDELoader.class";
 
 
 export default class DefaultLoader extends BaseLoader {
 
     static discover(): LoaderStatic[] {
+        // Make sure Loader is present;
+        // TODO Make it dynamic
+        EAMDLoader;
+        UDELoader;
+
         // TODO Discover Loader over interface interface
 
-        return [EAMDLoader];
+        let loaderDesc = InterfaceDescriptor.getInterfaceByNameHack('Loader');
+        if (!loaderDesc) throw new Error("Missing Loader interface");
+        return loaderDesc.implementations.map(d => d.class)
     }
 
-    static findLoader(ior: IOR) {
+    static findLoader(ior: IOR): Loader | undefined {
 
         const loaderList = this.discover();
         let ratedLoader = loaderList.map(loader => {
@@ -26,4 +35,5 @@ export default class DefaultLoader extends BaseLoader {
         }
 
     }
+
 }

@@ -1,7 +1,11 @@
 import EAMDLoader from "../../../src/2_systems/EAMD/EAMDLoader.class";
 import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class";
-import OnceKernel from "../../../src/1_infrastructure/OnceKernel.class";
 import OnceNodeServer from "../../../src/2_systems/Once/OnceNodeServer.class";
+
+
+beforeEach(async () => {
+  if (typeof ONCE === "undefined") await OnceNodeServer.start();
+});
 
 describe("EAMD Loader", () => {
   test(`IOR Find Loader`, () => {

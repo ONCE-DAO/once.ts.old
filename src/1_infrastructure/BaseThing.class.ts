@@ -1,11 +1,7 @@
 import Thing, { ThingObjectState } from "../3_services/Thing.interface";
 import EventService from "../3_services/EventService.interface";
-import TypeDescriptor from "../3_services/TypeDescriptor.interface";
-import DefaultClassDescriptor from "../2_systems/Things/DefaultClassDescriptor.class";
 import ClassDescriptor from "../2_systems/Things/DefaultClassDescriptor.class";
-import WeakRefPromiseStore from "../2_systems/Things/WeakRefPromiseStore.class";
-import Store from "../3_services/Store.interface";
-import Class from "../3_services/Class.interface";
+
 import { Metaclass, TSClass } from '../3_services/TypeDescriptor.interface';
 
 export enum emptyEventList { }

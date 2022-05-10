@@ -1,24 +1,35 @@
 import { InterfaceDescriptor } from "../2_systems/Things/DefaultClassDescriptor.class";
-import PersistanceManager from "../3_services/PersistanceManager.interface";
+import IOR from "../3_services/IOR.interface";
+import PersistanceManager, { UDEObject } from "../3_services/PersistanceManager.interface";
 import UcpComponent, { UcpComponentPersistanceManagerHandler } from "../3_services/UcpComponent.interface";
 import { UcpModelChangelog } from "../3_services/UcpModel.interface";
 import BaseThing from "./BaseThing.class";
 
-export enum PM_ACTION { create = "create", retrieve = "retrieve", update = "update", delete = "delete", load = "load" }
+export enum PM_ACTION { create = "create", retrieve = "retrieve", update = "update", delete = "delete" }
 
 export abstract class BasePersistanceManager extends BaseThing<any> implements PersistanceManager {
 
-    abstract create(): void
-    abstract retrieve(): void
-    abstract update(): void
-    abstract delete(): void
-    abstract load(): void
+    abstract create(): Promise<void>
+    abstract retrieve(): Promise<UDEObject>
+    abstract update(): Promise<void>
+    abstract delete(): Promise<void>
     abstract onModelChanged(changeObject: UcpModelChangelog): void
     abstract onNotification(changeObject: UcpModelChangelog): void
-    protected ucpComponent: UcpComponent<any, any>;
+    protected ucpComponent: UcpComponent<any, any> | undefined;
 
-    static getPersistenceManager(ucpComponent: UcpComponent<any, any>): PersistanceManager | undefined {
+    static getPersistenceManager(object: UcpComponent<any, any> | IOR): PersistanceManager | undefined {
 
+
+
+        let ior: IOR;
+        let ucpComponent: UcpComponent<any, any> | undefined;
+        if ("IOR" in object) {
+            ucpComponent = object;
+            ior = object.IOR;
+        } else {
+            ior = object;
+
+        }
         const aInterface = InterfaceDescriptor.getInterfaceByNameHack("PersistanceManager");
         if (!aInterface) {
             throw new Error("fail to find the persistence manager Interface");
@@ -26,7 +37,7 @@ export abstract class BasePersistanceManager extends BaseThing<any> implements P
 
         const classList = aInterface.implementations.map(x => {
             return {
-                result: (x.class.canHandle ? x.class.canHandle(ucpComponent) : 0) as number,
+                result: (x.class.canHandle ? x.class.canHandle(ior) : 0) as number,
                 aClass: x.class
             }
         }
@@ -38,11 +49,31 @@ export abstract class BasePersistanceManager extends BaseThing<any> implements P
         }
     }
 
-    constructor(ucpComponent: UcpComponent<any, any>) {
+    get ucpComponentData(): UDEObject {
+        if (!this.ucpComponent) throw new Error("Missing ucpComponent");
+        const ucpComponent = this.ucpComponent;
+        const IOR = this.ucpComponent.IOR;
+        const modelData = ucpComponent.ucpModel.toUDEStructure();
+
+        if (!IOR.id) throw new Error("Missing IOR ID in " + IOR.href);
+        const udeData: UDEObject = {
+            iorId: IOR.id,
+            type: 'Entity',
+            entityIOR: IOR.href,
+            objectIor: ucpComponent.classDescriptor.class.IOR.href,
+            time: Date.now(), // TODO Change Date later
+            ...modelData
+        };
+
+        return udeData;
+    }
+
+    constructor(ucpComponent?: UcpComponent<any, any>) {
         super();
-        this.ucpComponent = ucpComponent;
-        //TODO Replace Interface
-        ucpComponent.Store.register(this);
+        if (ucpComponent) {
+            this.ucpComponent = ucpComponent;
+            ucpComponent.Store.register(this);
+        }
     }
 
 

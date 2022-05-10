@@ -23,7 +23,7 @@ export default class RelatedObjectStore extends BaseThing<RelatedObjectStore> im
 
     register(aObject: RelatedObjectStoreStoredObject): void {
 
-        let interfaces = aObject.classDescriptor.interfaceList;
+        let interfaces = aObject.classDescriptor.implementedInterfaces;
 
         for (const anInterface of interfaces) {
             let exists = this.registry.get(anInterface);
@@ -36,7 +36,7 @@ export default class RelatedObjectStore extends BaseThing<RelatedObjectStore> im
     }
 
     remove(aObject: RelatedObjectStoreStoredObject, anInterface?: InterfaceDescriptor): void {
-        let interfaces = anInterface ? [anInterface] : aObject.classDescriptor.allInterfaces;
+        let interfaces = anInterface ? [anInterface] : aObject.classDescriptor.implementedInterfaces;
 
         for (const interfaceItem of interfaces) {
             let exists = this.registry.get(interfaceItem);

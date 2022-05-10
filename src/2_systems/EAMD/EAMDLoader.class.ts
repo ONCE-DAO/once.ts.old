@@ -4,7 +4,7 @@ import { urlProtocol } from "../../3_services/Url.interface";
 import BaseLoader from "../../1_infrastructure/BaseLoader.class";
 
 
-export const EAMDLoader: LoaderStatic = class EAMDLoader extends BaseLoader implements Loader {
+class EAMDLoader extends BaseLoader implements Loader {
 
   // get class(): typeof EAMDLoader {
   //   return EAMDLoader;
@@ -58,4 +58,4 @@ export const EAMDLoader: LoaderStatic = class EAMDLoader extends BaseLoader impl
 
 }
 
-export default EAMDLoader;
+export default (EAMDLoader as LoaderStatic);

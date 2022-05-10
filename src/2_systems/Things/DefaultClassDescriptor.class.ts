@@ -19,17 +19,35 @@ class ClassDescriptor {
         return descriptor;
     }
 
-    get allInterfaces(): InterfaceDescriptor[] {
-        let result: InterfaceDescriptor[] = [...this._interfaces];
-        for (const interfaceObject of this._interfaces) {
-            const extendedInterfaces = interfaceObject.allExtendedInterfaces;
-            if (extendedInterfaces.length > 0) result.push(...extendedInterfaces);
-        }
-        return [...new Set(result)]
-    }
+    /* get allInterfaces(): InterfaceDescriptor[] {
+         let result: InterfaceDescriptor[] = [...this._interfaces];
+         for (const interfaceObject of this._interfaces) {
+             const extendedInterfaces = interfaceObject.allExtendedInterfaces;
+             if (extendedInterfaces.length > 0) result.push(...extendedInterfaces);
+         }
+         return [...new Set(result)]
+     }
+     */
 
     implements(interfaceObject: InterfaceDescriptor) {
-        return this.allInterfaces.includes(interfaceObject);
+        return this.implementedInterfaces.includes(interfaceObject);
+    }
+
+    get packageFilename(): string {
+        if (this.filename === undefined) throw new Error("Missing Filename")
+        let filename = this.filename;
+        if (filename.match('/src/')) {
+            filename = filename.replace(/.*\/src\//, '');
+        } else if (filename.match('/dist/')) {
+            filename = filename.replace(/.*\/dist\//, '');
+        }
+        filename = filename.replace(/(\.js|\.ts)$/, '')
+        return filename;
+    }
+
+    //TODO Change that to Component export path
+    get classPackageString(): string {
+        return `${this.packagePath}${this.packageName}[${this.packageVersion}]/${this.packageFilename}#${this.className}`
     }
 
     private _class: Class<any> | undefined;
@@ -40,8 +58,8 @@ class ClassDescriptor {
         if (this._extends.length == 0) {
             let myClass = this._class;
 
-            let myPrototype = myClass.prototype;
-            let myType = Object.getPrototypeOf(myClass);
+            // let myPrototype = myClass.prototype;
+            // let myType = Object.getPrototypeOf(myClass);
 
             while (Object.getPrototypeOf(myClass)) {
                 myClass = Object.getPrototypeOf(myClass);
@@ -58,8 +76,13 @@ class ClassDescriptor {
         return this._extends;
     };
 
-    get class(): any {
+    get class(): any { // TODO Missing Type
         return this._class
+    }
+
+    get className(): string {
+        if (!this._class) throw new Error("Missing class in Descriptor")
+        return this._class.name;
     }
 
     init(aClass: Class<any>): this {
@@ -101,23 +124,42 @@ class ClassDescriptor {
     }
 
     private registerAllInterfaces(): void {
-        const allInterfaces = this.interfaceList;
+        const allInterfaces = this.implementedInterfaces;
         for (const aInterface of allInterfaces) {
             aInterface.addImplementation(this);
         }
     }
 
-    get interfaceList(): InterfaceDescriptorInterface[] {
-        let interfaceList: InterfaceDescriptorInterface[] = this.allInterfaces;
-        for (const aClass of this.extends) {
-            // @ts-ignore
-            if (aClass.classDescriptor) {
-                // @ts-ignore
-                interfaceList = [...interfaceList, ...aClass.classDescriptor.allInterfaces];
+    get implementedInterfaces(): InterfaceDescriptorInterface[] {
+        return this._getImplementedInterfaces();
+    }
+
+    _getImplementedInterfaces(interfaceList: InterfaceDescriptorInterface[] = []): InterfaceDescriptorInterface[] {
+
+        // const add = (aInterfaceDescriptor: InterfaceDescriptorInterface) => {
+        //     if (!interfaceList.includes(aInterfaceDescriptor)) {
+        //         interfaceList = [...interfaceList, ...aInterfaceDescriptor._getImplementedInterfaces(interfaceList)]
+        //     }
+        // }
+
+        for (const aInterfaceDescriptor of this._interfaces) {
+            if (!interfaceList.includes(aInterfaceDescriptor)) {
+                aInterfaceDescriptor._getImplementedInterfaces(interfaceList)
             }
         }
+
+
+        //@ts-ignore
+        if (this.extends[0] && this.extends[0]?.classDescriptor) {
+            //@ts-ignore
+            const classDescriptor = this.extends[0]?.classDescriptor as ClassDescriptor;
+
+            classDescriptor._getImplementedInterfaces(interfaceList);
+        }
+
         return interfaceList;
     }
+
 
 
     static addInterfaces(packagePath: string, packageName: string, packageVersion: string | undefined, interfaceName: string): Function {
@@ -201,6 +243,24 @@ export class InterfaceDescriptor {
         }
         return result;
     }
+
+
+    get implementedInterfaces(): InterfaceDescriptor[] {
+        return this._getImplementedInterfaces();
+    }
+
+    _getImplementedInterfaces(interfaceList: InterfaceDescriptorInterface[] = []): InterfaceDescriptorInterface[] {
+        if (!interfaceList.includes(this)) {
+            interfaceList.push(this);
+            for (const interfaceObject of this.extends) {
+                interfaceObject._getImplementedInterfaces(interfaceList);
+            }
+        }
+        return interfaceList;
+    }
+
+
+
 
     addImplementation(classDescriptor: ClassDescriptor): this {
         this.implementations.push(classDescriptor);
