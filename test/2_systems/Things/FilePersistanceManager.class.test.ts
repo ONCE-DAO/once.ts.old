@@ -98,5 +98,29 @@ describe("File PersistanceManager", () => {
     })
 
 
+    test("update on Model change", async () => {
+        let ucpComponent = new SomeExampleUcpComponent();
+
+
+        await ucpComponent.persistanceManager.create();
+
+        // @ts-ignore
+        let filename = await ucpComponent.persistanceManager.list[0].fileName();
+
+        ucpComponent.model.age = 10;
+
+        UDELoader.factory().clearStore();
+
+        let ior = new DefaultIOR().init(ucpComponent.IOR.href);
+        let ucpComponentClone = await ior.load();
+
+        expect(ucpComponentClone.model.age).toEqual(ucpComponent.model.age);
+
+        await ucpComponent.persistanceManager.delete();
+        // @ts-ignore
+        expect(fs.existsSync(filename), 'File was not deleted').toBeFalsy();
+
+
+    })
 
 })

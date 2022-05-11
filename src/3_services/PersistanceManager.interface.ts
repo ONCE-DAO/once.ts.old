@@ -9,8 +9,8 @@ export default interface PersistanceManager {
   retrieve(ior?: IOR): Promise<UDEObject>;
   update(): Promise<void>;
   delete(): Promise<void>;
-  onModelChanged(changeObject: UcpModelChangelog): void;
-  onNotification(changeObject: UcpModelChangelog): void;
+  onModelChanged(changeObject: UcpModelChangelog): Promise<void>;
+  onNotification(changeObject: UcpModelChangelog): Promise<void>;
 }
 
 export type UDEObject = ModelUDEStructure & {

@@ -30,6 +30,7 @@ export default class UDELoader extends BaseLoader {
     clearStore(): void {
         this.instanceStore.clear();
     }
+
     removeObjectFromStore(object: IOR | UcpComponent<any, any>): void {
         if ("IOR" in object) {
             this.instanceStore.remove(object.IOR.href);

@@ -2,7 +2,7 @@ import { InterfaceDescriptor } from "../2_systems/Things/DefaultClassDescriptor.
 import IOR from "../3_services/IOR.interface";
 import PersistanceManager, { UDEObject } from "../3_services/PersistanceManager.interface";
 import UcpComponent, { UcpComponentPersistanceManagerHandler } from "../3_services/UcpComponent.interface";
-import { UcpModelChangelog } from "../3_services/UcpModel.interface";
+import { UcpModelChangelog, UcpModelEvents } from "../3_services/UcpModel.interface";
 import BaseThing from "./BaseThing.class";
 
 export enum PM_ACTION { create = "create", retrieve = "retrieve", update = "update", delete = "delete" }
@@ -13,8 +13,8 @@ export abstract class BasePersistanceManager extends BaseThing<any> implements P
     abstract retrieve(): Promise<UDEObject>
     abstract update(): Promise<void>
     abstract delete(): Promise<void>
-    abstract onModelChanged(changeObject: UcpModelChangelog): void
-    abstract onNotification(changeObject: UcpModelChangelog): void
+    abstract onModelChanged(changeObject: UcpModelChangelog): Promise<void>
+    abstract onNotification(changeObject: UcpModelChangelog): Promise<void>
     protected ucpComponent: UcpComponent<any, any> | undefined;
 
     static getPersistenceManager(object: UcpComponent<any, any> | IOR): PersistanceManager | undefined {
@@ -73,6 +73,7 @@ export abstract class BasePersistanceManager extends BaseThing<any> implements P
         if (ucpComponent) {
             this.ucpComponent = ucpComponent;
             ucpComponent.Store.register(this);
+            ucpComponent.ucpModel.eventSupport.addEventListener(UcpModelEvents.ON_MODEL_CHANGED, this.onModelChanged.bind(this), this);
         }
     }
 

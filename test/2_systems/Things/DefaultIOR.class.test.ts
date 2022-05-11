@@ -104,7 +104,7 @@ describe("IOR Class", () => {
 
 
   validate.push({
-    url: "ior:esm:git:tla.EAM.Namespace[#sdsgzudhsudhusidh]",
+    url: "ior:esm:git:tla.EAM.Namespace[#branchName]",
     result: {
       protocol: ["ior", "esm", "git"],
       hostName: undefined,
@@ -112,23 +112,23 @@ describe("IOR Class", () => {
       origin: undefined,
       isLoaded: false,
       namespace: "tla.EAM.Namespace",
-      namespaceVersion: "#sdsgzudhsudhusidh",
-      href: "ior:esm:git:tla.EAM.Namespace[#sdsgzudhsudhusidh]"
+      namespaceVersion: "#branchName",
+      href: "ior:esm:git:tla.EAM.Namespace[#branchName]"
     },
   });
 
   validate.push({
-    url: "ior:esm:git:tla.EAM.Namespace[#sdsgzudhsudhusidh]/someClassName",
+    url: "ior:esm:git:tla.EAM.Once[latest]/someClassName",
     result: {
       protocol: ["ior", "esm", "git"],
       hostName: undefined,
       pathName: undefined,
       origin: undefined,
       isLoaded: false,
-      namespace: "tla.EAM.Namespace",
-      namespaceVersion: "#sdsgzudhsudhusidh",
+      namespace: "tla.EAM.Once",
+      namespaceVersion: "latest",
       namespaceObject: "someClassName",
-      href: "ior:esm:git:tla.EAM.Namespace[#sdsgzudhsudhusidh]/someClassName"
+      href: "ior:esm:git:tla.EAM.Once[latest]/someClassName"
     },
   });
 

@@ -3,12 +3,12 @@ import { OnceMode } from "../../3_services/Once.interface";
 import { UcpModelChangelog } from "../../3_services/UcpModel.interface";
 import fs from "fs";
 import IOR from "../../3_services/IOR.interface";
-import Loader, { LoaderStatic, loadingConfig } from "../../3_services/Loader.interface";
 import { UDEObject } from "../../3_services/PersistanceManager.interface";
 import UDELoader from "./UDELoader.class";
 
 export class FilePersistanceManager extends BasePersistanceManager {
     private static _loaderInstance: FilePersistanceManager;
+    private backendVersion: string | undefined = undefined;
 
     static canHandle(ior: IOR): number {
         if (ONCE && ONCE.mode === OnceMode.NODE_JS) {
@@ -68,6 +68,8 @@ export class FilePersistanceManager extends BasePersistanceManager {
 
         fs.writeFileSync(fileName, JSON.stringify(data, null, 2));
         UDELoader.factory().addObject2Store(this.IOR, this.ucpComponent)
+        this.backendVersion = data.version;
+
     }
 
 
@@ -77,11 +79,14 @@ export class FilePersistanceManager extends BasePersistanceManager {
 
         if (this.ucpComponent) {
             this.ucpComponent.model = data.data;
+            this.backendVersion = data.version;
         }
         return data;
     }
 
     async update(): Promise<void> {
+
+        if (this.backendVersion === undefined) throw new Error("Object is not persisted");
 
         let fileName = await this.fileName();
 
@@ -95,17 +100,22 @@ export class FilePersistanceManager extends BasePersistanceManager {
     }
 
     async delete(): Promise<void> {
+        if (this.backendVersion === undefined) return;
+
         if (!this.ucpComponent || !this.IOR) throw new Error("Missing UCP Component");
 
         let fileName = await this.fileName();
         fs.rmSync(fileName);
         UDELoader.factory().removeObjectFromStore(this.IOR);
+        this.backendVersion = undefined;
     }
 
-    onModelChanged(changeObject: UcpModelChangelog): void {
-        throw new Error("Method not implemented.");
+    async onModelChanged(changeObject: UcpModelChangelog): Promise<void> {
+        if (this.backendVersion) {
+            await this.update();
+        }
     }
-    onNotification(changeObject: UcpModelChangelog): void {
+    onNotification(changeObject: UcpModelChangelog): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
