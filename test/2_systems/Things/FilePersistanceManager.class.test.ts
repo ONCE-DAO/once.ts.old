@@ -1,5 +1,5 @@
 import { BasePersistanceManager } from "../../../src/1_infrastructure/BasePersistanceManager.class";
-import DefaultUcpComponent from "../../../src/2_systems/Things/DefaultUcpComponent.class";
+import SomeExampleUcpComponent from "../../../src/2_systems/Things/SomeExampleUcpComponent.class";
 
 import OnceNodeServer from "../../../src/2_systems/Once/OnceNodeServer.class";
 import { InterfaceDescriptor } from "../../../src/2_systems/Things/DefaultClassDescriptor.class";
@@ -7,6 +7,7 @@ import { InterfaceDescriptor } from "../../../src/2_systems/Things/DefaultClassD
 import fs from 'fs';
 import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class";
 import { FilePersistanceManager } from "../../../src/2_systems/Things/FilePersistanceManager.class";
+import UDELoader from "../../../src/2_systems/Things/UDELoader.class";
 
 beforeEach(async () => {
     if (typeof ONCE === "undefined") await OnceNodeServer.start();
@@ -16,7 +17,7 @@ describe("File PersistanceManager", () => {
 
 
     test("init", async () => {
-        let ucpComponent = new DefaultUcpComponent();
+        let ucpComponent = new SomeExampleUcpComponent();
 
         let pm = new FilePersistanceManager(ucpComponent);
 
@@ -25,7 +26,7 @@ describe("File PersistanceManager", () => {
 
 
     test("find File PersistanceManager", async () => {
-        let ucpComponent = new DefaultUcpComponent();
+        let ucpComponent = new SomeExampleUcpComponent();
 
         let pm = BasePersistanceManager.getPersistenceManager(ucpComponent);
 
@@ -33,7 +34,7 @@ describe("File PersistanceManager", () => {
     })
 
     test("ucpComponent Persistance Manager", async () => {
-        let ucpComponent = new DefaultUcpComponent();
+        let ucpComponent = new SomeExampleUcpComponent();
 
         let pm = ucpComponent.persistanceManager;
 
@@ -46,7 +47,7 @@ describe("File PersistanceManager", () => {
     })
 
     test("create / delete", async () => {
-        let ucpComponent = new DefaultUcpComponent();
+        let ucpComponent = new SomeExampleUcpComponent();
 
 
         await ucpComponent.persistanceManager.create();
@@ -65,7 +66,7 @@ describe("File PersistanceManager", () => {
     })
 
     test("update / load", async () => {
-        let ucpComponent = new DefaultUcpComponent();
+        let ucpComponent = new SomeExampleUcpComponent();
 
 
         await ucpComponent.persistanceManager.create();
@@ -82,6 +83,8 @@ describe("File PersistanceManager", () => {
         await ucpComponent.persistanceManager.update();
 
         let ior = new DefaultIOR().init(ucpComponent.IOR.href);
+
+        UDELoader.factory().clearStore();
 
         let ucpComponentClone = await ior.load();
 

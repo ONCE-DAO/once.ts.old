@@ -5,6 +5,7 @@ import fs from "fs";
 import IOR from "../../3_services/IOR.interface";
 import Loader, { LoaderStatic, loadingConfig } from "../../3_services/Loader.interface";
 import { UDEObject } from "../../3_services/PersistanceManager.interface";
+import UDELoader from "./UDELoader.class";
 
 export class FilePersistanceManager extends BasePersistanceManager {
     private static _loaderInstance: FilePersistanceManager;
@@ -56,16 +57,17 @@ export class FilePersistanceManager extends BasePersistanceManager {
 
 
     async create(): Promise<void> {
+        if (!this.ucpComponent || !this.IOR) throw new Error("Missing UCP Component");
         let fileName = await this.fileName();
 
         if (fs.existsSync(fileName)) {
             throw new Error(`File '${fileName}' already exists`);
         }
 
-        let data = this.ucpComponentData
+        let data = this.ucpComponentData;
 
-        fs.writeFileSync(fileName, JSON.stringify(data));
-
+        fs.writeFileSync(fileName, JSON.stringify(data, null, 2));
+        UDELoader.factory().addObject2Store(this.IOR, this.ucpComponent)
     }
 
 
@@ -89,12 +91,15 @@ export class FilePersistanceManager extends BasePersistanceManager {
 
         let data = this.ucpComponentData
 
-        fs.writeFileSync(fileName, JSON.stringify(data));
+        fs.writeFileSync(fileName, JSON.stringify(data, null, 2));
     }
 
     async delete(): Promise<void> {
+        if (!this.ucpComponent || !this.IOR) throw new Error("Missing UCP Component");
+
         let fileName = await this.fileName();
         fs.rmSync(fileName);
+        UDELoader.factory().removeObjectFromStore(this.IOR);
     }
 
     onModelChanged(changeObject: UcpModelChangelog): void {

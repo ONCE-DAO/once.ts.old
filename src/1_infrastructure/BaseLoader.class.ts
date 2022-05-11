@@ -4,19 +4,18 @@ import Loader, { LoaderStatic, loadingConfig } from "../3_services/Loader.interf
 import BaseThing from "./BaseThing.class";
 
 abstract class BaseLoader extends BaseThing<BaseLoader> implements Loader {
+    abstract removeObjectFromStore(object: any): void;
+    abstract addObject2Store(ior: IOR, object: any): void;
+
     protected static _instance: Loader | undefined;
     private discoveredLoader: Loader[] = [];
 
-    load(ior: IOR, config: loadingConfig): Promise<any> {
-        throw new Error("Method not implemented.");
-    }
+    abstract load(ior: IOR, config: loadingConfig): Promise<any>
 
     static canHandle(ior: IOR): number {
         return 0;
     }
-    canHandle(ior: IOR): number {
-        return 0;
-    }
+    abstract canHandle(ior: IOR): number
 
     static factory(ior: IOR): Loader {
         if (this._instance === undefined) {
@@ -27,10 +26,5 @@ abstract class BaseLoader extends BaseThing<BaseLoader> implements Loader {
         return this._instance;
     }
 
-    static getInstance() {
-        // HACK
-        // @ts-ignore
-        return new this();
-    }
 }
 export default BaseLoader;

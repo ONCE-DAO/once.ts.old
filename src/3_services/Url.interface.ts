@@ -39,6 +39,7 @@ export interface Url extends JSONProvider {
   fileType: string | undefined;
   fileTypes: string[];
   init(href: string): this;
+  clone(): Url;
 }
 
 

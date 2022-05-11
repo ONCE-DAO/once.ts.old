@@ -252,7 +252,7 @@ export default class DefaultUrl extends BaseThing<DefaultUrl> implements Url {
     }
 
     clone(): Url {
-        return new DefaultUrl().init(this.href);
+        return new this.class().init(this.href);
     }
 
 }

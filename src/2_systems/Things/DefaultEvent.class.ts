@@ -1,11 +1,11 @@
 import { OnceEvent } from "../../3_services/EventService.interface";
 import BaseThing from "../../1_infrastructure/BaseThing.class";
-import WeakRefPromiseStore from "./WeakRefPromiseStore.class";
 import Thing from "../../3_services/Thing.interface";
+import WeakRefStore from "./WeakRefStore.class";
 
 export default class DefaultEvent extends BaseThing<DefaultEvent> implements OnceEvent {
 
-    private readonly _store = new WeakRefPromiseStore();
+    private readonly _store = new WeakRefStore();
     addCallback(callbackFunction: Function, targetObject: Thing<any>): void {
         this._store.register(targetObject, callbackFunction);
     }

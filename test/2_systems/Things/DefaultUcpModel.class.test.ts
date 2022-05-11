@@ -1,16 +1,16 @@
 import ExtendedPromise from "../../../src/2_systems/JSExtensions/Promise";
 import UUiD from "../../../src/2_systems/JSExtensions/UUiD.class";
 import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class";
-import DefaultUcpComponent from "../../../src/2_systems/Things/DefaultUcpComponent.class";
+import SomeExampleUcpComponent from "../../../src/2_systems/Things/SomeExampleUcpComponent.class";
 import { UcpModelProxyIORSchema } from "../../../src/2_systems/Things/DefaultUcpModel.class";
 import { UcpModelChangeLogMethods, UcpModelEvents, UcpModelTransactionStates } from "../../../src/3_services/UcpModel.interface";
 
 
-let ucpComponent = new DefaultUcpComponent();
+let ucpComponent = new SomeExampleUcpComponent();
 let model = ucpComponent.model;
 let ucpModel = ucpComponent.ucpModel;
 beforeEach(() => {
-    ucpComponent = new DefaultUcpComponent();
+    ucpComponent = new SomeExampleUcpComponent();
     model = ucpComponent.model;
     ucpModel = ucpComponent.ucpModel;
 });
@@ -21,7 +21,7 @@ describe("Default Ucp Model", () => {
 
     test("int", async () => {
 
-        expect(ucpComponent.model).toMatchObject(DefaultUcpComponent.modelDefaultData);
+        expect(ucpComponent.model).toMatchObject(SomeExampleUcpComponent.modelDefaultData);
 
         //@ts-ignore Look into protected
         expect(ucpModel._history.length).toBe(1);
@@ -131,7 +131,7 @@ describe("Default Ucp Model", () => {
             model.inventory = [{ name: 'test', itemId: 5 }, { name: 'test2', itemId: 35 }];
             model.iorObject = new DefaultIOR().init('https://test.wo-da.de');
 
-            expect(ucpModel.toJSON).toBe('{"_component":{"name":"DefaultUcpComponent"},"name":"MyDefaultName","age":5,"inventory":[{"name":"test","itemId":5},{"name":"test2","itemId":35}],"iorObject":"ior:https://test.wo-da.de"}');
+            expect(ucpModel.toJSON).toBe('{"_component":{"name":"SomeExampleUcpComponent"},"name":"MyDefaultName","age":5,"inventory":[{"name":"test","itemId":5},{"name":"test2","itemId":35}],"iorObject":"ior:https://test.wo-da.de"}');
 
         })
 
@@ -579,7 +579,7 @@ describe("Default Ucp Model", () => {
                 model.someMap.set('my Key', 12345);
                 model.someMap.set('my Key2', 444444);
 
-                expect(ucpModel.toJSON).toStrictEqual("{\"_component\":{\"name\":\"DefaultUcpComponent\"},\"name\":\"MyDefaultName\",\"someMap\":[[\"my Key\",12345],[\"my Key2\",444444]]}");
+                expect(ucpModel.toJSON).toStrictEqual("{\"_component\":{\"name\":\"SomeExampleUcpComponent\"},\"name\":\"MyDefaultName\",\"someMap\":[[\"my Key\",12345],[\"my Key2\",444444]]}");
             })
 
             test("Map to Json with Number Key", async () => {
@@ -587,7 +587,7 @@ describe("Default Ucp Model", () => {
                 model.someNumberMap.set(1, 12345);
                 model.someNumberMap.set(2, 444444);
 
-                expect(ucpModel.toJSON).toStrictEqual("{\"_component\":{\"name\":\"DefaultUcpComponent\"},\"name\":\"MyDefaultName\",\"someNumberMap\":[[1,12345],[2,444444]]}");
+                expect(ucpModel.toJSON).toStrictEqual("{\"_component\":{\"name\":\"SomeExampleUcpComponent\"},\"name\":\"MyDefaultName\",\"someNumberMap\":[[1,12345],[2,444444]]}");
 
                 expect(ucpModel.changelog).toMatchObject({ "someNumberMap": { "2": { "from": undefined, "key": ["someNumberMap", 2], "method": "create", "to": 444444 } } });
 
@@ -598,7 +598,7 @@ describe("Default Ucp Model", () => {
                 model.someIORMap.set('ior:https://test.wo-da.de', 12345);
                 model.someIORMap.set(new DefaultIOR().init("prod.wo-da.de"), 444444);
 
-                expect(ucpModel.toJSON).toStrictEqual("{\"_component\":{\"name\":\"DefaultUcpComponent\"},\"name\":\"MyDefaultName\",\"someIORMap\":[[\"ior:https://test.wo-da.de\",12345],[\"ior://prod.wo-da.de\",444444]]}");
+                expect(ucpModel.toJSON).toStrictEqual("{\"_component\":{\"name\":\"SomeExampleUcpComponent\"},\"name\":\"MyDefaultName\",\"someIORMap\":[[\"ior:https://test.wo-da.de\",12345],[\"ior://prod.wo-da.de\",444444]]}");
 
                 expect(ucpModel.changelog).toMatchObject({ "someIORMap": { "ior://prod.wo-da.de": { "from": undefined, "key": ["someIORMap", "ior://prod.wo-da.de"], "method": "create", "to": 444444 } } });
             })

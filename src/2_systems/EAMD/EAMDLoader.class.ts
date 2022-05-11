@@ -2,9 +2,18 @@ import IOR from "../../3_services/IOR.interface";
 import Loader, { loaderReturnValue, LoaderStatic, loadingConfig } from "../../3_services/Loader.interface";
 import { urlProtocol } from "../../3_services/Url.interface";
 import BaseLoader from "../../1_infrastructure/BaseLoader.class";
+import UcpComponentInterface from "../../3_services/UcpComponent.interface";
 
 
 class EAMDLoader extends BaseLoader implements Loader {
+
+  removeObjectFromStore(object: any): void {
+    throw new Error("Method not implemented.");
+  }
+  addObject2Store(ior: IOR, object: any): void {
+    throw new Error("Method not implemented.");
+  }
+
 
   // get class(): typeof EAMDLoader {
   //   return EAMDLoader;

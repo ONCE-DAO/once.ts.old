@@ -7,7 +7,7 @@ import ClassDescriptor from "./DefaultClassDescriptor.class";
 
 
 
-interface MyDefaultUcpComponent extends UcpComponent<ModelDataType, MyDefaultUcpComponent> {
+interface MyExampleUcpComponent extends UcpComponent<ModelDataType, MyExampleUcpComponent> {
     myName: string | undefined;
 }
 
@@ -55,14 +55,14 @@ type ModelDataType = z.infer<typeof modelSchema>
 
 
 @ClassDescriptor.componentExport({ silent: true })
-export default class DefaultUcpComponent extends BaseUcpComponent<ModelDataType, MyDefaultUcpComponent> implements MyDefaultUcpComponent {
+export default class SomeExampleUcpComponent extends BaseUcpComponent<ModelDataType, MyExampleUcpComponent> implements MyExampleUcpComponent {
     get myName() { return this.model.myName }
 
     static get modelSchema() {
         return modelSchema;
     }
 
-    public readonly ucpModel: UcpModel = new DefaultUcpModel<ModelDataType, MyDefaultUcpComponent>(DefaultUcpComponent.modelDefaultData, this);
+    public readonly ucpModel: UcpModel = new DefaultUcpModel<ModelDataType, MyExampleUcpComponent>(SomeExampleUcpComponent.modelDefaultData, this);
 
 
     static get modelDefaultData() {
@@ -73,7 +73,6 @@ export default class DefaultUcpComponent extends BaseUcpComponent<ModelDataType,
     }
 }
 
-//const DefaultUcpComponentExport: UcpComponentStatics<ModelDataType, MyDefaultUcpComponent> = DefaultUcpComponent;
 
 
 

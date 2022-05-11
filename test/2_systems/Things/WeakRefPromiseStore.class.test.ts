@@ -14,14 +14,14 @@ describe("Default Store", () => {
         let store = new WeakRefPromiseStore().init();
         store.register('123', targetObject)
 
-        expect(store.lookup('123')).toBe(targetObject);
+        expect(await store.lookup('123')).toBe(targetObject);
     })
 
     test("register key=Object", async () => {
         let store = new WeakRefPromiseStore().init();
         store.register(targetObject, targetObject);
 
-        expect(store.lookup(targetObject)).toBe(targetObject);
+        expect(await store.lookup(targetObject)).toBe(targetObject);
     })
 
     test("remove key=String", async () => {
@@ -29,7 +29,7 @@ describe("Default Store", () => {
         store.register('123', targetObject);
 
         store.remove('123');
-        expect(store.lookup('123')).toBe(undefined);
+        expect(await store.lookup('123')).toBe(undefined);
 
     })
 
@@ -38,7 +38,7 @@ describe("Default Store", () => {
         store.register(targetObject, targetObject);
 
         store.remove(targetObject);
-        expect(store.lookup(targetObject)).toBe(undefined);
+        expect(await store.lookup(targetObject)).toBe(undefined);
 
     })
 

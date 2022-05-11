@@ -3,11 +3,13 @@ import Url from "./Url.interface";
 
 export interface IOR extends Url {
 
-  load(config: loadingConfig): Promise<any>
+  load(config?: loadingConfig): Promise<any>
   namespace: string | undefined;
   namespaceVersion: string | undefined;
   namespaceObject: string | undefined;
   id: string | undefined;
+  clone(): IOR;
+
 }
 
 export default IOR;

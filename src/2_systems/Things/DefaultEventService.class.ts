@@ -1,9 +1,9 @@
 import EventService, { OnceEvent } from "../../3_services/EventService.interface";
 import BaseThing from "../../1_infrastructure/BaseThing.class";
-import WeakRefPromiseStore from "./WeakRefPromiseStore.class";
 import DefaultEvent from "./DefaultEvent.class";
 import Thing from "../../3_services/Thing.interface";
 import Store from "../../3_services/Store.interface";
+import WeakRefStore from "./WeakRefStore.class";
 
 export default class DefaultEventService<EventEnum> extends BaseThing<DefaultEventService<EventEnum>> implements EventService<EventEnum> {
 
@@ -12,7 +12,7 @@ export default class DefaultEventService<EventEnum> extends BaseThing<DefaultEve
 
     private static get _store() {
         if (this.__store === undefined) {
-            this.__store = new WeakRefPromiseStore();
+            this.__store = new WeakRefStore();
         }
         return this.__store;
     }

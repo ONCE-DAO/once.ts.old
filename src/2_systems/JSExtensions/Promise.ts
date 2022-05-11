@@ -10,7 +10,7 @@ export type promiseHandler = {
     _reject?: callback,
     isCompleted: boolean
     timeoutId?: any,
-    promise?: any,
+    promise: Promise<any>,
     metaData?: any
 };
 export default class ExtendedPromise<T> extends Promise<T> {
@@ -26,19 +26,17 @@ export default class ExtendedPromise<T> extends Promise<T> {
 
     static createPromiseHandler(timeoutMS?: number, timeoutCallback?: timeoutCallback): promiseHandler {
 
-        const p: promiseHandler = {
-            setSuccess: function (result) {
+        const p: any = {
+            setSuccess: function (result: any) {
                 clearTimeout(p.timeoutId);
                 p.isCompleted = true;
-                //@ts-ignore
                 p._resolve(result);
             },
             isCompleted: false,
 
-            setError: function (result) {
+            setError: function (result: any) {
                 clearTimeout(p.timeoutId);
                 p.isCompleted = true;
-                //@ts-ignore
                 p._reject(result);
             }
         };
