@@ -8,5 +8,12 @@ export default interface Particle {
     modelSnapshot: any,
     waveList: Wave[],
     addChange(ChangeLog: Wave): void;
-
+    time: number;
 }
+
+export type ParticleUDEStructure = {
+    data: any,
+    time: number,
+    version: string,
+    predecessorVersion: string | undefined
+};

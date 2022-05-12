@@ -1,9 +1,9 @@
 import { z } from "zod";
 import BaseThing from "../../1_infrastructure/BaseThing.class";
 import EventService, { EventServiceConsumer } from "../../3_services/EventService.interface";
-import Particle from "../../3_services/Particle.interface";
+import Particle, { ParticleUDEStructure } from "../../3_services/Particle.interface";
 import UcpComponent from "../../3_services/UcpComponent.interface";
-import UcpModel, { ModelUDEStructure, UcpModelChangelog as UcpModelChangelog, UcpModelChangeLogMethods, UcpModelEvents, UcpModelTransactionStates } from "../../3_services/UcpModel.interface";
+import UcpModel, { UcpModelChangelog as UcpModelChangelog, UcpModelChangeLogMethods, UcpModelEvents, UcpModelTransactionStates } from "../../3_services/UcpModel.interface";
 import Wave from "../../3_services/Wave.interface";
 import ExtendedPromise from "../JSExtensions/Promise";
 import DefaultEventService from "./DefaultEventService.class";
@@ -206,9 +206,14 @@ export default class DefaultUcpModel<ModelDataType, UcpComponentInterface> exten
         return this.latestParticle.id;
     }
 
-    toUDEStructure(particleSnapshot: any): ModelUDEStructure {
-        const data = this.deepCopy(particleSnapshot || this.model);
-        return { data, version: this.version, predecessorVersion: "Not Implemented" }
+    toUDEStructure(): ParticleUDEStructure {
+        const data = this.deepCopy(this.model);
+        return {
+            data,
+            version: this.version,
+            predecessorVersion: "Not Implemented",
+            time: this.latestParticle.time
+        }
     }
 
     EVENT_NAMES = UcpModelEvents;

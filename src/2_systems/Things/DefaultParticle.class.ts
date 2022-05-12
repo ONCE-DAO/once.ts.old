@@ -1,4 +1,4 @@
-import Particle from "../../3_services/Particle.interface";
+import Particle, { ParticleUDEStructure } from "../../3_services/Particle.interface";
 import { UcpModelChangelog, UcpModelChangeLogMethods } from "../../3_services/UcpModel.interface";
 import Wave from "../../3_services/Wave.interface";
 import UUiD from "../JSExtensions/UUiD.class";
@@ -13,7 +13,11 @@ export default class DefaultParticle implements Particle {
 
     constructor(id?: string) {
         this.id = id || UUiD.uuidv4();
+
     }
+    // TODO Change for Browser
+    time: number = Date.now();
+
     readonly waveList: Wave[] = [];
     public readonly changelog: UcpModelChangelog = new DefaultUcpModelChangeLog();
 
@@ -90,6 +94,15 @@ export default class DefaultParticle implements Particle {
 
         return upperLevelChangeLog;
 
+    }
+
+    static validateParticleStructure(object: ParticleUDEStructure): ParticleUDEStructure {
+        if (typeof object.data !== 'object') throw new Error(`Parameter 'data' is wrong in Object value: '${object.data}`);
+        if (typeof object.time !== 'number') throw new Error(`Parameter 'time' is wrong in Object value: '${object.time}`)
+        if (typeof object.version !== 'string') throw new Error(`Parameter 'version' is wrong in Object value: '${object.version}`)
+        if (typeof object.predecessorVersion !== 'string' && typeof object.predecessorVersion !== 'undefined') throw new Error(`Parameter 'predecessorVersion' is wrong in Object value: '${object.predecessorVersion}`)
+
+        return object;
     }
 
 

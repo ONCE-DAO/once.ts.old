@@ -68,7 +68,7 @@ export class FilePersistanceManager extends BasePersistanceManager {
 
         fs.writeFileSync(fileName, JSON.stringify(data, null, 2));
         UDELoader.factory().addObject2Store(this.IOR, this.ucpComponent)
-        this.backendVersion = data.version;
+        this.backendVersion = data.particle.version;
 
     }
 
@@ -77,11 +77,13 @@ export class FilePersistanceManager extends BasePersistanceManager {
         let fileName = await this.fileName(ior);
         const data = JSON.parse(fs.readFileSync(fileName, 'utf-8'));
 
+        const udeObject = UDELoader.validateUDEStructure(data);
+
         if (this.ucpComponent) {
-            this.ucpComponent.model = data.data;
-            this.backendVersion = data.version;
+            this.ucpComponent.model = udeObject.particle.data;
+            this.backendVersion = udeObject.particle.data.version;
         }
-        return data;
+        return udeObject;
     }
 
     async update(): Promise<void> {

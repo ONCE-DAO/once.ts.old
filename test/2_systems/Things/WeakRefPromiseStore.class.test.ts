@@ -1,3 +1,4 @@
+import ExtendedPromise from "../../../src/2_systems/JSExtensions/Promise";
 import WeakRefPromiseStore from "../../../src/2_systems/Things/WeakRefPromiseStore.class";
 
 describe("Default Store", () => {
@@ -22,6 +23,47 @@ describe("Default Store", () => {
         store.register(targetObject, targetObject);
 
         expect(await store.lookup(targetObject)).toBe(targetObject);
+    })
+
+    test("register Promise Equal on Query", async () => {
+        let store = new WeakRefPromiseStore().init();
+
+        let promiseHandler = ExtendedPromise.createPromiseHandler();
+
+        store.register('123', promiseHandler.promise);
+
+        let clone = store.lookup('123');
+
+        expect(clone === promiseHandler.promise).toBeTruthy();
+    })
+
+    test("register Promise => Success", async () => {
+        let store = new WeakRefPromiseStore().init();
+
+        let promiseHandler = ExtendedPromise.createPromiseHandler();
+
+        store.register('123', promiseHandler.promise);
+
+        promiseHandler.setSuccess(555);
+
+        let clone = await store.lookup('123');
+
+        expect(clone).toBe(555);
+    })
+
+    test("register Promise => Error", async () => {
+        let store = new WeakRefPromiseStore().init();
+
+        let promiseHandler = ExtendedPromise.createPromiseHandler();
+
+        store.register('123', promiseHandler.promise);
+
+        promiseHandler.setError(new Error("Error"));
+        await ExtendedPromise.wait(1);
+
+        let clone = await store.lookup('123');
+
+        expect(clone).toBe(undefined);
     })
 
     test("remove key=String", async () => {

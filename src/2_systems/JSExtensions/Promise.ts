@@ -6,8 +6,6 @@ interface timeoutCallback { (promiseHandler: promiseHandler): void };
 export type promiseHandler = {
     setSuccess: callback,
     setError: callback,
-    _resolve?: callback,
-    _reject?: callback,
     isCompleted: boolean
     timeoutId?: any,
     promise: Promise<any>,
@@ -26,23 +24,24 @@ export default class ExtendedPromise<T> extends Promise<T> {
 
     static createPromiseHandler(timeoutMS?: number, timeoutCallback?: timeoutCallback): promiseHandler {
 
+        const h: any = {};
         const p: any = {
             setSuccess: function (result: any) {
                 clearTimeout(p.timeoutId);
                 p.isCompleted = true;
-                p._resolve(result);
+                h._resolve(result);
             },
             isCompleted: false,
 
             setError: function (result: any) {
                 clearTimeout(p.timeoutId);
                 p.isCompleted = true;
-                p._reject(result);
+                h._reject(result);
             }
         };
         p.promise = new Promise(function (resolve, reject) {
-            p._resolve = resolve;
-            p._reject = reject;
+            h._resolve = resolve;
+            h._reject = reject;
         });
 
 

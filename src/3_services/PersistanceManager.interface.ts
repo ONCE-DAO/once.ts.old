@@ -1,7 +1,8 @@
 import Class from "./Class.interface";
 import IOR from "./IOR.interface";
+import { ParticleUDEStructure } from "./Particle.interface";
 import UcpComponent from "./UcpComponent.interface";
-import { ModelUDEStructure, UcpModelChangelog } from "./UcpModel.interface";
+import { UcpModelChangelog } from "./UcpModel.interface";
 
 export default interface PersistanceManager {
 
@@ -13,12 +14,12 @@ export default interface PersistanceManager {
   onNotification(changeObject: UcpModelChangelog): Promise<void>;
 }
 
-export type UDEObject = ModelUDEStructure & {
-  iorId: string,
-  type: 'Entity',
-  entityIOR: string
-  objectIor: string
-  time: number
+export type UDEObject = {
+  id: string,
+  alias?: string[],
+  instanceIOR: string,
+  typeIOR: string,
+  particle: ParticleUDEStructure
 }
 
 // TODO@BE Need to use it

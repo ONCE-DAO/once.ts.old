@@ -22,7 +22,7 @@ export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> 
             if (typeof objectRef.promise !== 'undefined') {
                 result.push(objectRef.promise);
             } else {
-                const object = (this.weakRefAvailable ? objectRef.ref.deref() : objectRef.ref);
+                const object = this.parseWeakRef(objectRef.ref);
                 if (object) {
                     // TODO@BE Update wen UcpComponents
                     // if (Thinglish.isInstanceOf(object, UcpComponent)) {
@@ -39,7 +39,7 @@ export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> 
             if (typeof objectRef.promise !== 'undefined') {
                 result.push(objectRef.promise);
             } else {
-                const object = (this.weakRefAvailable ? objectRef.ref.deref() : objectRef.ref);
+                const object = this.parseWeakRef(objectRef.ref);
                 if (object) {
                     result.push({ key, value: object });
                 }
@@ -71,6 +71,22 @@ export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> 
         this.registry = {}
     }
 
+    private toWeakRef(object: any): any {
+        if (typeof object === 'object') {
+            return (this.weakRefAvailable ? new WeakRef(object) : object);
+        } else {
+            return object;
+        }
+    }
+
+    private parseWeakRef(object: any): any {
+        if (this.weakRefAvailable && typeof object.deref === 'function') {
+            return object.deref();
+        } else {
+            return object;
+        }
+    }
+
     register(key: any, value: any) {
 
         let objectRef: storedObject;
@@ -78,7 +94,7 @@ export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> 
         if (isPromise) {
             objectRef = { promise: value };
         } else {
-            objectRef = { ref: (this.weakRefAvailable ? new WeakRef(value) : value) }
+            objectRef = { ref: this.toWeakRef(value) }
         }
 
         if (typeof key === 'object') {
@@ -92,7 +108,7 @@ export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> 
                 if (x === undefined) {
                     this.remove(key);
                 } else {
-                    objectRef.ref = (this.weakRefAvailable ? new WeakRef(x) : x);
+                    objectRef.ref = this.toWeakRef(x);
                     delete objectRef.promise;
                 }
             }).catch((e: any) => {
@@ -102,7 +118,9 @@ export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> 
 
     }
 
-    async lookup(key: any): Promise<any> {
+
+
+    lookup(key: any): Promise<any> {
         let objectRef;
         if (typeof key === 'object') {
             objectRef = this.mapRegistry.get(key);
@@ -110,21 +128,21 @@ export default class WeakRefPromiseStore extends BaseThing<WeakRefPromiseStore> 
             objectRef = this.registry[key];
         }
 
-        if (objectRef !== undefined) {
+        if (objectRef === undefined) return Promise.resolve(undefined);
 
-            if (typeof objectRef.promise !== 'undefined') {
-                return objectRef.promise;
-            }
-            let object = (this.weakRefAvailable ? objectRef.ref.deref() : objectRef.ref);
-            // TODO@BE Update wenn ucp Components vorhanden
-            // if (Thinglish.isInstanceOf(object, UcpComponent)) {
-            //     if (object.componentState === UcpComponent.COMPONENT_STATES.DESTROYED) {
-            //         this.remove(key, { silent: true });
-            //         return undefined;
-            //     }
-            // }
-            return object;
+        if (typeof objectRef.promise !== 'undefined') {
+            return objectRef.promise;
         }
+        let object = this.parseWeakRef(objectRef.ref);
+        // TODO@BE Update wenn ucp Components vorhanden
+        // if (Thinglish.isInstanceOf(object, UcpComponent)) {
+        //     if (object.componentState === UcpComponent.COMPONENT_STATES.DESTROYED) {
+        //         this.remove(key, { silent: true });
+        //         return undefined;
+        //     }
+        // }
+        return Promise.resolve(object);
+
 
     }
 

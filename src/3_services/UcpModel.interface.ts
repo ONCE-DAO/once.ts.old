@@ -1,5 +1,6 @@
 import { EventServiceConsumer } from "./EventService.interface";
 import { JSONProvider } from "./JSON.interface";
+import { ParticleUDEStructure } from "./Particle.interface";
 import Thing from "./Thing.interface";
 import Wave from "./Wave.interface";
 
@@ -12,15 +13,10 @@ export default interface UcpModel extends EventServiceConsumer, Thing<UcpModel>,
     rollbackTransaction(): void;
     transactionState: UcpModelTransactionStates;
     loadOnAccess: boolean;
-    toUDEStructure(particleSnapshot?: any): ModelUDEStructure;
+    toUDEStructure(particleSnapshot?: any): ParticleUDEStructure;
     version: string;
 }
 
-export type ModelUDEStructure = {
-    data: any,
-    version: string,
-    predecessorVersion: string | undefined
-};
 
 export enum UcpModelChangeLogMethods { "set" = "set", "delete" = "delete", "create" = "create" }
 

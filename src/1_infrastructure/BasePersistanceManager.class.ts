@@ -57,12 +57,10 @@ export abstract class BasePersistanceManager extends BaseThing<any> implements P
 
         if (!IOR.id) throw new Error("Missing IOR ID in " + IOR.href);
         const udeData: UDEObject = {
-            iorId: IOR.id,
-            type: 'Entity',
-            entityIOR: IOR.href,
-            objectIor: ucpComponent.classDescriptor.class.IOR.href,
-            time: Date.now(), // TODO Change Date later
-            ...modelData
+            id: IOR.id,
+            instanceIOR: IOR.href,
+            typeIOR: ucpComponent.classDescriptor.class.IOR.href,
+            particle: modelData
         };
 
         return udeData;

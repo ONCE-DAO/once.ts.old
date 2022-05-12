@@ -8,6 +8,8 @@ import DefaultIOR from "./DefaultIOR.class";
 import UcpComponent from "../../3_services/UcpComponent.interface";
 import WeakRefPromiseStore from "./WeakRefPromiseStore.class";
 import ExtendedPromise from "../JSExtensions/Promise";
+import { UDEObject } from "../../3_services/PersistanceManager.interface";
+import DefaultParticle from "./DefaultParticle.class";
 
 export default class UDELoader extends BaseLoader {
     private static _loaderInstance: any;
@@ -59,7 +61,7 @@ export default class UDELoader extends BaseLoader {
             if (persistanceManager === undefined) throw new Error('No persistence manager found');
             let udeData = await persistanceManager.retrieve(ior);
 
-            let aClass = await DefaultIOR.load(udeData.objectIor);
+            let aClass = await DefaultIOR.load(udeData.typeIOR);
             let instance = new aClass() as UcpComponent<any, any>;
 
             instance.IOR = ior;
@@ -70,6 +72,16 @@ export default class UDELoader extends BaseLoader {
             return instance;
 
         }
+    }
+
+    static validateUDEStructure(udeObject: UDEObject): UDEObject {
+        if (typeof udeObject.id !== 'string') throw new Error(`Parameter 'id' is wrong in Object value: '${udeObject.id}`)
+        if (typeof udeObject.instanceIOR !== 'string') throw new Error(`Parameter 'instanceIOR' is wrong in Object value: '${udeObject.instanceIOR}`)
+        if (typeof udeObject.typeIOR !== 'string') throw new Error(`Parameter 'typeIOR' is wrong in Object value: '${udeObject.typeIOR}`)
+        if (typeof udeObject.particle !== 'object') throw new Error(`Parameter 'particle' is wrong in Object value: '${udeObject.particle}`)
+
+        DefaultParticle.validateParticleStructure(udeObject.particle);
+        return udeObject;
     }
 
 
