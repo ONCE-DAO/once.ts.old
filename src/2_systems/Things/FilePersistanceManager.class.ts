@@ -7,8 +7,13 @@ import { UDEObject } from "../../3_services/PersistanceManager.interface";
 import UDELoader from "./UDELoader.class";
 
 export class FilePersistanceManager extends BasePersistanceManager {
+
     private static _loaderInstance: FilePersistanceManager;
     private backendVersion: string | undefined = undefined;
+
+    private _alias: string[] = [];
+
+    static readonly _aliasSeparator: string = ".";
 
     static canHandle(ior: IOR): number {
         if (ONCE && ONCE.mode === OnceMode.NODE_JS) {
@@ -23,9 +28,13 @@ export class FilePersistanceManager extends BasePersistanceManager {
         return FilePersistanceManager.canHandle(ior);
     }
 
-    get IOR() { return this.ucpComponent?.IOR }
+    get IOR(): IOR & { id: string } | undefined {
+        let ior = this.ucpComponent?.IOR;
+        if (ior && typeof ior.id === 'undefined') throw new Error("Missing ID");
+        return ior as IOR & { id: string } | undefined;
+    }
 
-    async getUdeDirectory(): Promise<string> {
+    static async getUdeDirectory(): Promise<string> {
         if (!ONCE) throw new Error("Missing ONCE");
         const dir = ONCE.scenarioPath;
         if (!fs.existsSync(dir)) {
@@ -34,16 +43,27 @@ export class FilePersistanceManager extends BasePersistanceManager {
         return dir;
     }
 
-    async fileName(ior?: IOR) {
-        let dir = await this.getUdeDirectory();
+    async fileName(ior?: IOR & { id: string }) {
+        let dir = await FilePersistanceManager.getUdeDirectory();
 
         if (!ior) ior = this.IOR;
         if (!ior) throw new Error("Missing IOR");
 
         let id = ior.id;
-        let fileName = id + '.json';
+        let aliasList = this._alias.sort(function (a, b) {
+            a = a.toLowerCase();
+            b = b.toLowerCase();
+            if (a == b) return 0;
+            if (a > b) return 1;
+            return -1;
+        });
+
+        let fileName: string = '';
+        if (aliasList.length > 0) fileName += aliasList.join(FilePersistanceManager._aliasSeparator) + FilePersistanceManager._aliasSeparator;
+        fileName += id + '.json';
         let path = ior.pathName;
         if (path) {
+            dir = dir.replace(/\/$/, '');
             dir += path.replace('/' + id, '');
         }
 
@@ -55,9 +75,44 @@ export class FilePersistanceManager extends BasePersistanceManager {
         return file;
     }
 
+    static async discover(ior: IOR): Promise<{ [index: string]: string }> {
+        if (ior.pathName === undefined) throw new Error("Missing PathName in ior");
+
+        let dir = await FilePersistanceManager.getUdeDirectory();
+        dir += ior.pathName.replace('/' + ior.id, '');
+        const files = fs.readdirSync(dir);
+        const fullAliasList: { [index: string]: string } = {};
+        for (const file of files) {
+            if (file.endsWith('.json')) {
+                const aliasList = file.substring(0, file.length - 5).split(FilePersistanceManager._aliasSeparator);
+                for (const alias of aliasList) {
+                    if (fullAliasList[alias] === undefined) {
+                        fullAliasList[alias] = file;
+                    } else {
+                        console.error(`Duplicate UDE Alias! File1: ${file} / ${fullAliasList[alias]}`)
+                    }
+                }
+            }
+        }
+
+        return fullAliasList;
+    }
+
+    static async findFile4IOR(ior: IOR): Promise<string | undefined> {
+        const id = ior.id;
+        if (id === undefined) throw new Error("Missing id in IOR")
+        const aliasList = await this.discover(ior);
+        if (aliasList[id]) {
+            return aliasList[id];
+        }
+    }
+
 
     async create(): Promise<void> {
         if (!this.ucpComponent || !this.IOR) throw new Error("Missing UCP Component");
+
+        this._validateAliasList();
+
         let fileName = await this.fileName();
 
         if (fs.existsSync(fileName)) {
@@ -72,9 +127,24 @@ export class FilePersistanceManager extends BasePersistanceManager {
 
     }
 
+    private async _validateAliasList(): Promise<void> {
+        const ior = this.IOR;
+        if (!ior) throw new Error("Missing IOR");
 
-    async retrieve(ior?: IOR): Promise<UDEObject> {
+        let aliasList = await FilePersistanceManager.discover(ior);
+
+        for (let alias of [...this._alias, ior.id]) {
+            if (alias) {
+                if (aliasList[alias]) throw new Error(`Alias ${alias} already exists in File ${aliasList[alias]}! New IOR: ${ior.href}`);
+            }
+        }
+
+    }
+
+
+    async retrieve(ior?: IOR & { id: string }): Promise<UDEObject> {
         let fileName = await this.fileName(ior);
+
         const data = JSON.parse(fs.readFileSync(fileName, 'utf-8'));
 
         const udeObject = UDELoader.validateUDEStructure(data);
@@ -110,6 +180,16 @@ export class FilePersistanceManager extends BasePersistanceManager {
         fs.rmSync(fileName);
         UDELoader.factory().removeObjectFromStore(this.IOR);
         this.backendVersion = undefined;
+    }
+
+    async addAlias(alias: string): Promise<void> {
+        if (this.backendVersion !== undefined) {
+            await this.delete();
+            this._alias.push(alias);
+            await this.create();
+        } else {
+            this._alias.push(alias);
+        }
     }
 
     async onModelChanged(changeObject: UcpModelChangelog): Promise<void> {

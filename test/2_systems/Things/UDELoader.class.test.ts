@@ -40,10 +40,6 @@ describe("UDE Loader", () => {
 
     test("canHandle negative", async () => {
 
-        let ucpComponent = new SomeExampleUcpComponent();
-        await ucpComponent.persistanceManager.create();
-
-
         const ior = new DefaultIOR().init("ior:localhost/UDE/12345")
         let result = UDELoader.canHandle(ior);
 

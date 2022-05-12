@@ -8,6 +8,7 @@ import fs from 'fs';
 import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class";
 import { FilePersistanceManager } from "../../../src/2_systems/Things/FilePersistanceManager.class";
 import UDELoader from "../../../src/2_systems/Things/UDELoader.class";
+import exp from "constants";
 
 beforeEach(async () => {
     if (typeof ONCE === "undefined") await OnceNodeServer.start();
@@ -48,6 +49,7 @@ describe("File PersistanceManager", () => {
 
     test("create / delete", async () => {
         let ucpComponent = new SomeExampleUcpComponent();
+        ucpComponent.model.age = 0;
 
 
         await ucpComponent.persistanceManager.create();
@@ -68,7 +70,7 @@ describe("File PersistanceManager", () => {
     test("update / load", async () => {
         let ucpComponent = new SomeExampleUcpComponent();
 
-
+        ucpComponent.model.age = 1;
         await ucpComponent.persistanceManager.create();
 
         // @ts-ignore
@@ -122,5 +124,65 @@ describe("File PersistanceManager", () => {
 
 
     })
+
+
+    test("File starts with Alias and ends with id", async () => {
+        let ucpComponent = new SomeExampleUcpComponent();
+
+        const id = ucpComponent.IOR.id;
+
+        const myAlias = 'MyTestOnceFile' + Math.round(Math.random() * 100000);
+        await ucpComponent.persistanceManager.addAlias(myAlias);
+
+        // @ts-ignore
+        let filename: string = await ucpComponent.persistanceManager.list[0].fileName();
+
+        let fileList = filename.split('/');
+        let file = fileList[fileList.length - 1];
+
+        expect(file).toBe(myAlias + '.' + id + '.json');
+
+    });
+
+    test("add Alias before create", async () => {
+        let ucpComponent = new SomeExampleUcpComponent();
+
+
+        const myAlias = 'MyTestOnceFile' + Math.round(Math.random() * 100000);
+        await ucpComponent.persistanceManager.addAlias(myAlias);
+
+        await ucpComponent.persistanceManager.create();
+
+        // @ts-ignore
+        let filename = await ucpComponent.persistanceManager.list[0].fileName();
+
+        expect(filename.match(myAlias)).toBeTruthy();
+
+        await ucpComponent.persistanceManager.delete();
+        // @ts-ignore
+        expect(fs.existsSync(filename), 'File was not deleted').toBeFalsy();
+
+    });
+
+    test("add Alias after create", async () => {
+        let ucpComponent = new SomeExampleUcpComponent();
+
+
+        const myAlias = 'MyTestOnceFile' + Math.round(Math.random() * 100000);
+        await ucpComponent.persistanceManager.create();
+
+        await ucpComponent.persistanceManager.addAlias(myAlias);
+
+
+        // @ts-ignore
+        let filename = await ucpComponent.persistanceManager.list[0].fileName();
+
+        expect(filename.match(myAlias)).toBeTruthy();
+
+        await ucpComponent.persistanceManager.delete();
+        // @ts-ignore
+        expect(fs.existsSync(filename), 'File was not deleted').toBeFalsy();
+
+    });
 
 })

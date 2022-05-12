@@ -1,14 +1,14 @@
 import { z } from "zod";
 import DefaultIOR from "../2_systems/Things/DefaultIOR.class";
 import { UcpModelProxySchema } from "../2_systems/Things/DefaultUcpModel.class";
+import { DefaultPersistanceManagerHandler } from "../2_systems/Things/PersistanceManagerHandler.class";
 import RelatedObjectStore from "../2_systems/Things/RelatedObjectStore.class";
 import IOR from "../3_services/IOR.interface";
 import { JSONProvider } from "../3_services/JSON.interface";
-import { OnceMode } from "../3_services/Once.interface";
 import RelatedObjectStoreInterface from "../3_services/RelatedObjectStore.interface";
-import UcpComponent, { UcpComponentPersistanceManagerHandler } from "../3_services/UcpComponent.interface";
+import UcpComponent from "../3_services/UcpComponent.interface";
 import UcpModel from "../3_services/UcpModel.interface";
-import { BasePersistanceManager, PersistanceManagerHandler } from "./BasePersistanceManager.class";
+import { BasePersistanceManager } from "./BasePersistanceManager.class";
 import BaseThing from "./BaseThing.class";
 
 // HACK: ONCE should be there
@@ -18,15 +18,15 @@ await import("../2_systems/Things/FilePersistanceManager.class")
 
 export default abstract class BaseUcpComponent<ModelDataType, ClassInterface> extends BaseThing<ClassInterface> implements UcpComponent<ModelDataType, ClassInterface>, JSONProvider {
     readonly Store: RelatedObjectStoreInterface = new RelatedObjectStore();
-    private _persistanceManager: UcpComponentPersistanceManagerHandler | undefined;
+    private _persistanceManager: DefaultPersistanceManagerHandler | undefined;
     private _IOR: IOR | undefined;
     public abstract ucpModel: UcpModel;
 
-    get persistanceManager(): UcpComponentPersistanceManagerHandler {
+    get persistanceManager(): DefaultPersistanceManagerHandler {
 
         if (this._persistanceManager === undefined) {
             BasePersistanceManager.getPersistenceManager(this);
-            this._persistanceManager = new PersistanceManagerHandler(this);
+            this._persistanceManager = new DefaultPersistanceManagerHandler(this);
         }
         return this._persistanceManager;
     }
@@ -85,24 +85,4 @@ export default abstract class BaseUcpComponent<ModelDataType, ClassInterface> ex
         return this._IOR;
     }
 
-    /*
-    get IOR(): IOR {
-        if (!this._IOR) {
-            this._IOR = new DefaultIOR();
-
-            let href = 'localhost:' + this.filename;
-            this._IOR.init(href);
-        }
-        return this._IOR;
-    }
-    */
-
 }
-
-/*
-            age: z.number().optional(),
-            inventory: z.object({
-                name: z.string().optional(),
-                itemId: z.number().optional(),
-            }).array().optional()
-            */

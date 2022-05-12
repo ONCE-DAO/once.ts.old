@@ -5,13 +5,14 @@ import UcpComponent from "./UcpComponent.interface";
 import { UcpModelChangelog } from "./UcpModel.interface";
 
 export default interface PersistanceManager {
-
   create(): Promise<void>;
   retrieve(ior?: IOR): Promise<UDEObject>;
   update(): Promise<void>;
   delete(): Promise<void>;
   onModelChanged(changeObject: UcpModelChangelog): Promise<void>;
   onNotification(changeObject: UcpModelChangelog): Promise<void>;
+
+  addAlias(alias: string): Promise<void>;
 }
 
 export type UDEObject = {
