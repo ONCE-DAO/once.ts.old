@@ -43,11 +43,27 @@ export class FilePersistanceManager extends BasePersistanceManager {
         return dir;
     }
 
-    async fileName(ior?: IOR & { id: string }) {
-        let dir = await FilePersistanceManager.getUdeDirectory();
-
+    async directory(ior?: IOR & { id: string }): Promise<string> {
         if (!ior) ior = this.IOR;
         if (!ior) throw new Error("Missing IOR");
+
+        let dir = await FilePersistanceManager.getUdeDirectory();
+        let path = ior.pathName;
+        if (path) {
+            dir = dir.replace(/\/$/, '');
+            dir += path.replace(ior.id, '');
+        }
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir);
+        }
+
+        return dir;
+    }
+
+    async fileName(ior?: IOR & { id: string }) {
+        if (!ior) ior = this.IOR;
+        if (!ior) throw new Error("Missing IOR");
+
 
         let id = ior.id;
         let aliasList = this._alias.sort(function (a, b) {
@@ -61,18 +77,11 @@ export class FilePersistanceManager extends BasePersistanceManager {
         let fileName: string = '';
         if (aliasList.length > 0) fileName += aliasList.join(FilePersistanceManager._aliasSeparator) + FilePersistanceManager._aliasSeparator;
         fileName += id + '.json';
-        let path = ior.pathName;
-        if (path) {
-            dir = dir.replace(/\/$/, '');
-            dir += path.replace('/' + id, '');
-        }
 
-        let file = dir + '/' + fileName;
 
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir);
-        }
-        return file;
+        const dir = await this.directory();
+
+        return dir + '/' + fileName;
     }
 
     static async discover(ior: IOR): Promise<{ [index: string]: string }> {
@@ -143,9 +152,15 @@ export class FilePersistanceManager extends BasePersistanceManager {
 
 
     async retrieve(ior?: IOR & { id: string }): Promise<UDEObject> {
-        let fileName = await this.fileName(ior);
+        let internalIOR = ior || this.IOR;
+        if (!internalIOR) throw new Error("Missing IOR");
 
-        const data = JSON.parse(fs.readFileSync(fileName, 'utf-8'));
+        let fileName = await FilePersistanceManager.findFile4IOR(internalIOR);
+        if (!fileName) throw new Error("No file Found");
+
+        const filepath = (await this.directory(internalIOR)) + fileName;
+
+        const data = JSON.parse(fs.readFileSync(filepath, 'utf-8'));
 
         const udeObject = UDELoader.validateUDEStructure(data);
 

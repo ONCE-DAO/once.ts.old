@@ -22,20 +22,12 @@ describe("UDE Loader", () => {
         expect(loader).toEqual(loader2);
     })
 
-    test("canHandle", async () => {
+    test("canHandle ude", async () => {
 
         const ior = new DefaultIOR().init("ior:ude:localhost/UDE/12345")
         let result = UDELoader.canHandle(ior);
 
         expect(result).toBe(1);
-    })
-
-    test("canHandle", async () => {
-
-        const ior = new DefaultIOR().init("ior:localhost/UDE/12345")
-        let result = UDELoader.canHandle(ior);
-
-        expect(result).toBe(0);
     })
 
     test("canHandle negative", async () => {
@@ -48,6 +40,7 @@ describe("UDE Loader", () => {
 
     test("Store create => load => load => delete", async () => {
 
+        this
         let ucpComponent = new SomeExampleUcpComponent();
         await ucpComponent.persistanceManager.create();
 
@@ -65,9 +58,29 @@ describe("UDE Loader", () => {
             throw new Error("Missing Error");
         } catch (e) {
             //@ts-ignore
-            expect(e.message.match(/no such file or directory/)).toBeTruthy();
+            expect(e.message).toBe("No file Found");
         }
 
+
+
+    })
+
+    test("Load with Alias", async () => {
+
+        let ucpComponent = new SomeExampleUcpComponent();
+
+        const myAlias = expect.getState().currentTestName + Math.round(Math.random() * 100000);
+        ucpComponent.persistanceManager.addAlias(myAlias)
+        await ucpComponent.persistanceManager.create();
+
+        let loadIOR = ucpComponent.IOR.clone();
+        loadIOR.id = myAlias;
+
+
+        let ucpComponentClone = await loadIOR.load();
+        expect(ucpComponent).toBe(ucpComponentClone);
+
+        await ucpComponent.persistanceManager.delete();
 
 
     })

@@ -61,12 +61,20 @@ export default class UDELoader extends BaseLoader {
             if (persistanceManager === undefined) throw new Error('No persistence manager found');
             let udeData = await persistanceManager.retrieve(ior);
 
+            if (ior.href !== udeData.instanceIOR) {
+                const existingInstanceWithAlias = await this.instanceStore.lookup(udeData.instanceIOR);
+                if (existingInstanceWithAlias) {
+                    promiseHandler.setSuccess(existingInstanceWithAlias);
+                    return existingInstanceWithAlias;
+                }
+            }
+
             let aClass = await DefaultIOR.load(udeData.typeIOR);
             let instance = new aClass() as UcpComponent<any, any>;
 
             instance.IOR = ior;
 
-            instance.persistanceManager.retrieve();
+            await instance.persistanceManager.retrieve();
             promiseHandler.setSuccess(instance);
 
             return instance;

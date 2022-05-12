@@ -131,7 +131,7 @@ describe("File PersistanceManager", () => {
 
         const id = ucpComponent.IOR.id;
 
-        const myAlias = 'MyTestOnceFile' + Math.round(Math.random() * 100000);
+        const myAlias = expect.getState().currentTestName + Math.round(Math.random() * 100000);
         await ucpComponent.persistanceManager.addAlias(myAlias);
 
         // @ts-ignore
@@ -148,7 +148,7 @@ describe("File PersistanceManager", () => {
         let ucpComponent = new SomeExampleUcpComponent();
 
 
-        const myAlias = 'MyTestOnceFile' + Math.round(Math.random() * 100000);
+        const myAlias = expect.getState().currentTestName + Math.round(Math.random() * 100000);
         await ucpComponent.persistanceManager.addAlias(myAlias);
 
         await ucpComponent.persistanceManager.create();
@@ -168,7 +168,7 @@ describe("File PersistanceManager", () => {
         let ucpComponent = new SomeExampleUcpComponent();
 
 
-        const myAlias = 'MyTestOnceFile' + Math.round(Math.random() * 100000);
+        const myAlias = expect.getState().currentTestName + Math.round(Math.random() * 100000);
         await ucpComponent.persistanceManager.create();
 
         await ucpComponent.persistanceManager.addAlias(myAlias);
