@@ -1,5 +1,6 @@
 import Thing from "./Thing.interface";
 import EAMD from "./EAMD.interface";
+import { OnceConfig } from "../2_systems/Once/ONCEConfig.class";
 
 export default interface Once extends Thing<Once> {
   ENV: NodeJS.ProcessEnv;
@@ -9,6 +10,8 @@ export default interface Once extends Thing<Once> {
   state: OnceState;
   start(): void;
   scenarioPath: string;
+
+  getConfig(): Promise<OnceConfig>;
 }
 
 declare global {

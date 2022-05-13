@@ -1,5 +1,5 @@
 import { PM_ACTION } from "../../1_infrastructure/BasePersistanceManager.class";
-import PersistanceManager from "../../3_services/PersistanceManager.interface";
+import PersistanceManager, { UDEObject } from "../../3_services/PersistanceManager.interface";
 import { PersistanceManagerHandler } from "../../3_services/PersistanceManagerHandler.interface";
 import UcpComponent from "../../3_services/UcpComponent.interface";
 import { InterfaceDescriptor } from "./DefaultClassDescriptor.class";
@@ -8,7 +8,7 @@ export class DefaultPersistanceManagerHandler implements PersistanceManagerHandl
     async create(): Promise<any[]> {
         return this.runPMAction(PM_ACTION.create)
     }
-    async retrieve(): Promise<any[]> {
+    async retrieve(): Promise<UDEObject[]> {
         return this.runPMAction(PM_ACTION.retrieve)
     }
     async update(): Promise<any[]> {
@@ -18,6 +18,7 @@ export class DefaultPersistanceManagerHandler implements PersistanceManagerHandl
         return this.runPMAction(PM_ACTION.delete)
     }
     async addAlias(alias: string): Promise<any[]> {
+        if (alias.match(/\./)) throw new Error("No '.' are allowed in alias")
         return this.runPMAction(PM_ACTION.addAlias, alias)
     }
     async removeAlias(alias: string): Promise<any[]> {

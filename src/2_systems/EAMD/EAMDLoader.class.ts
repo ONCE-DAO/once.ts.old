@@ -54,8 +54,9 @@ class EAMDLoader extends BaseLoader implements Loader {
     } else {
       const result = await import(modulePath);
 
+      // HACK should be removed after Components exists
       if (ior.namespaceObject !== undefined) {
-        if (!result[ior.namespaceObject]) throw new Error(`Missing Object '${ior.namespaceObject}' in import`)
+        if (!result[ior.namespaceObject]) throw new Error(`Missing Object '${ior.namespaceObject}' in the export from file: '${modulePath}'`)
         return result[ior.namespaceObject];
       } else {
         return result;

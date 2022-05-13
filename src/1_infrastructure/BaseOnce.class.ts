@@ -3,6 +3,8 @@ import Once, { OnceMode, OnceState } from "../3_services/Once.interface";
 import DefaultThing from "./BaseThing.class";
 
 import fs from "fs";
+import DefaultOnceConfig, { OnceConfig } from "../2_systems/Once/ONCEConfig.class";
+import DefaultIOR from "../2_systems/Things/DefaultIOR.class";
 
 export abstract class BaseOnce extends DefaultThing<Once> implements Once {
   creationDate: Date;
@@ -11,6 +13,8 @@ export abstract class BaseOnce extends DefaultThing<Once> implements Once {
   eamd: EAMDInterface | undefined;
   ENV: any;
   global: typeof globalThis;
+  protected _config: OnceConfig | undefined;
+
 
 
   constructor(glob: typeof globalThis) {
@@ -20,6 +24,25 @@ export abstract class BaseOnce extends DefaultThing<Once> implements Once {
     this.global = glob;
     this.ENV = {};
   }
+
+
+  async getConfig(): Promise<OnceConfig> {
+    const configAlias = 'onceConfig';
+    if (this._config === undefined) {
+      try {
+        this._config = await new DefaultIOR().init('ior:ude:localhost/UDE/' + configAlias).load();
+      } catch (e) {
+        console.log("No stored ONCE Config Instance found");
+      }
+      if (this._config === undefined) {
+        this._config = new DefaultOnceConfig();
+        this._config.persistanceManager.addAlias(configAlias);
+        await this._config.persistanceManager.create();
+      }
+    }
+    return this._config;
+  }
+
   get scenarioPath(): string {
     let path = process.cwd();
     if (path.match('/Scenarios/')) return path;
