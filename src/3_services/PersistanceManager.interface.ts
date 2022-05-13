@@ -13,6 +13,9 @@ export default interface PersistanceManager {
   onNotification(changeObject: UcpModelChangelog): Promise<void>;
 
   addAlias(alias: string): Promise<void>;
+  removeAlias(alias: string): Promise<void>;
+
+  alias: string[];
 }
 
 export type UDEObject = {

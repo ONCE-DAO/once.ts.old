@@ -8,10 +8,12 @@ import UDELoader from "./UDELoader.class";
 
 export class FilePersistanceManager extends BasePersistanceManager {
 
-    private static _loaderInstance: FilePersistanceManager;
-    private backendVersion: string | undefined = undefined;
 
-    private _alias: string[] = [];
+    get backendActive(): boolean {
+        return this.backendVersion !== undefined;
+    }
+
+    private backendVersion: string | undefined = undefined;
 
     static readonly _aliasSeparator: string = ".";
 
@@ -66,7 +68,7 @@ export class FilePersistanceManager extends BasePersistanceManager {
 
 
         let id = ior.id;
-        let aliasList = this._alias.sort(function (a, b) {
+        let aliasList = this.alias.sort(function (a, b) {
             a = a.toLowerCase();
             b = b.toLowerCase();
             if (a == b) return 0;
@@ -116,6 +118,25 @@ export class FilePersistanceManager extends BasePersistanceManager {
         }
     }
 
+    async addAlias(alias: string): Promise<void> {
+        if (this.backendActive) {
+            await this.delete();
+            this.alias.push(alias);
+            await this.create();
+        } else {
+            this.alias.push(alias);
+        }
+    }
+
+    async removeAlias(alias: string): Promise<void> {
+        if (this.backendActive) {
+            await this.delete();
+            this.alias.splice(this.alias.indexOf(alias), 1);
+            await this.create();
+        } else {
+            this.alias.splice(this.alias.indexOf(alias), 1);
+        }
+    }
 
     async create(): Promise<void> {
         if (!this.ucpComponent || !this.IOR) throw new Error("Missing UCP Component");
@@ -142,9 +163,11 @@ export class FilePersistanceManager extends BasePersistanceManager {
 
         let aliasList = await FilePersistanceManager.discover(ior);
 
-        for (let alias of [...this._alias, ior.id]) {
+        for (let alias of [...this.alias, ior.id]) {
             if (alias) {
-                if (aliasList[alias]) throw new Error(`Alias ${alias} already exists in File ${aliasList[alias]}! New IOR: ${ior.href}`);
+                if (aliasList[alias]) {
+                    throw new Error(`Alias ${alias} already exists in File ${aliasList[alias]}! New IOR: ${ior.href}`);
+                }
             }
         }
 
@@ -171,9 +194,11 @@ export class FilePersistanceManager extends BasePersistanceManager {
         return udeObject;
     }
 
+
+
     async update(): Promise<void> {
 
-        if (this.backendVersion === undefined) throw new Error("Object is not persisted");
+        if (!this.backendActive) throw new Error("Object is not persisted");
 
         let fileName = await this.fileName();
 
@@ -187,7 +212,7 @@ export class FilePersistanceManager extends BasePersistanceManager {
     }
 
     async delete(): Promise<void> {
-        if (this.backendVersion === undefined) return;
+        if (!this.backendActive) return;
 
         if (!this.ucpComponent || !this.IOR) throw new Error("Missing UCP Component");
 
@@ -197,15 +222,7 @@ export class FilePersistanceManager extends BasePersistanceManager {
         this.backendVersion = undefined;
     }
 
-    async addAlias(alias: string): Promise<void> {
-        if (this.backendVersion !== undefined) {
-            await this.delete();
-            this._alias.push(alias);
-            await this.create();
-        } else {
-            this._alias.push(alias);
-        }
-    }
+
 
     async onModelChanged(changeObject: UcpModelChangelog): Promise<void> {
         if (this.backendVersion) {

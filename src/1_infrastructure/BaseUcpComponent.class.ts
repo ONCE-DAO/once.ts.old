@@ -5,6 +5,7 @@ import { DefaultPersistanceManagerHandler } from "../2_systems/Things/Persistanc
 import RelatedObjectStore from "../2_systems/Things/RelatedObjectStore.class";
 import IOR from "../3_services/IOR.interface";
 import { JSONProvider } from "../3_services/JSON.interface";
+import { PersistanceManagerHandler } from "../3_services/PersistanceManagerHandler.interface";
 import RelatedObjectStoreInterface from "../3_services/RelatedObjectStore.interface";
 import UcpComponent from "../3_services/UcpComponent.interface";
 import UcpModel from "../3_services/UcpModel.interface";
@@ -22,7 +23,7 @@ export default abstract class BaseUcpComponent<ModelDataType, ClassInterface> ex
     private _IOR: IOR | undefined;
     public abstract ucpModel: UcpModel;
 
-    get persistanceManager(): DefaultPersistanceManagerHandler {
+    get persistanceManager(): PersistanceManagerHandler {
 
         if (this._persistanceManager === undefined) {
             BasePersistanceManager.getPersistenceManager(this);

@@ -6,5 +6,9 @@ export interface PersistanceManagerHandler {
     update(): Promise<any[]>;
     delete(): Promise<any[]>;
     list: PersistanceManager[];
+
+    addAlias(alias: string): Promise<any[]>;
+    removeAlias(alias: string): Promise<any[]>;
+
     // await(): Promise<any[]>;
 }

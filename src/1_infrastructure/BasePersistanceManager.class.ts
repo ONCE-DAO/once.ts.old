@@ -5,9 +5,10 @@ import UcpComponent from "../3_services/UcpComponent.interface";
 import { UcpModelChangelog, UcpModelEvents } from "../3_services/UcpModel.interface";
 import BaseThing from "./BaseThing.class";
 
-export enum PM_ACTION { create = "create", retrieve = "retrieve", update = "update", delete = "delete", addAlias = "addAlias" }
+export enum PM_ACTION { create = "create", retrieve = "retrieve", update = "update", delete = "delete", addAlias = "addAlias", removeAlias = "removeAlias" }
 
 export abstract class BasePersistanceManager extends BaseThing<any> implements PersistanceManager {
+    public alias: string[] = [];
 
     abstract create(): Promise<void>
     abstract retrieve(): Promise<UDEObject>
@@ -16,7 +17,7 @@ export abstract class BasePersistanceManager extends BaseThing<any> implements P
     abstract onModelChanged(changeObject: UcpModelChangelog): Promise<void>
     abstract onNotification(changeObject: UcpModelChangelog): Promise<void>
 
-    abstract addAlias(alias: string): Promise<void>
+    abstract get backendActive(): boolean
 
     protected ucpComponent: UcpComponent<any, any> | undefined;
 
@@ -52,6 +53,24 @@ export abstract class BasePersistanceManager extends BaseThing<any> implements P
         }
     }
 
+    async addAlias(alias: string): Promise<void> {
+        if (this.backendActive) {
+            this.alias.push(alias);
+            await this.update();
+        } else {
+            this.alias.push(alias);
+        }
+    }
+
+    async removeAlias(alias: string): Promise<void> {
+        if (this.backendActive) {
+            this.alias.splice(this.alias.indexOf(alias), 1);
+            await this.update();
+        } else {
+            this.alias.splice(this.alias.indexOf(alias), 1);
+        }
+    }
+
     get ucpComponentData(): UDEObject {
         if (!this.ucpComponent) throw new Error("Missing ucpComponent");
         const ucpComponent = this.ucpComponent;
@@ -63,8 +82,9 @@ export abstract class BasePersistanceManager extends BaseThing<any> implements P
             id: IOR.id,
             instanceIOR: IOR.href,
             typeIOR: ucpComponent.classDescriptor.class.IOR.href,
-            particle: modelData
+            particle: modelData,
         };
+        if (this.alias) udeData.alias = this.alias;
 
         return udeData;
     }

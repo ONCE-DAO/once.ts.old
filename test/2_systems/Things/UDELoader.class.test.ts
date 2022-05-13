@@ -53,6 +53,17 @@ describe("UDE Loader", () => {
 
         await ucpComponent.persistanceManager.delete();
 
+
+    })
+
+    test("Store create => delete (Store cleaned)", async () => {
+
+        this
+        let ucpComponent = new SomeExampleUcpComponent();
+        await ucpComponent.persistanceManager.create();
+
+        await ucpComponent.persistanceManager.delete();
+
         try {
             await ucpComponent.IOR.clone().load();
             throw new Error("Missing Error");
@@ -60,8 +71,6 @@ describe("UDE Loader", () => {
             //@ts-ignore
             expect(e.message).toBe("No file Found");
         }
-
-
 
     })
 

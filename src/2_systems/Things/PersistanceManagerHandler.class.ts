@@ -17,11 +17,13 @@ export class DefaultPersistanceManagerHandler implements PersistanceManagerHandl
     async delete(): Promise<any[]> {
         return this.runPMAction(PM_ACTION.delete)
     }
-
     async addAlias(alias: string): Promise<any[]> {
         return this.runPMAction(PM_ACTION.addAlias, alias)
-
     }
+    async removeAlias(alias: string): Promise<any[]> {
+        return this.runPMAction(PM_ACTION.removeAlias, alias)
+    }
+
     get list(): PersistanceManager[] {
         const interfaceDescriptor = InterfaceDescriptor.getInterfaceByNameHack("PersistanceManager");
         if (!interfaceDescriptor) return [];
@@ -33,7 +35,7 @@ export class DefaultPersistanceManagerHandler implements PersistanceManagerHandl
         const resultPromises = [];
         if (persistenceManagerList) {
             for (let pm of persistenceManagerList) {
-                if (action === PM_ACTION.addAlias) {
+                if (action === PM_ACTION.addAlias || action === PM_ACTION.removeAlias) {
                     resultPromises.push(pm[action](param1));
                 } else {
                     resultPromises.push(pm[action]());

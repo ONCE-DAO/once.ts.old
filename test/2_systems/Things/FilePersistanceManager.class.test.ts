@@ -8,10 +8,19 @@ import fs from 'fs';
 import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class";
 import { FilePersistanceManager } from "../../../src/2_systems/Things/FilePersistanceManager.class";
 import UDELoader from "../../../src/2_systems/Things/UDELoader.class";
-import exp from "constants";
 
 beforeEach(async () => {
     if (typeof ONCE === "undefined") await OnceNodeServer.start();
+});
+
+let allFiles: string[] = [];
+
+afterAll(() => {
+    for (let file of allFiles) {
+        if (fs.existsSync(file)) {
+            fs.rmSync(file);
+        }
+    }
 });
 
 describe("File PersistanceManager", () => {
@@ -57,6 +66,8 @@ describe("File PersistanceManager", () => {
         // @ts-ignore
         let filename = await ucpComponent.persistanceManager.list[0].fileName();
 
+        allFiles.push(filename);
+
         // @ts-ignore
         expect(fs.existsSync(filename), 'File is Missing').toBeTruthy();
 
@@ -75,6 +86,7 @@ describe("File PersistanceManager", () => {
 
         // @ts-ignore
         let filename = await ucpComponent.persistanceManager.list[0].fileName();
+        allFiles.push(filename);
 
         // @ts-ignore
         expect(fs.existsSync(filename), 'File is Missing').toBeTruthy();
@@ -108,6 +120,7 @@ describe("File PersistanceManager", () => {
 
         // @ts-ignore
         let filename = await ucpComponent.persistanceManager.list[0].fileName();
+        allFiles.push(filename);
 
         ucpComponent.model.age = 10;
 
@@ -131,7 +144,7 @@ describe("File PersistanceManager", () => {
 
         const id = ucpComponent.IOR.id;
 
-        const myAlias = expect.getState().currentTestName + Math.round(Math.random() * 100000);
+        const myAlias = "JestTest_" + expect.getState().currentTestName + Math.round(Math.random() * 100000);
         await ucpComponent.persistanceManager.addAlias(myAlias);
 
         // @ts-ignore
@@ -148,13 +161,14 @@ describe("File PersistanceManager", () => {
         let ucpComponent = new SomeExampleUcpComponent();
 
 
-        const myAlias = expect.getState().currentTestName + Math.round(Math.random() * 100000);
+        const myAlias = "JestTest_" + expect.getState().currentTestName + Math.round(Math.random() * 100000);
         await ucpComponent.persistanceManager.addAlias(myAlias);
 
         await ucpComponent.persistanceManager.create();
 
         // @ts-ignore
         let filename = await ucpComponent.persistanceManager.list[0].fileName();
+        allFiles.push(filename);
 
         expect(filename.match(myAlias)).toBeTruthy();
 
@@ -168,7 +182,7 @@ describe("File PersistanceManager", () => {
         let ucpComponent = new SomeExampleUcpComponent();
 
 
-        const myAlias = expect.getState().currentTestName + Math.round(Math.random() * 100000);
+        const myAlias = "JestTest_" + expect.getState().currentTestName + Math.round(Math.random() * 100000);
         await ucpComponent.persistanceManager.create();
 
         await ucpComponent.persistanceManager.addAlias(myAlias);
@@ -176,12 +190,93 @@ describe("File PersistanceManager", () => {
 
         // @ts-ignore
         let filename = await ucpComponent.persistanceManager.list[0].fileName();
+        allFiles.push(filename);
 
         expect(filename.match(myAlias)).toBeTruthy();
 
         await ucpComponent.persistanceManager.delete();
         // @ts-ignore
         expect(fs.existsSync(filename), 'File was not deleted').toBeFalsy();
+
+    });
+
+    test("load with Alias => load return IOR with UUID", async () => {
+        let ucpComponent = new SomeExampleUcpComponent();
+
+
+        const myAlias = "JestTest_" + expect.getState().currentTestName + Math.round(Math.random() * 100000);
+        await ucpComponent.persistanceManager.addAlias(myAlias);
+        await ucpComponent.persistanceManager.create();
+
+        // @ts-ignore
+        let filename = await ucpComponent.persistanceManager.list[0].fileName();
+        allFiles.push(filename);
+
+        UDELoader.factory().clearStore();
+
+        const aliasIOR = ucpComponent.IOR.clone();
+        aliasIOR.id = myAlias;
+
+        let componentClone = await aliasIOR.load();
+
+        expect(componentClone.IOR.id).toBe(ucpComponent.IOR.id);
+
+        await ucpComponent.persistanceManager.delete();
+        // @ts-ignore
+        expect(fs.existsSync(filename), 'File was not deleted').toBeFalsy();
+
+    });
+
+
+    test("load with Alias => get IOR with UUID in Store", async () => {
+        let ucpComponent = new SomeExampleUcpComponent();
+
+
+        const myAlias = "JestTest_" + expect.getState().currentTestName + Math.round(Math.random() * 100000);
+        await ucpComponent.persistanceManager.addAlias(myAlias);
+        await ucpComponent.persistanceManager.create();
+
+        // @ts-ignore
+        let filename = await ucpComponent.persistanceManager.list[0].fileName();
+        allFiles.push(filename);
+
+        UDELoader.factory().clearStore();
+
+        const aliasIOR = ucpComponent.IOR.clone();
+        aliasIOR.id = myAlias;
+
+        let componentClone = await aliasIOR.load();
+
+        //@ts-ignore
+        let storedObject = await UDELoader.factory().instanceStore.lookup(ucpComponent.IOR.href)
+
+        expect(storedObject).toBe(componentClone);
+
+        await ucpComponent.persistanceManager.delete();
+        // @ts-ignore
+        expect(fs.existsSync(filename), 'File was not deleted').toBeFalsy();
+
+    });
+
+    test("Remove Alias", async () => {
+        let ucpComponent = new SomeExampleUcpComponent();
+
+        const id = ucpComponent.IOR.id;
+
+        const myAlias = "JestTest_" + expect.getState().currentTestName + Math.round(Math.random() * 100000);
+        await ucpComponent.persistanceManager.addAlias(myAlias);
+
+
+        await ucpComponent.persistanceManager.removeAlias(myAlias);
+
+        // @ts-ignore
+        let filename: string = await ucpComponent.persistanceManager.list[0].fileName();
+
+
+        let fileList = filename.split('/');
+        let file = fileList[fileList.length - 1];
+
+        expect(file).toBe(id + '.json');
 
     });
 
