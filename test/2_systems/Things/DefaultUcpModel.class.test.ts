@@ -4,12 +4,15 @@ import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class";
 import SomeExampleUcpComponent from "../../../src/2_systems/Things/SomeExampleUcpComponent.class";
 import { UcpModelProxyIORSchema } from "../../../src/2_systems/Things/DefaultUcpModel.class";
 import { UcpModelChangeLogMethods, UcpModelEvents, UcpModelTransactionStates } from "../../../src/3_services/UcpModel.interface";
+import OnceNodeServer from "../../../src/2_systems/Once/OnceNodeServer.class";
 
 
 let ucpComponent = new SomeExampleUcpComponent();
 let model = ucpComponent.model;
 let ucpModel = ucpComponent.ucpModel;
-beforeEach(() => {
+beforeEach(async () => {
+    if (typeof ONCE === "undefined") await OnceNodeServer.start();
+
     ucpComponent = new SomeExampleUcpComponent();
     model = ucpComponent.model;
     ucpModel = ucpComponent.ucpModel;
@@ -620,10 +623,32 @@ describe("Default Ucp Model", () => {
             })
 
             test("set Object with IOR", async () => {
-                const ior = new DefaultIOR().init("https://wo-da.de");
-                model.iorObject = { IOR: ior };
+                let object = new SomeExampleUcpComponent();
+                model.iorObject = object;
+
+                expect(model.iorObject).toBe(object);
                 //@ts-ignore Check internals
-                expect(ucpModel.latestParticle.modelSnapshot.iorObject).toBe("ior:https://wo-da.de")
+                expect(ucpModel.latestParticle.modelSnapshot.iorObject).toBe(object.IOR.href)
+            })
+
+            test("set UDE Object", async () => {
+                let object = new SomeExampleUcpComponent();
+                await object.persistanceManager.create();
+
+                model.iorObject = object.IOR.href;
+
+                let resultPromise = model.iorObject;
+
+                expect(ExtendedPromise.isPromise(resultPromise)).toBeTruthy();
+
+                let result = await resultPromise;
+
+                expect(result).toBe(object);
+
+                object.persistanceManager.delete();
+
+                //@ts-ignore Check internals
+                expect(ucpModel.latestParticle.modelSnapshot.iorObject).toBe(object.IOR.href)
             })
 
             test("loadOnAccess false", async () => {
@@ -634,19 +659,20 @@ describe("Default Ucp Model", () => {
             })
 
             test("loadOnAccess true", async () => {
-                const ior = new DefaultIOR().init("https://wo-da.de");
-                const loadObject = { name: "dummyObject", IOR: ior };
-                ior.load = async () => { return loadObject };
+                let object = new SomeExampleUcpComponent();
+                await object.persistanceManager.create();
 
-                model.iorObject = ior;
-                ucpModel.loadOnAccess = true;
+                model.iorObject = object.IOR.href;
 
-                let promise = model.iorObject;
-                expect(ExtendedPromise.isPromise(promise)).toBe(true);
+                let resultPromise = model.iorObject;
 
-                let object = await promise;
-                expect(object).toBe(loadObject);
+                expect(ExtendedPromise.isPromise(resultPromise)).toBeTruthy();
 
+                let result = await resultPromise;
+
+                object.persistanceManager.delete();
+
+                expect(result).toBe(object);
             })
         })
 

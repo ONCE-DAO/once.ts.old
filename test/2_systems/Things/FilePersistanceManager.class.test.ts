@@ -216,6 +216,7 @@ describe("File PersistanceManager", () => {
 
         // @ts-ignore
         let filename = await ucpComponent.persistanceManager.list[0].fileName();
+
         allFiles.push(filename);
 
         expect(filename.match(myAlias)).toBeTruthy();
@@ -316,30 +317,6 @@ describe("File PersistanceManager", () => {
             //@ts-ignore
             expect(err.message).toBe("No '.' are allowed in alias")
         }
-
-    });
-
-
-    test("Load with Alias String", async () => {
-        let ucpComponent = new SomeExampleUcpComponent();
-
-        const id = ucpComponent.IOR.id;
-
-        const myAlias = getAlias();
-        await ucpComponent.persistanceManager.addAlias(myAlias);
-        await ucpComponent.persistanceManager.create();
-        // @ts-ignore
-        let filename = await ucpComponent.persistanceManager.list[0].fileName();
-        allFiles.push(filename);
-
-
-        UDELoader.factory().clearStore();
-
-
-        let clone = await new DefaultIOR().init('ior:ude:localhost/UDE/' + myAlias).load();
-
-        expect(clone).toBe(ucpComponent)
-
 
     });
 

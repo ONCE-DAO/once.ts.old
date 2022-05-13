@@ -30,7 +30,7 @@ export const UcpModelProxySchema = z.object({
 });
 
 const iorSchema = z.object({ load: z.function().args(z.any()), href: z.string() });
-export const UcpModelProxyIORSchema = z.union([z.string(), iorSchema, z.object({ IOR: iorSchema })]).describe("IOR Object")
+export const UcpModelProxyIORSchema = z.union([z.string().regex(/^ior:/), iorSchema, z.object({ IOR: iorSchema }), z.promise(z.any())]).describe("IOR Object")
 
 type internalIOR = z.infer<typeof UcpModelProxyIORSchema>
 
@@ -331,19 +331,31 @@ export default class DefaultUcpModel<ModelDataType, UcpComponentInterface> exten
         }
     }
 
-    private deepCopy(source: any): any {
-        if (source === undefined) return undefined;
-        return JSON.parse(JSON.stringify(source, (key, value) => {
-            if (key === '_helper') return undefined
+    private deepCopy(value: any, key?: any): any {
+        if (value === undefined) return undefined;
+        if (typeof value === 'object') { }
+
+        if (typeof value === 'object') {
+            if (key === '_helper') return undefined;
 
             if (value instanceof UcpModelMapProxy) return [...value]
-            if (value instanceof Map) return [...value]
+            if (value instanceof Map) return [...value];
+
+            // UDE Object
+            if (value.classDescriptor && value.IOR) return value.IOR.href;
 
             const toJSON = value?.toJSON || value?.IOR?.toJSON;
             if (typeof toJSON !== 'undefined') return toJSON
 
-            return value;
-        }))
+            const result: any = Array.isArray(value) ? [] : {};
+            for (const key in value) {
+                result[key] = this.deepCopy(value[key], key);
+            }
+
+            return result;
+        }
+
+        return value;
     }
 
     processTransaction() {
