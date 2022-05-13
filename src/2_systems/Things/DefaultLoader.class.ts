@@ -1,6 +1,6 @@
 import BaseLoader from "../../1_infrastructure/BaseLoader.class";
 import IOR from "../../3_services/IOR.interface";
-import Loader, { LoaderStatic, loadingConfig } from "../../3_services/Loader.interface";
+import Loader, { LoaderID, LoaderStatic, loadingConfig } from "../../3_services/Loader.interface";
 import EAMDLoader from "../EAMD/EAMDLoader.class";
 import { InterfaceDescriptor } from "./DefaultClassDescriptor.class";
 import UDELoader from "./UDELoader.class";
@@ -26,11 +26,18 @@ export default class DefaultLoader extends BaseLoader {
         EAMDLoader;
         UDELoader;
 
+        // NEW: 
+        return LoaderID.implementations.map(d => d.class)
+
+        // HACK Method
+        /*
         // TODO Discover Loader over interface interface
 
         let loaderDesc = InterfaceDescriptor.getInterfaceByNameHack('Loader');
         if (!loaderDesc) throw new Error("Missing Loader interface");
         return loaderDesc.implementations.map(d => d.class)
+
+        */
     }
 
     static findLoader(ior: IOR): Loader | undefined {
