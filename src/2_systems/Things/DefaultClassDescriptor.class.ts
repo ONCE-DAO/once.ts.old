@@ -233,6 +233,7 @@ export class InterfaceDescriptor {
     private static readonly _interfaceStore: { [i: string]: InterfaceDescriptor } = {};
     readonly extends: InterfaceDescriptor[] = [];
     readonly implementations: ClassDescriptor[] = [];
+    public static lastDescriptor: InterfaceDescriptor;
 
     get allExtendedInterfaces(): InterfaceDescriptor[] {
         let result: InterfaceDescriptor[] = [];
@@ -317,6 +318,7 @@ export class InterfaceDescriptor {
             throw new Error("Interface with the name already exists '" + uniqueName + "'");
         }
         InterfaceDescriptor._interfaceStore[uniqueName] = this;
+        InterfaceDescriptor.lastDescriptor = this;
         return this;
     }
 

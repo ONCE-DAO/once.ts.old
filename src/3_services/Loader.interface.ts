@@ -7,8 +7,6 @@ export enum loaderReturnValue { "default", "path" }
 
 export type loadingConfig = { usedByClass?: Class<any>, returnValue?: loaderReturnValue } | undefined;
 
-// Namespace Package und Version könnten noch über den Filenamen discovered werden
-export const LoaderID = InterfaceDescriptor.register("tla.EAM", "once.ts", "0.0.1", "Loader")
 
 export interface Loader {
 
@@ -17,6 +15,8 @@ export interface Loader {
   removeObjectFromStore(object: IOR | any): void
   addObject2Store(ior: IOR, object: any | Promise<any>): void;
 }
+export const LoaderID = InterfaceDescriptor.lastDescriptor;
+
 export interface LoaderStatic extends ThingStatics<LoaderStatic> {
   canHandle(ior: IOR): number
   factory(ior: IOR): Loader
