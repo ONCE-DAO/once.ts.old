@@ -1,3 +1,4 @@
+import { InterfaceDescriptor } from "../2_systems/Things/DefaultClassDescriptor.class";
 import Class from "./Class.interface";
 import IOR from "./IOR.interface";
 import { ParticleUDEStructure } from "./Particle.interface";
@@ -17,6 +18,9 @@ export default interface PersistanceManager {
 
   alias: string[];
 }
+
+export const PersistanceManagerID = InterfaceDescriptor.lastDescriptor;
+
 
 export type UDEObject = {
   id: string,

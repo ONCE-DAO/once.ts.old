@@ -322,6 +322,7 @@ export class InterfaceDescriptor {
         return this;
     }
 
+    /*
     static getInterfaceByNameHack(interfaceName: string): InterfaceDescriptor | undefined {
         // HACK Wird ersetzt durch Components und Interface Integration
         if (!ONCE) throw new Error("Missing ONCE");
@@ -332,6 +333,7 @@ export class InterfaceDescriptor {
         return InterfaceDescriptor.getInterfaceByName(aInterfaceName);
 
     }
+    */
 
 }
 

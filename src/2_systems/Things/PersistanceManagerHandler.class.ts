@@ -1,8 +1,7 @@
 import { PM_ACTION } from "../../1_infrastructure/BasePersistanceManager.class";
-import PersistanceManager, { UDEObject } from "../../3_services/PersistanceManager.interface";
+import PersistanceManager, { PersistanceManagerID, UDEObject } from "../../3_services/PersistanceManager.interface";
 import { PersistanceManagerHandler } from "../../3_services/PersistanceManagerHandler.interface";
 import UcpComponent from "../../3_services/UcpComponent.interface";
-import { InterfaceDescriptor } from "./DefaultClassDescriptor.class";
 
 export class DefaultPersistanceManagerHandler implements PersistanceManagerHandler {
     async create(): Promise<any[]> {
@@ -26,9 +25,7 @@ export class DefaultPersistanceManagerHandler implements PersistanceManagerHandl
     }
 
     get list(): PersistanceManager[] {
-        const interfaceDescriptor = InterfaceDescriptor.getInterfaceByNameHack("PersistanceManager");
-        if (!interfaceDescriptor) return [];
-        return this.ucpComponent.Store.lookup(interfaceDescriptor) as PersistanceManager[];
+        return this.ucpComponent.Store.lookup(PersistanceManagerID) as PersistanceManager[];
     }
 
     private async runPMAction(action: PM_ACTION, param1?: any): Promise<any[]> {

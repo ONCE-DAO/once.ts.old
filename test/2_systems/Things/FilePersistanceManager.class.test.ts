@@ -8,6 +8,7 @@ import fs from 'fs';
 import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class";
 import { FilePersistanceManager } from "../../../src/2_systems/Things/FilePersistanceManager.class";
 import UDELoader from "../../../src/2_systems/Things/UDELoader.class";
+import { PersistanceManagerID } from "../../../src/3_services/PersistanceManager.interface";
 
 beforeEach(async () => {
     if (global.ONCE_STARTED === false) await OnceNodeServer.start();
@@ -52,9 +53,7 @@ describe("File PersistanceManager", () => {
 
         let pm = ucpComponent.persistanceManager;
 
-        let iDesc = InterfaceDescriptor.getInterfaceByNameHack("PersistanceManager");
-        if (!iDesc) throw new Error("Missing InterfaceDescriptor");
-        expect(ucpComponent.Store.lookup(iDesc).length).toBe(1);
+        expect(ucpComponent.Store.lookup(PersistanceManagerID).length).toBe(1);
 
         expect(pm.list.length).toBeGreaterThan(-1);
         expect(pm.list[0]).toBeInstanceOf(FilePersistanceManager);

@@ -26,18 +26,7 @@ export default class DefaultLoader extends BaseLoader {
         EAMDLoader;
         UDELoader;
 
-        // NEW: 
         return LoaderID.implementations.map(d => d.class)
-
-        // HACK Method
-        /*
-        // TODO Discover Loader over interface interface
-
-        let loaderDesc = InterfaceDescriptor.getInterfaceByNameHack('Loader');
-        if (!loaderDesc) throw new Error("Missing Loader interface");
-        return loaderDesc.implementations.map(d => d.class)
-
-        */
     }
 
     static findLoader(ior: IOR): Loader | undefined {

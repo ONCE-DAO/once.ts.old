@@ -1,6 +1,6 @@
 import { InterfaceDescriptor } from "../2_systems/Things/DefaultClassDescriptor.class";
 import IOR from "../3_services/IOR.interface";
-import PersistanceManager, { UDEObject } from "../3_services/PersistanceManager.interface";
+import PersistanceManager, { PersistanceManagerID, UDEObject } from "../3_services/PersistanceManager.interface";
 import UcpComponent from "../3_services/UcpComponent.interface";
 import { UcpModelChangelog, UcpModelEvents } from "../3_services/UcpModel.interface";
 import BaseThing from "./BaseThing.class";
@@ -34,12 +34,8 @@ export abstract class BasePersistanceManager extends BaseThing<any> implements P
             ior = object;
 
         }
-        const aInterface = InterfaceDescriptor.getInterfaceByNameHack("PersistanceManager");
-        if (!aInterface) {
-            throw new Error("fail to find the persistence manager Interface");
-        }
 
-        const classList = aInterface.implementations.map(x => {
+        const classList = PersistanceManagerID.implementations.map(x => {
             return {
                 result: (x.class.canHandle ? x.class.canHandle(ior) : 0) as number,
                 aClass: x.class
