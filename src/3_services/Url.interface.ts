@@ -1,4 +1,5 @@
 import { getCommentRange } from "typescript";
+import { InterfaceDescriptor } from "../2_systems/Things/DefaultClassDescriptor.class";
 import { JSONProvider } from "./JSON.interface";
 
 export enum urlProtocol {
@@ -16,7 +17,6 @@ export enum urlProtocol {
 
 type numberOrUndefined = number | undefined
 
-//@xxxxx.declareInterface(): InterfaceDescriptor
 export interface Url extends JSONProvider {
 
   href: string;
@@ -42,6 +42,7 @@ export interface Url extends JSONProvider {
   clone(): Url;
 }
 
+export const UrlID = InterfaceDescriptor.lastDescriptor;
 
 
 export default Url;

@@ -6,9 +6,22 @@ class ClassDescriptor {
     private static _classDescriptorStore = new WeakMap<Class<any>, ClassDescriptor>();
     ucpComponentDescriptor: UcpComponentDescriptor | undefined;
     filename: string | undefined;
-    packagePath: string | undefined;
-    packageName: string | undefined;
-    packageVersion: string | undefined;
+    get packagePath(): string {
+        if (!this.ucpComponentDescriptor?.srcPath) throw new Error("Missing srcPath in ucpComponentDescriptor");
+        return this.ucpComponentDescriptor.srcPath;
+    }
+    get packageName(): string {
+        if (!this.ucpComponentDescriptor?.name) throw new Error("Missing name in ucpComponentDescriptor");
+        return this.ucpComponentDescriptor.name;
+
+    }
+    get packageVersion(): string {
+        if (!this.ucpComponentDescriptor?.version) throw new Error("Missing version in ucpComponentDescriptor");
+        return this.ucpComponentDescriptor.version;
+
+    }
+
+    get name(): string | undefined { return this._class?.name }
 
     static getClassDescriptor4Class(aClass: Class<any>): ClassDescriptor {
         let descriptor = this._classDescriptorStore.get(aClass);
@@ -90,8 +103,6 @@ class ClassDescriptor {
         return this;
     }
 
-
-
     add(object: InterfaceDescriptor | UcpComponentDescriptor): ClassDescriptor {
         if (object instanceof InterfaceDescriptor) {
             this._interfaces.push(object);
@@ -113,14 +124,9 @@ class ClassDescriptor {
     }
 
     register(packagePath: string, packageName: string, packageVersion: string | undefined): void {
-        this.packagePath = packagePath;
-        this.packageName = packageName;
-        this.packageVersion = packageVersion;
-
         let ucpComponentDescriptor = UcpComponentDescriptor.getDescriptor(packagePath, packageName, packageVersion);
         ucpComponentDescriptor.register(this.class);
         this.registerAllInterfaces();
-
     }
 
     private registerAllInterfaces(): void {
@@ -230,10 +236,29 @@ class ClassDescriptor {
 type interfaceDescriptorInput = { packagePath: string, packageName: string, packageVersion: string | undefined, interfaceName: string }
 
 export class InterfaceDescriptor {
-    private static readonly _interfaceStore: { [i: string]: InterfaceDescriptor } = {};
+    public readonly name: string;
+
     readonly extends: InterfaceDescriptor[] = [];
     readonly implementations: ClassDescriptor[] = [];
     public static lastDescriptor: InterfaceDescriptor;
+    public ucpComponentDescriptor!: UcpComponentDescriptor;
+
+
+    get packagePath(): string {
+        if (!this.ucpComponentDescriptor?.srcPath) throw new Error("Missing srcPath in ucpComponentDescriptor");
+        return this.ucpComponentDescriptor.srcPath;
+    }
+    get packageName(): string {
+        if (!this.ucpComponentDescriptor?.name) throw new Error("Missing name in ucpComponentDescriptor");
+        return this.ucpComponentDescriptor.name;
+
+    }
+    get packageVersion(): string {
+        if (!this.ucpComponentDescriptor?.version) throw new Error("Missing version in ucpComponentDescriptor");
+        return this.ucpComponentDescriptor.version;
+
+    }
+
 
     get allExtendedInterfaces(): InterfaceDescriptor[] {
         let result: InterfaceDescriptor[] = [];
@@ -244,7 +269,6 @@ export class InterfaceDescriptor {
         }
         return result;
     }
-
 
     get implementedInterfaces(): InterfaceDescriptor[] {
         return this._getImplementedInterfaces();
@@ -260,9 +284,6 @@ export class InterfaceDescriptor {
         return interfaceList;
     }
 
-
-
-
     addImplementation(classDescriptor: ClassDescriptor): this {
         this.implementations.push(classDescriptor);
         return this
@@ -270,70 +291,47 @@ export class InterfaceDescriptor {
 
 
     addExtension(packagePath: string, packageName: string, packageVersion: string | undefined, interfaceName: string): InterfaceDescriptor {
-        const uniqueName = InterfaceDescriptor.uniqueName(packagePath, packageName, packageVersion, interfaceName);
 
-        let interfaceDescriptorInstance = InterfaceDescriptor.getInterfaceByName(uniqueName)
-        if (interfaceDescriptorInstance === undefined) {
-            interfaceDescriptorInstance = new InterfaceDescriptor(packagePath, packageName, packageVersion, interfaceName);
+        let ucpComponentDescriptor = UcpComponentDescriptor.getDescriptor(packagePath, packageName, packageVersion);
+
+        let interfaceDesc = ucpComponentDescriptor.getUnitByName(interfaceName, 'InterfaceDescriptor')
+        if (interfaceDesc === undefined) {
+            interfaceDesc = new InterfaceDescriptor(ucpComponentDescriptor, interfaceName);;
         }
-        this.add(interfaceDescriptorInstance);
+
+        this.add(interfaceDesc);
 
         return this;
     }
 
-    add(object: any): this {
+    add(object: InterfaceDescriptor | UcpComponentDescriptor): this {
         if (object instanceof InterfaceDescriptor) {
             this.extends.push(object)
+        } else if ("writeToPath" in object) {
+            this.ucpComponentDescriptor = object;
         }
         return this;
-    }
-
-
-    static getInterfaceByName(uniqueName: string): InterfaceDescriptor | undefined {
-        if (this._interfaceStore[uniqueName]) {
-            return this._interfaceStore[uniqueName];
-        }
-        return undefined;
     }
 
     static register(packagePath: string, packageName: string, packageVersion: string | undefined, interfaceName: string): InterfaceDescriptor {
-        const uniqueName = this.uniqueName(packagePath, packageName, packageVersion, interfaceName);
-        if (InterfaceDescriptor._interfaceStore[uniqueName]) {
-            return InterfaceDescriptor._interfaceStore[uniqueName];
+        let ucpComponentDescriptor = UcpComponentDescriptor.getDescriptor(packagePath, packageName, packageVersion);
+
+        let interfaceDesc = ucpComponentDescriptor.getUnitByName(interfaceName, 'InterfaceDescriptor')
+        if (interfaceDesc) {
+            return interfaceDesc;
         }
-        return new InterfaceDescriptor(packagePath, packageName, packageVersion, interfaceName);
+
+        interfaceDesc = new InterfaceDescriptor(ucpComponentDescriptor, interfaceName);
+        InterfaceDescriptor.lastDescriptor = interfaceDesc;
+
+        return interfaceDesc;
     }
 
-    static uniqueName(packagePath: string, packageName: string, packageVersion: string | undefined, interfaceName: string): string {
-        return `${packagePath}.${packageName}[${packageVersion || 'latest'}]/${interfaceName}`
-    }
-
-    get uniqueName(): string {
-        return InterfaceDescriptor.uniqueName(this.packagePath, this.packageName, this.packageVersion, this.interfaceName);
-    }
-
-    constructor(public packagePath: string, public packageName: string, public packageVersion: string | undefined, public interfaceName: string) {
-        const uniqueName = this.uniqueName
-        if (InterfaceDescriptor._interfaceStore[uniqueName]) {
-            throw new Error("Interface with the name already exists '" + uniqueName + "'");
-        }
-        InterfaceDescriptor._interfaceStore[uniqueName] = this;
-        InterfaceDescriptor.lastDescriptor = this;
+    constructor(ucpComponentDescriptor: UcpComponentDescriptor, interfaceName: string) {
+        this.name = interfaceName;
+        ucpComponentDescriptor.register(this);
         return this;
     }
-
-    /*
-    static getInterfaceByNameHack(interfaceName: string): InterfaceDescriptor | undefined {
-        // HACK Wird ersetzt durch Components und Interface Integration
-        if (!ONCE) throw new Error("Missing ONCE");
-        const packagePath = ONCE.classDescriptor.packagePath as string;
-        const packageName = ONCE.classDescriptor.packageName as string;
-        const packageVersion = ONCE.classDescriptor.packageVersion;
-        const aInterfaceName = InterfaceDescriptor.uniqueName(packagePath, packageName, packageVersion, interfaceName);
-        return InterfaceDescriptor.getInterfaceByName(aInterfaceName);
-
-    }
-    */
 
 }
 

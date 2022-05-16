@@ -3,6 +3,7 @@ import { basename, join } from "path";
 import { NpmPackage } from "./NpmPackage.class";
 import { create } from "xmlbuilder2";
 import Thing from "../3_services/Thing.interface";
+import ClassDescriptor, { InterfaceDescriptor } from "./Things/DefaultClassDescriptor.class";
 
 export default class UcpComponentDescriptor {
 
@@ -23,6 +24,29 @@ export default class UcpComponentDescriptor {
   identifier: string | undefined;
   static getInstance() {
     return new UcpComponentDescriptor();
+  }
+
+  getUnitByName(name: string, type: 'ClassDescriptor'): ClassDescriptor | undefined;
+  getUnitByName(name: string, type: 'InterfaceDescriptor'): InterfaceDescriptor | undefined;
+  getUnitByName(name: string, type: 'InterfaceDescriptor' | 'ClassDescriptor'): any {
+
+    if (type === 'ClassDescriptor') {
+      return this.units.filter(u => {
+        if (u instanceof ClassDescriptor && u.name === name) {
+          return u;
+        }
+      })?.[0]
+    }
+
+    if (type === 'InterfaceDescriptor') {
+      return this.units.filter(u => {
+        if (u instanceof InterfaceDescriptor && u.name === name) {
+          return u;
+        }
+      })?.[0]
+    }
+
+
   }
 
   init({ path, relativePath }: UcpComponentDescriptorInitParameters) {
@@ -62,10 +86,22 @@ export default class UcpComponentDescriptor {
       .replace("/", "-")}.component.xml`;
   }
 
-  register(object: Thing<any>) {
-    this.units.push(object);
+  register(object: Thing<any> | InterfaceDescriptor) {
+
     if ("classDescriptor" in object) {
+      this.units.push(object);
+
       object.classDescriptor.add(this);
+
+    } else if ("implementedInterfaces" in object) {
+      const existingInterfaceDescriptors = this.getUnitByName(object.name, "InterfaceDescriptor");
+      if (existingInterfaceDescriptors) {
+        throw new Error(`Duplicated Interface '${object.name}' in UcpComponent ${this.name}`);
+      }
+      this.units.push(object);
+
+      object.add(this);
+
     }
   }
 

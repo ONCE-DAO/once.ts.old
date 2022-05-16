@@ -1,55 +1,92 @@
 import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class"
 import BaseThing from "../../../src/1_infrastructure/BaseThing.class";
-import Url from "../../../src/3_services/Url.interface";
+import Url, { UrlID } from "../../../src/3_services/Url.interface";
 import DefaultUrl from "../../../src/2_systems/Things/DefaultUrl.class";
 import ClassDescriptor, { InterfaceDescriptor } from "../../../src/2_systems/Things/DefaultClassDescriptor.class";
 import UcpComponentDescriptor from "../../../src/2_systems/UcpComponentDescriptor.class";
 
-describe("ClassDescriptor", () => {
 
 
-  test("new ClassDescriptor", async () => {
-    let td = new ClassDescriptor().init(DefaultIOR);
-    expect(td).toBeInstanceOf(ClassDescriptor);
+interface MyString {
+  myString: string;
+}
+
+const MyStringID = InterfaceDescriptor.lastDescriptor;
+
+interface MyString2 {
+  myString: string;
+}
+const MyString2ID = InterfaceDescriptor.lastDescriptor;
+
+interface MyUrl extends MyString {
+  myUrl: string;
+}
+
+const MyUrlID = InterfaceDescriptor.lastDescriptor;
+
+@ClassDescriptor.componentExport({ silent: true })
+//@ts-ignore
+class TestClass1 extends DefaultUrl implements MyUrl, MyString, MyString2 {
+  myUrl: string = "";
+  myString: string = "";
+
+}
+
+
+describe(" Descriptor", () => {
+
+  describe("Class Descriptor", () => {
+
+
+    test("new ClassDescriptor", async () => {
+      let td = new ClassDescriptor().init(DefaultIOR);
+      expect(td).toBeInstanceOf(ClassDescriptor);
+    })
+
+    test("ClassDescriptor on Class (Static)", async () => {
+      expect(DefaultIOR.classDescriptor).toBeInstanceOf(ClassDescriptor);
+    })
+
+    test("ClassDescriptor on Instance", async () => {
+      let ior = new DefaultIOR();
+      expect(ior.classDescriptor).toBeInstanceOf(ClassDescriptor);
+    })
+
+
+
+
+    test("Class in ClassDescriptor", async () => {
+      let ior = new DefaultIOR();
+      expect(ior.classDescriptor.class).toBe(DefaultIOR);
+    })
+
+    test("ClassDescriptor extends", async () => {
+
+
+      class TestClass1 extends DefaultUrl implements Url {
+
+      }
+      expect(TestClass1.classDescriptor.extends[0]).toBe(DefaultUrl);
+      expect(TestClass1.classDescriptor.extends[1]).toBe(BaseThing);
+
+    })
+
+
+
+
   })
-
-  test("ClassDescriptor on Class (Static)", async () => {
-    expect(DefaultIOR.classDescriptor).toBeInstanceOf(ClassDescriptor);
-  })
-
-  test("ClassDescriptor on Instance", async () => {
-    let ior = new DefaultIOR();
-    expect(ior.classDescriptor).toBeInstanceOf(ClassDescriptor);
-  })
-
   describe("Interface Descriptor", () => {
 
-    interface MyString {
-      myString: string;
-    }
 
-    interface MyString2 {
-      myString: string;
-    }
-
-    interface MyUrl extends MyString {
-      myUrl: string;
-    }
-
-    @ClassDescriptor.componentExport({ silent: true })
-    //@ts-ignore
-    class TestClass1 extends DefaultUrl implements MyUrl, MyString, MyString2 {
-      myUrl: string = "";
-      myString: string = "";
-
-    }
 
     test("Interface Registration", async () => {
 
       let x = new TestClass1();
 
+      UrlID
+
       let allInterfaces = x.classDescriptor.implementedInterfaces;
-      let interfaceNameList = allInterfaces.map(x => x.interfaceName);
+      let interfaceNameList = allInterfaces.map(x => x.name);
 
       expect(interfaceNameList.includes('MyString2')).toBeTruthy();
       expect(interfaceNameList.includes('MyString')).toBeTruthy();
@@ -70,26 +107,15 @@ describe("ClassDescriptor", () => {
 
 
 
-
-    test("Interface Descriptor getInterfaceByName", () => {
-
-      const interfaceDescriptor = InterfaceDescriptor.getInterfaceByName(InterfaceDescriptor.uniqueName("tla.EAM", "once.ts", "0.0.1", "MyUrl"));
-      expect(interfaceDescriptor).toBeInstanceOf(InterfaceDescriptor);
-    })
-
     test("Interface Descriptor implementations", () => {
-      const interfaceDescriptor = InterfaceDescriptor.getInterfaceByName(InterfaceDescriptor.uniqueName("tla.EAM", "once.ts", "0.0.1", "MyUrl"));
 
-      expect(interfaceDescriptor?.implementations.includes(TestClass1.classDescriptor)).toBe(true);
+      expect(MyUrlID?.implementations.includes(TestClass1.classDescriptor)).toBe(true);
 
     })
 
     test("Interface Descriptor extends", () => {
 
-      const interfaceDescriptor = InterfaceDescriptor.getInterfaceByName(InterfaceDescriptor.uniqueName("tla.EAM", "once.ts", "0.0.1", "MyUrl"));
-
-      const myStringDescriptor = InterfaceDescriptor.getInterfaceByName(InterfaceDescriptor.uniqueName("tla.EAM", "once.ts", "0.0.1", "MyString"));
-      expect(interfaceDescriptor?.extends).toMatchObject([myStringDescriptor]);
+      expect(MyUrlID?.extends).toMatchObject([MyStringID]);
     })
 
     test("Ucp Component Descriptor", () => {
@@ -109,34 +135,31 @@ describe("ClassDescriptor", () => {
     })
 
     test("ClassDescriptor implements", async () => {
-      const interfaceDescriptor = InterfaceDescriptor.getInterfaceByName(InterfaceDescriptor.uniqueName("tla.EAM", "once.ts", "0.0.1", "MyUrl"));
-      expect(interfaceDescriptor).toBeInstanceOf(InterfaceDescriptor);
+      expect(MyUrlID).toBeInstanceOf(InterfaceDescriptor);
 
-      if (interfaceDescriptor) {
+      if (MyUrlID) {
 
-        expect(TestClass1.classDescriptor.implements(interfaceDescriptor)).toBe(true);
+        expect(TestClass1.classDescriptor.implements(MyUrlID)).toBe(true);
       }
+    })
+
+    test("has ucpComponentDescriptor", async () => {
+      expect(MyUrlID.ucpComponentDescriptor).toBeInstanceOf(UcpComponentDescriptor);
+      expect(MyUrlID.packageVersion).toBe(MyUrlID.ucpComponentDescriptor.version);
+      expect(MyUrlID.packageName).toBe(MyUrlID.ucpComponentDescriptor.name);
+      expect(MyUrlID.packagePath).toBe(MyUrlID.ucpComponentDescriptor.srcPath);
     })
   });
 
 
-  test("Class in ClassDescriptor", async () => {
-    let ior = new DefaultIOR();
-    expect(ior.classDescriptor.class).toBe(DefaultIOR);
+  describe("UcpComponent Descriptor", () => {
+    test("getUnitByName (InterfaceDescriptor)", async () => {
+      let ucpComponentDescriptor = MyUrlID.ucpComponentDescriptor;
+
+      let ID = ucpComponentDescriptor.getUnitByName("MyUrl", "InterfaceDescriptor");
+
+      expect(ID).toBeInstanceOf(InterfaceDescriptor);
+    });
   })
 
-  test("ClassDescriptor extends", async () => {
-
-
-    class TestClass1 extends DefaultUrl implements Url {
-
-    }
-    expect(TestClass1.classDescriptor.extends[0]).toBe(DefaultUrl);
-    expect(TestClass1.classDescriptor.extends[1]).toBe(BaseThing);
-
-  })
-
-
-
-
-})
+});
