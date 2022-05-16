@@ -10,7 +10,7 @@ import { FilePersistanceManager } from "../../../src/2_systems/Things/FilePersis
 import UDELoader from "../../../src/2_systems/Things/UDELoader.class";
 
 beforeEach(async () => {
-    if (typeof ONCE === "undefined") await OnceNodeServer.start();
+    if (global.ONCE_STARTED === false) await OnceNodeServer.start();
 });
 
 let allFiles: string[] = [];

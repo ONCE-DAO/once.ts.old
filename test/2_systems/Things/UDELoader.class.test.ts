@@ -4,7 +4,7 @@ import SomeExampleUcpComponent from "../../../src/2_systems/Things/SomeExampleUc
 import UDELoader from "../../../src/2_systems/Things/UDELoader.class";
 
 beforeEach(async () => {
-    if (typeof ONCE === "undefined") await OnceNodeServer.start();
+    if (ONCE_STARTED === false) await OnceNodeServer.start();
 });
 
 describe("UDE Loader", () => {

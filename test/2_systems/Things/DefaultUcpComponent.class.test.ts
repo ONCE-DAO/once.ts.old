@@ -1,8 +1,9 @@
 
 import OnceNodeServer from "../../../src/2_systems/Once/OnceNodeServer.class";
 import SomeExampleUcpComponent from "../../../src/2_systems/Things/SomeExampleUcpComponent.class";
+
 beforeEach(async () => {
-    if (typeof ONCE === "undefined") await OnceNodeServer.start();
+    if (ONCE_STARTED === false) await OnceNodeServer.start();
 });
 
 describe("Default UcpComponent", () => {

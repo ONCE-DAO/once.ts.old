@@ -15,9 +15,13 @@ export default interface Once extends Thing<Once> {
 }
 
 declare global {
-  var ONCE: Once | undefined;
+  var ONCE_STARTED: boolean;
+  var ONCE: Once;
   var NODE_JS: boolean;
 }
+
+global.ONCE_STARTED = false;
+
 
 /* eslint-disable no-unused-vars */
 export enum OnceState {

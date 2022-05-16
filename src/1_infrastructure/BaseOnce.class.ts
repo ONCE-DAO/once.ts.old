@@ -23,6 +23,7 @@ export abstract class BaseOnce extends DefaultThing<Once> implements Once {
     glob.ONCE = this;
     this.global = glob;
     this.ENV = {};
+    glob.ONCE_STARTED = true;
   }
 
 

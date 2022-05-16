@@ -1,8 +1,9 @@
 import OnceNodeServer from "../../../src/2_systems/Once/OnceNodeServer.class";
 import DefaultStore from "../../../src/2_systems/Things/DefaultStore.class";
 beforeEach(async () => {
-    if (typeof ONCE === "undefined") await OnceNodeServer.start();
+    if (ONCE_STARTED === false) await OnceNodeServer.start();
 });
+
 describe("Default Store", () => {
     test("init", async () => {
         let store = new DefaultStore().init();

@@ -2,7 +2,7 @@ import DefaultOnceConfig from "../../../src/2_systems/Once/ONCEConfig.class";
 import OnceNodeServer from "../../../src/2_systems/Once/OnceNodeServer.class";
 
 beforeEach(async () => {
-    if (typeof ONCE === "undefined") await OnceNodeServer.start();
+    if (ONCE_STARTED === false) await OnceNodeServer.start();
 });
 
 describe("ONCE", () => {

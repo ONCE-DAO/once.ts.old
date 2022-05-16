@@ -11,7 +11,7 @@ let ucpComponent = new SomeExampleUcpComponent();
 let model = ucpComponent.model;
 let ucpModel = ucpComponent.ucpModel;
 beforeEach(async () => {
-    if (typeof ONCE === "undefined") await OnceNodeServer.start();
+    if (ONCE_STARTED === false) await OnceNodeServer.start();
 
     ucpComponent = new SomeExampleUcpComponent();
     model = ucpComponent.model;

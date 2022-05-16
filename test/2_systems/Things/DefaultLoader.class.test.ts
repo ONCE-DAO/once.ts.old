@@ -3,8 +3,9 @@ import OnceNodeServer from "../../../src/2_systems/Once/OnceNodeServer.class";
 import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class";
 import DefaultLoader from "../../../src/2_systems/Things/DefaultLoader.class"
 beforeEach(async () => {
-    if (typeof ONCE === "undefined") await OnceNodeServer.start();
+    if (ONCE_STARTED === false) await OnceNodeServer.start();
 });
+
 describe("Default Loader", () => {
     test("Find Loader", async () => {
         EAMDLoader;
