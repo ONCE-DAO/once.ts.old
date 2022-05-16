@@ -5,7 +5,9 @@ import DefaultThing from "./BaseThing.class";
 import fs from "fs";
 import DefaultOnceConfig, { OnceConfig } from "../2_systems/Once/ONCEConfig.class";
 import DefaultIOR from "../2_systems/Things/DefaultIOR.class";
+import ClassDescriptor from "../2_systems/Things/DefaultClassDescriptor.class";
 
+@ClassDescriptor.componentExport('namedExport')
 export abstract class BaseOnce extends DefaultThing<Once> implements Once {
   creationDate: Date;
   mode: OnceMode = OnceMode.BOOTING;

@@ -4,10 +4,12 @@ import IOR from "../../3_services/IOR.interface";
 import { urlProtocol } from "../../3_services/Url.interface";
 import DefaultLoader from "./DefaultLoader.class";
 import UUiD from "../JSExtensions/UUiD.class";
+import ClassDescriptor from "./DefaultClassDescriptor.class";
 
 
 
 
+@ClassDescriptor.componentExport("namedExport")
 export default class DefaultIOR extends DefaultUrl implements IOR {
 
     private _referencedObject: any;

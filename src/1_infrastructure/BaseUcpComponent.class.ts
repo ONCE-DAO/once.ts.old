@@ -1,4 +1,5 @@
 import { z } from "zod";
+import ClassDescriptor from "../2_systems/Things/DefaultClassDescriptor.class";
 import DefaultIOR from "../2_systems/Things/DefaultIOR.class";
 import { UcpModelProxySchema } from "../2_systems/Things/DefaultUcpModel.class";
 import { DefaultPersistanceManagerHandler } from "../2_systems/Things/PersistanceManagerHandler.class";
@@ -16,7 +17,7 @@ import BaseThing from "./BaseThing.class";
 //if (ONCE && ONCE.mode === OnceMode.NODE_JS) {
 await import("../2_systems/Things/FilePersistanceManager.class")
 //}
-
+@ClassDescriptor.componentExport('namedExport')
 export default abstract class BaseUcpComponent<ModelDataType, ClassInterface> extends BaseThing<ClassInterface> implements UcpComponent<ModelDataType, ClassInterface>, JSONProvider {
     readonly Store: RelatedObjectStoreInterface = new RelatedObjectStore();
     private _persistanceManager: DefaultPersistanceManagerHandler | undefined;

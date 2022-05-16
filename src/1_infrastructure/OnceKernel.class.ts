@@ -14,8 +14,6 @@ export default abstract class OnceKernel {
     ----------------------------------
     `);
 
-
-
     return once;
   }
 

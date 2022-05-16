@@ -5,26 +5,45 @@ import { create } from "xmlbuilder2";
 import Thing from "../3_services/Thing.interface";
 import ClassDescriptor, { InterfaceDescriptor } from "./Things/DefaultClassDescriptor.class";
 
+import fs from 'fs';
+import path from 'path';
+
+
 export default class UcpComponentDescriptor {
 
   private static readonly _componentDescriptorStore: { [i: string]: UcpComponentDescriptor } = {};
 
   // TODO: specify better
   units: any[] = [];
-  exportList: any[] = [];
 
   static getDescriptorName(packagePath: string, packageName: string, packageVersion: string | undefined) {
     return `${packagePath}${packageName}[${packageVersion || 'latest'}]`;
   }
 
-  srcPath: string | undefined;
+  npmPackage!: NpmPackage;
+
   relativeSrcPath: string | undefined;
-  name: string | undefined;
-  version: string | undefined;
+
   identifier: string | undefined;
   static getInstance() {
     return new UcpComponentDescriptor();
   }
+
+  get name(): string {
+    if (!this.npmPackage.name) throw new Error("NPM Name is missing");
+    return this.npmPackage.name;
+  }
+
+  get version(): string {
+    if (!this.npmPackage.version) throw new Error("NPM version is missing");
+    return this.npmPackage.version;
+  }
+
+  get srcPath(): string {
+    if (!this.npmPackage.path) throw new Error("NPM version is missing");
+    return this.npmPackage.path;
+  }
+
 
   getUnitByName(name: string, type: 'ClassDescriptor'): ClassDescriptor | undefined;
   getUnitByName(name: string, type: 'InterfaceDescriptor'): InterfaceDescriptor | undefined;
@@ -50,11 +69,16 @@ export default class UcpComponentDescriptor {
   }
 
   init({ path, relativePath }: UcpComponentDescriptorInitParameters) {
-    (this.srcPath = path), (this.relativeSrcPath = relativePath);
+    (this.relativeSrcPath = relativePath);
     this.identifier = basename(relativePath);
-    let npmPackage = NpmPackage.getByFolder(this.srcPath);
-    this.name = npmPackage?.name;
-    this.version = npmPackage?.version;
+
+
+    let npmPackage = NpmPackage.getByFolder(path);
+    if (!npmPackage) throw new Error("Could not find a NPM Package");
+
+    this.npmPackage = npmPackage;
+    // this.name = npmPackage?.name;
+    // this.version = npmPackage?.version;
     return this;
   }
 
@@ -74,6 +98,81 @@ export default class UcpComponentDescriptor {
       join(path, version, this.fileName),
       descriptor.end({ prettyPrint: true })
     );
+  }
+
+
+
+  async createExportFile() {
+    let files = this.npmPackage.discoverFiles(['*.ts']).filter(f => f.match(/(class|interface)\.ts$/)).sort();
+
+    let baseDirectory = this.npmPackage.localBaseDir;
+
+    let exportList: string[] = [];
+    let defaultExport: string = "";
+    let fd = fs.openSync(baseDirectory + "/index.ts", 'w', 0o666);
+
+    const defaultFile = baseDirectory + "/index.default.ts";
+    if (fs.existsSync(defaultFile)) {
+      let defaultData = readFileSync(defaultFile).toString();
+      fs.writeSync(fd, "// ########## Default Export ##########\n");
+      fs.writeSync(fd, defaultData);
+      fs.writeSync(fd, "\n// ########## Default Export END ##########\n\n");
+
+    }
+
+    fs.writeSync(fd, "// ########## Generated Export ##########\n");
+
+
+    for (const file of files) {
+      const fileImport = baseDirectory + file.replace(/\.ts$/, '');
+      const moduleFile = path.relative(baseDirectory, fileImport);
+
+      let importedModule = await import(fileImport);
+      if (importedModule) {
+        let exportedModuleItems = { ...importedModule };
+        for (const itemKey of Object.keys(exportedModuleItems)) {
+          let item = exportedModuleItems[itemKey];
+          let descriptor: InterfaceDescriptor | ClassDescriptor | undefined;
+          if (item instanceof InterfaceDescriptor) {
+            descriptor = item as InterfaceDescriptor;
+
+          } else if ("classDescriptor" in item && item.classDescriptor) {
+            descriptor = item.classDescriptor as ClassDescriptor;
+          }
+
+          if (descriptor && descriptor.componentExport && descriptor.componentExportName) {
+
+            let line = "import ";
+            line += itemKey === "default" ? descriptor.componentExportName : `{ ${itemKey} } `;
+            line += ` from "./${moduleFile}";\n`
+
+            fs.writeSync(fd, line);
+
+            if (descriptor.componentExport === "defaultExport") {
+              defaultExport = descriptor.componentExportName;
+            } else {
+              exportList.push(descriptor.componentExportName);
+            }
+
+          }
+        }
+      }
+    }
+
+
+    if (defaultExport) {
+      let line = `export default ${defaultExport};\n`
+      fs.writeSync(fd, line);
+    }
+    if (exportList.length > 0) {
+      let line = `export {${exportList.join(', ')}};\n`
+      fs.writeSync(fd, line);
+    }
+
+    fs.writeSync(fd, "// ########## Generated Export END ##########\n");
+
+    fs.closeSync(fd);
+
   }
 
   static readFromFile(path: string): UcpComponentDescriptor {
@@ -120,12 +219,8 @@ export default class UcpComponentDescriptor {
     return new UcpComponentDescriptor().initBasics(packagePath, packageName, packageVersion)
   }
   initBasics(packagePath: string, packageName: string, packageVersion: string | undefined): UcpComponentDescriptor {
-    //throw new Error("Method not implemented.");
 
-    this.name = packageName;
-    this.version = packageVersion;
-    this.srcPath = packagePath;
-
+    this.npmPackage = NpmPackage.getByPackage(packagePath, packageName, packageVersion || '');
     let name = UcpComponentDescriptor.getDescriptorName(packagePath, packageName, packageVersion);
     UcpComponentDescriptor._componentDescriptorStore[name] = this;
     return this;

@@ -5,8 +5,6 @@ import { z } from "zod";
 import ClassDescriptor from "../Things/DefaultClassDescriptor.class";
 import DefaultUcpModel, { UcpModelProxyIORSchema, UcpModelProxySchema } from "../Things/DefaultUcpModel.class";
 
-
-
 export interface OnceConfig extends UcpComponent<ModelDataType, DefaultOnceConfig> {
     hostname: string;
     model: ModelDataType;
@@ -26,7 +24,7 @@ const modelSchema =
 type ModelDataType = z.infer<typeof modelSchema>
 
 
-@ClassDescriptor.componentExport({ silent: true })
+@ClassDescriptor.componentExport("namedExport")
 export default class DefaultOnceConfig extends BaseUcpComponent<ModelDataType, DefaultOnceConfig> implements OnceConfig {
     get hostname(): string { return this.model.hostname; }
     set hostname(value: string) { this.model.hostname = value }

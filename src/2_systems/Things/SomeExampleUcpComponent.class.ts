@@ -54,7 +54,7 @@ const modelSchema =
 type ModelDataType = z.infer<typeof modelSchema>
 
 
-@ClassDescriptor.componentExport({ silent: true })
+@ClassDescriptor.componentExport('namedExport')
 export default class SomeExampleUcpComponent extends BaseUcpComponent<ModelDataType, MyExampleUcpComponent> implements MyExampleUcpComponent {
     get myName() { return this.model.myName }
 

@@ -16,6 +16,7 @@ export interface Loader {
   addObject2Store(ior: IOR, object: any | Promise<any>): void;
 }
 export const LoaderID = InterfaceDescriptor.lastDescriptor;
+LoaderID.componentExport = 'namedExport';
 
 export interface LoaderStatic extends ThingStatics<LoaderStatic> {
   canHandle(ior: IOR): number

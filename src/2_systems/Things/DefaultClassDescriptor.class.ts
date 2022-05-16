@@ -6,6 +6,14 @@ class ClassDescriptor {
     private static _classDescriptorStore = new WeakMap<Class<any>, ClassDescriptor>();
     ucpComponentDescriptor: UcpComponentDescriptor | undefined;
     filename: string | undefined;
+
+    get componentExportName(): string {
+        if (!this.name) throw new Error("No name");
+        return this.name;
+    }
+
+    componentExport: 'defaultExport' | 'namedExport' | undefined;
+
     get packagePath(): string {
         if (!this.ucpComponentDescriptor?.srcPath) throw new Error("Missing srcPath in ucpComponentDescriptor");
         return this.ucpComponentDescriptor.srcPath;
@@ -198,39 +206,12 @@ class ClassDescriptor {
     }
 
     // Adds Object to export list
-    static componentExport(config?: { silent?: boolean }): Function {
+    static componentExport(exportType: 'defaultExport' | 'namedExport'): Function {
         return (aClass: any, name: string, x: any): void => {
-
-            try {
-                (aClass.classDescriptor as ClassDescriptor).componentExport = true;
-            } catch (e) {
-                if (config?.silent !== true) {
-                    throw e;
-                } else {
-                    console.error(e);
-                }
-            }
+            (aClass.classDescriptor as ClassDescriptor).componentExport = exportType;
         }
     }
 
-    set componentExport(newValue: boolean) {
-
-        if (!this.ucpComponentDescriptor) {
-            throw new Error("Missing ucpComponentDescriptor in classDescriptor (Missing UcpComponentDescriptor.register)" + this.class.name)
-        }
-
-        const exportList = this.ucpComponentDescriptor.exportList;
-        if (newValue === true) {
-            exportList.push(this)
-        } else {
-            exportList.splice(exportList.indexOf(this), 1)
-        }
-    }
-
-    get componentExport(): boolean {
-        if (!this.ucpComponentDescriptor) throw new Error("Missing ucpComponentDescriptor in classDescriptor " + this.class.name)
-        return this.ucpComponentDescriptor.exportList.includes(this);
-    }
 }
 
 type interfaceDescriptorInput = { packagePath: string, packageName: string, packageVersion: string | undefined, interfaceName: string }
@@ -243,6 +224,14 @@ export class InterfaceDescriptor {
     public static lastDescriptor: InterfaceDescriptor;
     public ucpComponentDescriptor!: UcpComponentDescriptor;
 
+    public filename: string = "Missing";
+
+    _componentExport: 'namedExport' | 'defaultExport' | undefined;
+
+
+    get componentExportName(): string {
+        return this.name + 'ID';
+    }
 
     get packagePath(): string {
         if (!this.ucpComponentDescriptor?.srcPath) throw new Error("Missing srcPath in ucpComponentDescriptor");
@@ -273,6 +262,9 @@ export class InterfaceDescriptor {
     get implementedInterfaces(): InterfaceDescriptor[] {
         return this._getImplementedInterfaces();
     }
+
+    get componentExport(): 'namedExport' | 'defaultExport' | undefined { return this._componentExport }
+    set componentExport(value: 'namedExport' | 'defaultExport' | undefined) { this._componentExport = value; }
 
     _getImplementedInterfaces(interfaceList: InterfaceDescriptorInterface[] = []): InterfaceDescriptorInterface[] {
         if (!interfaceList.includes(this)) {
@@ -336,6 +328,6 @@ export class InterfaceDescriptor {
 }
 
 
-type InterfaceDescriptorInterface = InstanceType<typeof InterfaceDescriptor>
+export type InterfaceDescriptorInterface = InstanceType<typeof InterfaceDescriptor>
 
 export default ClassDescriptor

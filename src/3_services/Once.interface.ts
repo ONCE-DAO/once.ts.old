@@ -1,6 +1,7 @@
 import Thing from "./Thing.interface";
 import EAMD from "./EAMD.interface";
 import { OnceConfig } from "../2_systems/Once/ONCEConfig.class";
+import { InterfaceDescriptor } from "../2_systems/Things/DefaultClassDescriptor.class";
 
 export default interface Once extends Thing<Once> {
   ENV: NodeJS.ProcessEnv;
@@ -13,6 +14,8 @@ export default interface Once extends Thing<Once> {
 
   getConfig(): Promise<OnceConfig>;
 }
+
+export const OnceID = InterfaceDescriptor.lastDescriptor;
 
 declare global {
   var ONCE_STARTED: boolean;
