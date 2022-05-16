@@ -24,7 +24,8 @@ interface MyUrl extends MyString {
 
 const MyUrlID = InterfaceDescriptor.lastDescriptor;
 
-@ClassDescriptor.componentExport('namedExport')
+
+@ClassDescriptor.componentExport('defaultExport')
 //@ts-ignore
 class TestClass1 extends DefaultUrl implements MyUrl, MyString, MyString2 {
   myUrl: string = "";
@@ -163,9 +164,17 @@ describe(" Descriptor", () => {
 
     test("createExportFile", async () => {
       let ucpComponentDescriptor = MyUrlID.ucpComponentDescriptor;
-
+      ucpComponentDescriptor.exportFile = "index_test.ts.tmp"
       await ucpComponentDescriptor.createExportFile();
+
     })
+
+    test("defaultExportObject", async () => {
+      let ucpComponentDescriptor = MyUrlID.ucpComponentDescriptor;
+
+      expect(ucpComponentDescriptor.defaultExportObject).toBe(TestClass1);
+    })
+
 
   })
 

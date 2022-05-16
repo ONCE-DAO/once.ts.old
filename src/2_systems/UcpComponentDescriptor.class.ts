@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from "fs";
 import { basename, join } from "path";
 import { NpmPackage } from "./NpmPackage.class";
 import { create } from "xmlbuilder2";
-import Thing from "../3_services/Thing.interface";
+import { ThingStatics } from "../3_services/Thing.interface";
 import ClassDescriptor, { InterfaceDescriptor } from "./Things/DefaultClassDescriptor.class";
 
 import fs from 'fs';
@@ -11,10 +11,12 @@ import path from 'path';
 
 export default class UcpComponentDescriptor {
 
+  exportFile: string = "index.ts";
+
   private static readonly _componentDescriptorStore: { [i: string]: UcpComponentDescriptor } = {};
 
   // TODO: specify better
-  units: any[] = [];
+  units: (ThingStatics<any> | InterfaceDescriptor)[] = [];
 
   static getDescriptorName(packagePath: string, packageName: string, packageVersion: string | undefined) {
     return `${packagePath}${packageName}[${packageVersion || 'latest'}]`;
@@ -100,7 +102,16 @@ export default class UcpComponentDescriptor {
     );
   }
 
-
+  get defaultExportObject(): ThingStatics<any> | InterfaceDescriptor | undefined {
+    let result = this.units.filter(unit => {
+      if ("classDescriptor" in unit) {
+        return unit.classDescriptor.componentExport === "defaultExport"
+      } else if (unit instanceof InterfaceDescriptor) {
+        return unit.componentExport === "defaultExport"
+      }
+    });
+    return result?.[0];
+  }
 
   async createExportFile() {
     let files = this.npmPackage.discoverFiles(['*.ts']).filter(f => f.match(/(class|interface)\.ts$/)).sort();
@@ -109,7 +120,7 @@ export default class UcpComponentDescriptor {
 
     let exportList: string[] = [];
     let defaultExport: string = "";
-    let fd = fs.openSync(baseDirectory + "/index.ts", 'w', 0o666);
+    let fd = fs.openSync(baseDirectory + `/${this.exportFile}`, 'w', 0o666);
 
     const defaultFile = baseDirectory + "/index.default.ts";
     if (fs.existsSync(defaultFile)) {
@@ -185,7 +196,7 @@ export default class UcpComponentDescriptor {
       .replace("/", "-")}.component.xml`;
   }
 
-  register(object: Thing<any> | InterfaceDescriptor) {
+  register(object: ThingStatics<any> | InterfaceDescriptor) {
 
     if ("classDescriptor" in object) {
       this.units.push(object);
