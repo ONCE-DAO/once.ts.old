@@ -175,6 +175,55 @@ describe(" Descriptor", () => {
       expect(ucpComponentDescriptor.defaultExportObject).toBe(TestClass1);
     })
 
+    test("Method _getInterfaceExportName export interface InterfaceName", async () => {
+      let ucpComponentDescriptor = MyUrlID.ucpComponentDescriptor;
+      let data = "\nexport interface InterfaceName \n"
+
+      //@ts-ignore
+      let interfaceName = ucpComponentDescriptor._getInterfaceExportName("", "InterfaceName", data);
+
+      expect(interfaceName).toBe("InterfaceName");
+    })
+
+    test("Method _getInterfaceExportName export interface InterfaceName", async () => {
+      let ucpComponentDescriptor = MyUrlID.ucpComponentDescriptor;
+      let data = "\nexport default interface InterfaceName \n"
+
+      //@ts-ignore
+      let interfaceName = ucpComponentDescriptor._getInterfaceExportName("", "InterfaceName", data);
+
+      expect(interfaceName).toBe("default");
+    })
+
+    test("Method _getInterfaceExportName export default interface InterfaceName", async () => {
+      let ucpComponentDescriptor = MyUrlID.ucpComponentDescriptor;
+      let data = "\nexport default interface InterfaceName \n"
+
+      //@ts-ignore
+      let interfaceName = ucpComponentDescriptor._getInterfaceExportName("", "InterfaceName", data);
+
+      expect(interfaceName).toBe("default");
+    })
+
+    test("Method _getInterfaceExportName export default InterfaceName", async () => {
+      let ucpComponentDescriptor = MyUrlID.ucpComponentDescriptor;
+      let data = "\nexport default InterfaceName \n"
+
+      //@ts-ignore
+      let interfaceName = ucpComponentDescriptor._getInterfaceExportName("", "InterfaceName", data);
+
+      expect(interfaceName).toBe("default");
+    })
+
+    test("Method _getInterfaceExportName export { InterfaceName }", async () => {
+      let ucpComponentDescriptor = MyUrlID.ucpComponentDescriptor;
+      let data = "\export { InterfaceName } \n"
+
+      //@ts-ignore
+      let interfaceName = ucpComponentDescriptor._getInterfaceExportName("", "InterfaceName", data);
+
+      expect(interfaceName).toBe("InterfaceName");
+    })
 
   })
 

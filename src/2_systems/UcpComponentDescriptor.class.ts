@@ -113,6 +113,28 @@ export default class UcpComponentDescriptor {
     return result?.[0];
   }
 
+  private _getInterfaceExportName(fileName: string, interfaceName: string, fileData?: string): string {
+    if (!fileData) {
+      if (!fs.existsSync(fileName)) {
+        throw new Error(`File '${fileName}' doesn't exist`);
+      }
+
+      fileData = readFileSync(fileName).toString();
+    }
+
+    let regex = new RegExp(`export (default)? ?(interface )?({[^}*])?${interfaceName}`, "m");
+    let matchResult = fileData.match(regex);
+    if (matchResult) {
+      if (matchResult[1] === "default") {
+        return "default";
+      } else {
+        return interfaceName;
+      }
+    }
+    throw new Error(`Could not find the interface ${interfaceName} in file '${fileName}'`);
+
+  }
+
   async createExportFile() {
     let files = this.npmPackage.discoverFiles(['*.ts']).filter(f => f.match(/(class|interface)\.ts$/)).sort();
 
@@ -159,6 +181,18 @@ export default class UcpComponentDescriptor {
 
             fs.writeSync(fd, line);
 
+            // Import Real Interface
+            if (item instanceof InterfaceDescriptor) {
+              let exportName = this._getInterfaceExportName(baseDirectory + file, item.name);
+
+              let interfaceLine = "import ";
+              interfaceLine += exportName === "default" ? item.name : `{ ${exportName} } `;
+              interfaceLine += ` from "./${moduleFile}";\n`
+              exportList.push(item.name);
+              fs.writeSync(fd, interfaceLine);
+
+            }
+
             if (descriptor.componentExport === "defaultExport") {
               defaultExport = descriptor.componentExportName;
             } else {
@@ -181,7 +215,6 @@ export default class UcpComponentDescriptor {
     }
 
     fs.writeSync(fd, "// ########## Generated Export END ##########\n");
-
     fs.closeSync(fd);
 
   }
