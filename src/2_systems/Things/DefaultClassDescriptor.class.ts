@@ -310,6 +310,7 @@ export class InterfaceDescriptor {
 
         let interfaceDesc = ucpComponentDescriptor.getUnitByName(interfaceName, 'InterfaceDescriptor')
         if (interfaceDesc) {
+            InterfaceDescriptor.lastDescriptor = interfaceDesc;
             return interfaceDesc;
         }
 

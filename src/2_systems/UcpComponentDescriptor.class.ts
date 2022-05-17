@@ -158,7 +158,7 @@ export default class UcpComponentDescriptor {
 
     for (const file of files) {
       // HACK Keine Ahnung warum .js gebraucht wird.
-      const fileImport = baseDirectory + file.replace(/\.ts$/, '.js');
+      const fileImport = baseDirectory + file.replace(/\.ts$/, '');
       const moduleFile = path.relative(baseDirectory, fileImport);
 
       let importedModule = await import(fileImport);
