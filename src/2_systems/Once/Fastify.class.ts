@@ -1,11 +1,12 @@
 import Server, { ServerStatusType } from "../../3_services/Server.interface";
 
-import Fastify, { FastifyInstance } from 'fastify';
+import Fastify, { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import BaseUcpComponent from "../../1_infrastructure/BaseUcpComponent.class";
 import { z } from "zod";
 import DefaultUcpModel, { UcpModelProxyIORSchema, UcpModelProxySchema } from "../Things/DefaultUcpModel.class";
 import UcpModel from "../../3_services/UcpModel.interface";
 import DefaultUrl from "../Things/DefaultUrl.class";
+import fs from "fs";
 
 import path from 'path';
 
@@ -75,10 +76,35 @@ export default class OnceWebserver extends BaseUcpComponent<ModelDataType, Serve
             return { hello: 'world' }
         })
 
+        let onceBaseDir = process.cwd();
+
         let baseDirectory = await ONCE.eamd?.eamdDirectory;
         if (!baseDirectory) throw new Error("Missing Base Directory");
 
-        this._fastify.use('/EAMD.ucp/tla/EAM/once.ts/', serveStatic(baseDirectory));
+
+        this._fastify.use('/EAMD.ucp', serveStatic(baseDirectory));
+        this._fastify.use('/EAMD.ucp/tla/EAM/once.ts', serveStatic(onceBaseDir));
+
+        this._fastify.get('/*', async (request: FastifyRequest, reply: FastifyReply) => {
+            let url = request.url;
+            if (url.match('EAMD.ucp/tla/EAM/once.ts') && url.endsWith('.class')) {
+                let matchResult = url.match(/EAMD.ucp\/tla\/EAM\/once.ts\/(.*)/);
+                if (matchResult) {
+                    let file = path.join(onceBaseDir, matchResult[1] + '.js');
+                    if (fs.existsSync(file)) {
+                        reply.header('Content-Type', 'application/javascript; charset=UTF-8');
+                        return fs.readFileSync(file, 'utf8');
+                    }
+
+                }
+            }
+            throw new Error("Not Found");
+
+        })
+
+
+
+
 
 
         this._fastify.listen({ port: this.model.port }, (err, address) => {
@@ -87,6 +113,7 @@ export default class OnceWebserver extends BaseUcpComponent<ModelDataType, Serve
         })
 
     }
+
     async stop(): Promise<any> {
         if (this._fastify !== undefined) {
             await this._fastify.close();

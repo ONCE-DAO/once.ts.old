@@ -3,6 +3,7 @@ import OnceNodeServer from "../../../src/2_systems/Once/OnceNodeServer.class";
 import fetch from 'node-fetch';
 
 import OnceWebserver from "../../../src/2_systems/Once/Fastify.class";
+import ExtendedPromise from "../../../src/2_systems/JSExtensions/Promise";
 
 let server: OnceWebserver;
 
@@ -43,7 +44,7 @@ describe("Once WebServer", () => {
 
     })
 
-    test("test ONCE Directory", async () => {
+    test("test EAMD.ucp Directory", async () => {
         server = new OnceWebserver();
 
         await server.start();
@@ -51,11 +52,12 @@ describe("Once WebServer", () => {
 
 
         let url = server.internalUrl;
-        url.pathName = "/EAMD.ucp/tla/EAM/once.ts/README.md";
-
-        let result = await fetch(url.href);
-
+        url.pathName = "/EAMD.ucp/README.md";
+        let href = url.href
+        let result = await fetch(href);
+        let text = await result.text();
         expect(result.ok).toBe(true);
+
 
         await server.stop();
         expect(server.status).toBe("stopped");
@@ -64,5 +66,49 @@ describe("Once WebServer", () => {
     })
 
 
+    test("test ONCE.ts Directory", async () => {
+        server = new OnceWebserver();
 
+        await server.start();
+        expect(server.status).toBe("running");
+
+
+        let url = server.internalUrl;
+        url.pathName = "/EAMD.ucp/tla/EAM/once.ts/README.md";
+        let href = url.href
+        let result = await fetch(href);
+        let text = await result.text();
+        expect(result.ok).toBe(true);
+
+
+        await server.stop();
+        expect(server.status).toBe("stopped");
+
+
+    })
+
+    test("test ONCE.ts index.html", async () => {
+
+        server = new OnceWebserver();
+
+        await server.start();
+        expect(server.status).toBe("running");
+
+
+        let url = server.internalUrl;
+        url.pathName = "/EAMD.ucp/tla/EAM/once.ts/src";
+        let href = url.href
+        let result = await fetch(href);
+        let text = await result.text();
+
+        await ExtendedPromise.wait(1000000)
+
+        expect(result.ok).toBe(true);
+
+
+        await server.stop();
+        expect(server.status).toBe("stopped");
+
+
+    }, 1000000)
 })
