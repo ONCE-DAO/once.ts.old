@@ -1,6 +1,6 @@
 import BaseThing from "../../1_infrastructure/BaseThing.class";
 import FunctionPromiseQueue from "../../3_services/Queue.interface";
-import ExtendedPromise, { promiseHandler } from "../JSExtensions/Promise";
+import ExtendedPromise, { promiseHandler } from "../JSExtensions/Promise.class";
 import UUiD from "../JSExtensions/UUiD.class";
 
 

@@ -8,10 +8,11 @@ beforeEach(async () => {
 });
 
 describe("EAMD Loader", () => {
-  test(`IOR Find Loader`, () => {
+  test(`IOR Find Loader`, async () => {
     // @ts-ignore
     let ior = new DefaultIOR().init("ior:esm:git:tla.EAM.Once");
-    let loader = ior.loader;
+    expect(ior.loader).toBe(undefined);
+    let loader = (await ior.discoverLoader())
     expect(loader).toBeInstanceOf(EAMDLoader);
   });
 
@@ -25,7 +26,9 @@ describe("EAMD Loader", () => {
     let ior = new DefaultIOR().init("ior:esm:git:tla.EAM.Once");
 
     expect(EAMDLoader.canHandle(ior)).toBe(1);
-    expect(ior.loader.canHandle(ior)).toBe(1);
+
+    //@ts-ignore
+    expect((await ior.discoverLoader()).canHandle(ior)).toBe(1);
 
     let ior2 = new DefaultIOR().init("ior:google.de");
 

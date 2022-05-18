@@ -2,8 +2,7 @@ import EAMDInterface from "../3_services/EAMD.interface";
 import Once, { OnceMode, OnceState } from "../3_services/Once.interface";
 import DefaultThing from "./BaseThing.class";
 
-import fs from "fs";
-import DefaultOnceConfig, { OnceConfig } from "../2_systems/Once/ONCEConfig.class";
+import { OnceConfig } from "../2_systems/Once/ONCEConfig.class";
 import DefaultIOR from "../2_systems/Things/DefaultIOR.class";
 import ClassDescriptor from "../2_systems/Things/DefaultClassDescriptor.class";
 
@@ -38,6 +37,9 @@ export abstract class BaseOnce extends DefaultThing<Once> implements Once {
         console.log("No stored ONCE Config Instance found");
       }
       if (this._config === undefined) {
+
+        let DefaultOnceConfig = (await import("../2_systems/Once/ONCEConfig.class")).default;
+
         this._config = new DefaultOnceConfig();
         this._config.persistanceManager.addAlias(configAlias);
         await this._config.persistanceManager.create();
@@ -45,30 +47,6 @@ export abstract class BaseOnce extends DefaultThing<Once> implements Once {
     }
     return this._config;
   }
-
-  get scenarioPath(): string {
-    let path = process.cwd();
-    if (path.match('/Scenarios/')) return path;
-
-    if (this.mode === OnceMode.NODE_JS) {
-      const pathList = path.split('/');
-      while (pathList.length > 1) {
-        let scenarioPath = pathList.join('/') + '/EAMD.ucp/Scenarios/'
-        if (fs.existsSync(scenarioPath)) {
-          scenarioPath += 'localhost/'
-          if (!fs.existsSync(scenarioPath)) {
-            fs.mkdirSync(scenarioPath)
-          }
-          return scenarioPath;
-        }
-
-        pathList.pop();
-
-      }
-    }
-    throw new Error("Could not find scenario path");
-
-  };
 
   abstract start(): Promise<Once>;
   abstract init(...a: any[]): any;

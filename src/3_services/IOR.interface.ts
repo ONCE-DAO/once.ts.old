@@ -1,4 +1,4 @@
-import { loadingConfig } from "./Loader.interface";
+import Loader, { loadingConfig } from "./Loader.interface";
 import Url from "./Url.interface";
 
 export interface IOR extends Url {
@@ -9,6 +9,7 @@ export interface IOR extends Url {
   namespaceObject: string | undefined;
   id: string | undefined;
   clone(): IOR;
+  loader: Loader | undefined;
 
 }
 

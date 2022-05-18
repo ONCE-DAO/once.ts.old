@@ -1,10 +1,12 @@
 import Class from "../../3_services/Class.interface";
-import UcpComponentDescriptor from "../UcpComponentDescriptor.class";
+import { UcpComponentDescriptorInterface } from "../../3_services/UcpComponentDescriptor.interface";
+import UcpComponentDescriptor from "../BaseUcpComponentDescriptor.class";
+//import ServerSideUcpComponentDescriptor from "../ServerSideUcpComponentDescriptor.class";
 
 class ClassDescriptor {
 
     private static _classDescriptorStore = new WeakMap<Class<any>, ClassDescriptor>();
-    ucpComponentDescriptor: UcpComponentDescriptor | undefined;
+    ucpComponentDescriptor: UcpComponentDescriptorInterface | undefined;
     filename: string | undefined;
 
     get componentExportName(): string {
@@ -111,11 +113,11 @@ class ClassDescriptor {
         return this;
     }
 
-    add(object: InterfaceDescriptor | UcpComponentDescriptor): ClassDescriptor {
+    add(object: InterfaceDescriptor | UcpComponentDescriptorInterface): ClassDescriptor {
         if (object instanceof InterfaceDescriptor) {
             this._interfaces.push(object);
             object.addImplementation(this);
-        } else if (object instanceof UcpComponentDescriptor) {
+        } else {
             this.ucpComponentDescriptor = object;
         }
 
@@ -214,6 +216,9 @@ class ClassDescriptor {
 
 }
 
+export type ClassDescriptorInterface = InstanceType<typeof ClassDescriptor>
+
+
 type interfaceDescriptorInput = { packagePath: string, packageName: string, packageVersion: string | undefined, interfaceName: string }
 
 export class InterfaceDescriptor {
@@ -222,7 +227,7 @@ export class InterfaceDescriptor {
     readonly extends: InterfaceDescriptor[] = [];
     readonly implementations: ClassDescriptor[] = [];
     public static lastDescriptor: InterfaceDescriptor;
-    public ucpComponentDescriptor!: UcpComponentDescriptor;
+    public ucpComponentDescriptor!: UcpComponentDescriptorInterface;
 
     public filename: string = "Missing";
 
@@ -288,7 +293,7 @@ export class InterfaceDescriptor {
 
         let interfaceDesc = ucpComponentDescriptor.getUnitByName(interfaceName, 'InterfaceDescriptor')
         if (interfaceDesc === undefined) {
-            interfaceDesc = new InterfaceDescriptor(ucpComponentDescriptor, interfaceName);;
+            interfaceDesc = new InterfaceDescriptor(ucpComponentDescriptor, interfaceName);
         }
 
         this.add(interfaceDesc);
@@ -296,7 +301,7 @@ export class InterfaceDescriptor {
         return this;
     }
 
-    add(object: InterfaceDescriptor | UcpComponentDescriptor): this {
+    add(object: InterfaceDescriptor | UcpComponentDescriptorInterface): this {
         if (object instanceof InterfaceDescriptor) {
             this.extends.push(object)
         } else if ("writeToPath" in object) {
@@ -320,7 +325,7 @@ export class InterfaceDescriptor {
         return interfaceDesc;
     }
 
-    constructor(ucpComponentDescriptor: UcpComponentDescriptor, interfaceName: string) {
+    constructor(ucpComponentDescriptor: UcpComponentDescriptorInterface, interfaceName: string) {
         this.name = interfaceName;
         ucpComponentDescriptor.register(this);
         return this;

@@ -5,6 +5,7 @@ import fs from "fs";
 import IOR from "../../3_services/IOR.interface";
 import { UDEObject } from "../../3_services/PersistanceManager.interface";
 import UDELoader from "./UDELoader.class";
+import OnceNodeServer from "../Once/OnceNodeServer.class";
 
 export class FilePersistanceManager extends BasePersistanceManager {
 
@@ -18,7 +19,7 @@ export class FilePersistanceManager extends BasePersistanceManager {
     static readonly _aliasSeparator: string = ".";
 
     static canHandle(ior: IOR): number {
-        if (ONCE && ONCE.mode === OnceMode.NODE_JS) {
+        if (ONCE && (ONCE.mode === OnceMode.NODE_JS || ONCE.mode === OnceMode.NODE_LOADER)) {
             if (ior.hostName === 'localhost' && ior.id) {
                 return 1;
             }
@@ -38,7 +39,7 @@ export class FilePersistanceManager extends BasePersistanceManager {
 
     static async getUdeDirectory(): Promise<string> {
         if (!ONCE) throw new Error("Missing ONCE");
-        const dir = ONCE.scenarioPath;
+        const dir = (ONCE as OnceNodeServer).scenarioPath;
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir);
         }

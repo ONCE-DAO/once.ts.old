@@ -1,7 +1,6 @@
 import fs, { cpSync, existsSync, fstat, mkdirSync, renameSync } from "fs";
 import { join, relative } from "path";
 import simpleGit, { Options, SimpleGit, TaskOptions } from "simple-git";
-import { NpmPackage } from "../NpmPackage.class";
 
 import GitRepository, {
   GitCloneParameter,
@@ -13,6 +12,7 @@ import SubmoduleInterface from "../../3_services/Submodule.interface";
 import DefaultSubmodule from "./Submodule.class";
 import { EAMD_FOLDERS } from "../../3_services/EAMD.interface";
 import IOR from "../../3_services/IOR.interface";
+import { ServerSideNpmPackage } from "../ServerSideNpmPackage.class";
 
 export default class DefaultGitRepository implements GitRepository {
   async init({
@@ -59,7 +59,7 @@ export default class DefaultGitRepository implements GitRepository {
   protected gitRepo?: [SimpleGit, string];
 
   private static getdevFolder(repo: GitRepository) {
-    const npmPackage = NpmPackage.getByFolder(repo.folderPath);
+    const npmPackage = ServerSideNpmPackage.getByFolder(repo.folderPath);
     if (!npmPackage) throw new Error("TODO");
 
     const split = npmPackage.namespace?.split(".");
@@ -154,7 +154,7 @@ export default class DefaultGitRepository implements GitRepository {
     return new Promise(async (resolve) => {
       const remoteUrl = this.gitRepo
         ? (await this.gitRepo[0].getConfig("remote.origin.url")).value ||
-          undefined
+        undefined
         : undefined;
       resolve(remoteUrl || "");
     });
@@ -173,7 +173,7 @@ export default class DefaultGitRepository implements GitRepository {
   get repoName(): Promise<string | undefined> {
     return new Promise(async (resolve) => {
       if (!this.gitRepo) return undefined;
-      const pkg = await NpmPackage.getByFolder(this.gitRepo[1]);
+      const pkg = await ServerSideNpmPackage.getByFolder(this.gitRepo[1]);
       resolve(pkg?.name);
     });
   }

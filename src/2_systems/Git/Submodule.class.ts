@@ -16,10 +16,10 @@ import { EAMD_FOLDERS } from "../../3_services/EAMD.interface";
 import Submodule, {
   AddSubmoduleArgs,
 } from "../../3_services/Submodule.interface";
-import { NpmPackage } from "../NpmPackage.class";
-import UcpComponentDescriptor from "../UcpComponentDescriptor.class";
 import glob from "glob";
 import DefaultGitRepository from "./GitRepository.class";
+import ServerSideUcpComponentDescriptor from "../ServerSideUcpComponentDescriptor.class";
+import { ServerSideNpmPackage } from "../ServerSideNpmPackage.class";
 
 //TODO @PB Refactor code
 export default class DefaultSubmodule implements Submodule {
@@ -110,7 +110,7 @@ export default class DefaultSubmodule implements Submodule {
     return join(global.ONCE.eamd?.eamdDirectory || "", this.devPath || "");
   }
   private get npmPackage() {
-    return NpmPackage.getByFolder(this.fullPath);
+    return ServerSideNpmPackage.getByFolder(this.fullPath);
   }
 
   private get snapshot() {
@@ -134,7 +134,7 @@ export default class DefaultSubmodule implements Submodule {
       );
       this.copy(this.fullPath, this.version, "ressources");
       this.copy(this.fullPath, this.version, "bin");
-      UcpComponentDescriptor.getInstance()
+      new ServerSideUcpComponentDescriptor()
         .init({ path: this.fullPath, relativePath: this.devPath })
         .writeToPath(this.fullPath, this.version);
 
@@ -210,7 +210,7 @@ export default class DefaultSubmodule implements Submodule {
       clone: { url, branch },
     });
 
-    const pkg = NpmPackage.getByPath(join(tmpFolder, "package.build.json"));
+    const pkg = ServerSideNpmPackage.getByPath(join(tmpFolder, "package.build.json"));
     if (overwrite && pkg) {
       console.log("OVERWRITE with", overwrite);
       pkg.name = overwrite.name;

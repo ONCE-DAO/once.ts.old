@@ -1,7 +1,7 @@
 import EventService from "../../3_services/EventService.interface";
 import Store, { StoreEvents } from "../../3_services/Store.interface";
 import BaseThing from "../../1_infrastructure/BaseThing.class";
-import ExtendedPromise from "../JSExtensions/Promise";
+import ExtendedPromise from "../JSExtensions/Promise.class";
 import DefaultEventService from "./DefaultEventService.class";
 
 type storedObject = { ref?: any };

@@ -3,9 +3,8 @@ import Once, { OnceMode, OnceState } from "../../3_services/Once.interface";
 import { RootEAMD } from "../EAMD/RootEAMD.class";
 import { UserEAMD } from "../EAMD/UserEAMD.class";
 import { BaseNodeOnce } from "../../1_infrastructure/BaseNodeOnce.class";
-import DefaultSubmodule from "../Git/Submodule.class";
-import { FilePersistanceManager } from "../Things/FilePersistanceManager.class";
 
+import fs from "fs";
 export default class OnceNodeServer extends BaseNodeOnce implements Once {
 
   init(...a: any[]) {
@@ -61,6 +60,30 @@ export default class OnceNodeServer extends BaseNodeOnce implements Once {
     // }
     return once;
   }
+
+  get scenarioPath(): string {
+    let path = process.cwd();
+    if (path.match('/Scenarios/')) return path;
+
+    if (this.mode === OnceMode.NODE_JS) {
+      const pathList = path.split('/');
+      while (pathList.length > 1) {
+        let scenarioPath = pathList.join('/') + '/EAMD.ucp/Scenarios/'
+        if (fs.existsSync(scenarioPath)) {
+          scenarioPath += 'localhost/'
+          if (!fs.existsSync(scenarioPath)) {
+            fs.mkdirSync(scenarioPath)
+          }
+          return scenarioPath;
+        }
+
+        pathList.pop();
+
+      }
+    }
+    throw new Error("Could not find scenario path");
+
+  };
 
   static async initEAMD(): Promise<EAMD> {
     const rootEAMD = RootEAMD.getInstance().init();

@@ -2,6 +2,7 @@ import Thing from "./Thing.interface";
 import EAMD from "./EAMD.interface";
 import { OnceConfig } from "../2_systems/Once/ONCEConfig.class";
 import { InterfaceDescriptor } from "../2_systems/Things/DefaultClassDescriptor.class";
+import IOR from "./IOR.interface";
 
 export default interface Once extends Thing<Once> {
   ENV: NodeJS.ProcessEnv;
@@ -10,8 +11,6 @@ export default interface Once extends Thing<Once> {
   mode: OnceMode;
   state: OnceState;
   start(): void;
-  scenarioPath: string;
-
   getConfig(): Promise<OnceConfig>;
 }
 
@@ -23,7 +22,11 @@ declare global {
   var NODE_JS: boolean;
 }
 
-global.ONCE_STARTED = false;
+if (typeof window !== "undefined") {
+  window.ONCE_STARTED = false;
+} else {
+  global.ONCE_STARTED = false;
+}
 
 
 /* eslint-disable no-unused-vars */

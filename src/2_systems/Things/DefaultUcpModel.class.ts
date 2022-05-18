@@ -5,7 +5,7 @@ import Particle, { ParticleUDEStructure } from "../../3_services/Particle.interf
 import UcpComponent from "../../3_services/UcpComponent.interface";
 import UcpModel, { UcpModelChangelog as UcpModelChangelog, UcpModelChangeLogMethods, UcpModelEvents, UcpModelTransactionStates } from "../../3_services/UcpModel.interface";
 import Wave from "../../3_services/Wave.interface";
-import ExtendedPromise from "../JSExtensions/Promise";
+import ExtendedPromise from "../JSExtensions/Promise.class";
 import DefaultEventService from "./DefaultEventService.class";
 import DefaultIOR from "./DefaultIOR.class";
 import DefaultParticle from "./DefaultParticle.class";

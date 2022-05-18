@@ -3,7 +3,7 @@ import OnceNodeServer from "../../../src/2_systems/Once/OnceNodeServer.class";
 import fetch from 'node-fetch';
 
 import OnceWebserver from "../../../src/2_systems/Once/Fastify.class";
-import ExtendedPromise from "../../../src/2_systems/JSExtensions/Promise";
+import ExtendedPromise from "../../../src/2_systems/JSExtensions/Promise.class";
 
 let server: OnceWebserver;
 
@@ -36,7 +36,7 @@ describe("Once WebServer", () => {
 
         let result = await fetch(server.internalUrl.href);
 
-        expect(result.ok).toBe(true);
+        expect(result.status).toBe(500);
 
         await server.stop();
         expect(server.status).toBe("stopped");

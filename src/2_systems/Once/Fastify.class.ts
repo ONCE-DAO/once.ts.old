@@ -47,7 +47,6 @@ export default class OnceWebserver extends BaseUcpComponent<ModelDataType, Serve
         } else {
             return "running";
         }
-
     }
 
     get internalUrl() {
@@ -71,23 +70,20 @@ export default class OnceWebserver extends BaseUcpComponent<ModelDataType, Serve
         await this._fastify.register(middie);
 
 
-        this._fastify.get('/', async (request, reply) => {
-            reply.type('application/json').code(200)
-            return { hello: 'world' }
-        })
-
         let onceBaseDir = process.cwd();
 
         let baseDirectory = await ONCE.eamd?.eamdDirectory;
         if (!baseDirectory) throw new Error("Missing Base Directory");
 
 
+        this._fastify.use('/', serveStatic(baseDirectory));
+
         this._fastify.use('/EAMD.ucp', serveStatic(baseDirectory));
         this._fastify.use('/EAMD.ucp/tla/EAM/once.ts', serveStatic(onceBaseDir));
 
         this._fastify.get('/*', async (request: FastifyRequest, reply: FastifyReply) => {
             let url = request.url;
-            if (url.match('EAMD.ucp/tla/EAM/once.ts') && url.endsWith('.class')) {
+            if (url.match('EAMD.ucp/tla/EAM/once.ts') && (url.endsWith('.class') || url.endsWith('.interface'))) {
                 let matchResult = url.match(/EAMD.ucp\/tla\/EAM\/once.ts\/(.*)/);
                 if (matchResult) {
                     let file = path.join(onceBaseDir, matchResult[1] + '.js');

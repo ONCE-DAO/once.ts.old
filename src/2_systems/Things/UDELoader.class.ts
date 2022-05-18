@@ -7,7 +7,7 @@ import { urlProtocol } from "../../3_services/Url.interface";
 import DefaultIOR from "./DefaultIOR.class";
 import UcpComponent from "../../3_services/UcpComponent.interface";
 import WeakRefPromiseStore from "./WeakRefPromiseStore.class";
-import ExtendedPromise from "../JSExtensions/Promise";
+import ExtendedPromise from "../JSExtensions/Promise.class";
 import { UDEObject } from "../../3_services/PersistanceManager.interface";
 import DefaultParticle from "./DefaultParticle.class";
 import ClassDescriptor from "./DefaultClassDescriptor.class";

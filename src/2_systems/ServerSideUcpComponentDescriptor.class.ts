@@ -1,81 +1,34 @@
 import { readFileSync, writeFileSync } from "fs";
-import { basename, join } from "path";
-import { NpmPackage } from "./NpmPackage.class";
+import { join } from "path";
 import { create } from "xmlbuilder2";
 import { ThingStatics } from "../3_services/Thing.interface";
-import ClassDescriptor, { InterfaceDescriptor } from "./Things/DefaultClassDescriptor.class";
+import { ClassDescriptorInterface, InterfaceDescriptorInterface } from "./Things/DefaultClassDescriptor.class";
 
 import fs from 'fs';
 import path from 'path';
+import DefaultUcpComponentDescriptor, { UcpComponentDescriptorInitParameters } from "./DefaultUcpComponentDescriptor.class";
+import { ServerSideNpmPackage } from "./ServerSideNpmPackage.class";
 
 
-export default class UcpComponentDescriptor {
+export default class ServerSideUcpComponentDescriptor extends DefaultUcpComponentDescriptor {
 
   exportFile: string = "index.ts";
 
-  private static readonly _componentDescriptorStore: { [i: string]: UcpComponentDescriptor } = {};
-
-  // TODO: specify better
-  units: (ThingStatics<any> | InterfaceDescriptor)[] = [];
-
-  static getDescriptorName(packagePath: string, packageName: string, packageVersion: string | undefined) {
-    return `${packagePath}${packageName}[${packageVersion || 'latest'}]`;
-  }
-
-  npmPackage!: NpmPackage;
-
-  relativeSrcPath: string | undefined;
-
-  identifier: string | undefined;
-  static getInstance() {
-    return new UcpComponentDescriptor();
-  }
-
-  get name(): string {
-    if (!this.npmPackage.name) throw new Error("NPM Name is missing");
-    return this.npmPackage.name;
-  }
-
-  get version(): string {
-    if (!this.npmPackage.version) throw new Error("NPM version is missing");
-    return this.npmPackage.version;
-  }
-
-  get srcPath(): string {
-    if (!this.npmPackage.path) throw new Error("NPM version is missing");
-    return this.npmPackage.path;
-  }
+  protected myClass = ServerSideUcpComponentDescriptor;
 
 
-  getUnitByName(name: string, type: 'ClassDescriptor'): ClassDescriptor | undefined;
-  getUnitByName(name: string, type: 'InterfaceDescriptor'): InterfaceDescriptor | undefined;
-  getUnitByName(name: string, type: 'InterfaceDescriptor' | 'ClassDescriptor'): any {
-
-    if (type === 'ClassDescriptor') {
-      return this.units.filter(u => {
-        if (u instanceof ClassDescriptor && u.name === name) {
-          return u;
-        }
-      })?.[0]
-    }
-
-    if (type === 'InterfaceDescriptor') {
-      return this.units.filter(u => {
-        if (u instanceof InterfaceDescriptor && u.name === name) {
-          return u;
-        }
-      })?.[0]
-    }
-
-
-  }
+  // HACK Keine ahnung warum er das ! nicht akzeptiert
+  // @ts-ignore
+  npmPackage!: ServerSideNpmPackage;
 
   init({ path, relativePath }: UcpComponentDescriptorInitParameters) {
     (this.relativeSrcPath = relativePath);
-    this.identifier = basename(relativePath);
+
+    // TODO Deaktiviert wegen Browser
+    //this.identifier = basename(relativePath);
 
 
-    let npmPackage = NpmPackage.getByFolder(path);
+    let npmPackage = ServerSideNpmPackage.getByFolder(path) as ServerSideNpmPackage;
     if (!npmPackage) throw new Error("Could not find a NPM Package");
 
     this.npmPackage = npmPackage;
@@ -102,11 +55,11 @@ export default class UcpComponentDescriptor {
     );
   }
 
-  get defaultExportObject(): ThingStatics<any> | InterfaceDescriptor | undefined {
+  get defaultExportObject(): ThingStatics<any> | InterfaceDescriptorInterface | undefined {
     let result = this.units.filter(unit => {
       if ("classDescriptor" in unit) {
         return unit.classDescriptor.componentExport === "defaultExport"
-      } else if (unit instanceof InterfaceDescriptor) {
+      } else if (unit) {
         return unit.componentExport === "defaultExport"
       }
     });
@@ -166,12 +119,12 @@ export default class UcpComponentDescriptor {
         let exportedModuleItems = { ...importedModule };
         for (const itemKey of Object.keys(exportedModuleItems)) {
           let item = exportedModuleItems[itemKey];
-          let descriptor: InterfaceDescriptor | ClassDescriptor | undefined;
-          if (item instanceof InterfaceDescriptor) {
-            descriptor = item as InterfaceDescriptor;
+          let descriptor: InterfaceDescriptorInterface | ClassDescriptorInterface | undefined;
+          if ("allExtendedInterfaces" in item) {
+            descriptor = item as InterfaceDescriptorInterface;
 
           } else if ("classDescriptor" in item && item.classDescriptor) {
-            descriptor = item.classDescriptor as ClassDescriptor;
+            descriptor = item.classDescriptor as ClassDescriptorInterface;
           }
 
           if (descriptor && descriptor.componentExport && descriptor.componentExportName) {
@@ -183,7 +136,7 @@ export default class UcpComponentDescriptor {
             fs.writeSync(fd, line);
 
             // Import Real Interface
-            if (item instanceof InterfaceDescriptor) {
+            if ("allExtendedInterfaces" in item) {
               let exportName = this._getInterfaceExportName(baseDirectory + file, item.name);
 
               let interfaceLine = "import ";
@@ -220,7 +173,7 @@ export default class UcpComponentDescriptor {
 
   }
 
-  static readFromFile(path: string): UcpComponentDescriptor {
+  static readFromFile(path: string): DefaultUcpComponentDescriptor {
     return JSON.parse(readFileSync(path).toString());
   }
 
@@ -230,49 +183,6 @@ export default class UcpComponentDescriptor {
       .replace("/", "-")}.component.xml`;
   }
 
-  register(object: ThingStatics<any> | InterfaceDescriptor) {
 
-    if ("classDescriptor" in object) {
-      this.units.push(object);
-
-      object.classDescriptor.add(this);
-
-    } else if ("implementedInterfaces" in object) {
-      const existingInterfaceDescriptors = this.getUnitByName(object.name, "InterfaceDescriptor");
-      if (existingInterfaceDescriptors) {
-        throw new Error(`Duplicated Interface '${object.name}' in UcpComponent ${this.name}`);
-      }
-      this.units.push(object);
-
-      object.add(this);
-
-    }
-  }
-
-  static register(packagePath: string, packageName: string, packageVersion: string | undefined): Function {
-    return (aClass: any, name: string, x: any): void => {
-
-      const descriptor = UcpComponentDescriptor.getDescriptor(packagePath, packageName, packageVersion);
-      descriptor.register(aClass);
-    }
-  }
-
-  static getDescriptor(packagePath: string, packageName: string, packageVersion: string | undefined): UcpComponentDescriptor {
-    let name = this.getDescriptorName(packagePath, packageName, packageVersion);
-    if (this._componentDescriptorStore[name]) return this._componentDescriptorStore[name];
-
-    return new UcpComponentDescriptor().initBasics(packagePath, packageName, packageVersion)
-  }
-  initBasics(packagePath: string, packageName: string, packageVersion: string | undefined): UcpComponentDescriptor {
-
-    this.npmPackage = NpmPackage.getByPackage(packagePath, packageName, packageVersion || '');
-    let name = UcpComponentDescriptor.getDescriptorName(packagePath, packageName, packageVersion);
-    UcpComponentDescriptor._componentDescriptorStore[name] = this;
-    return this;
-  }
 }
 
-type UcpComponentDescriptorInitParameters = {
-  path: string;
-  relativePath: string;
-};

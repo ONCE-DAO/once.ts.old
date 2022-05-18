@@ -1,4 +1,3 @@
-import DefaultSubmodule from "../2_systems/Git/Submodule.class";
 import Once, { OnceRuntimeResolver } from "../3_services/Once.interface";
 
 export default abstract class OnceKernel {
@@ -22,15 +21,18 @@ export default abstract class OnceKernel {
 
     if (this.RuntimeIs.NODE_LOADER()) {
       return (
-        await import("../2_systems/Once/OnceNodeImportLoader.class.js")
+        await import("../2_systems/Once/OnceNodeImportLoader.class")
       ).default.start();
     }
     if (this.RuntimeIs.NODE_JS()) {
       return (
-        await import("../2_systems/Once/OnceNodeServer.class.js")
+        await import("../2_systems/Once/OnceNodeServer.class")
       ).default.start();
     }
     if (this.RuntimeIs.BROWSER()) {
+      return (
+        await import("../2_systems/Once/OnceBrowser.class")
+      ).default.start();
     }
     if (this.RuntimeIs.SERVICE_WORKER()) {
     }

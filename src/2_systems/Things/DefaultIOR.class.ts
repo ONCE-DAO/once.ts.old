@@ -2,7 +2,6 @@ import DefaultUrl, { formatType } from "./DefaultUrl.class"
 import Loader, { loadingConfig } from "../../3_services/Loader.interface";
 import IOR from "../../3_services/IOR.interface";
 import { urlProtocol } from "../../3_services/Url.interface";
-import DefaultLoader from "./DefaultLoader.class";
 import UUiD from "../JSExtensions/UUiD.class";
 import ClassDescriptor from "./DefaultClassDescriptor.class";
 
@@ -13,7 +12,7 @@ import ClassDescriptor from "./DefaultClassDescriptor.class";
 export default class DefaultIOR extends DefaultUrl implements IOR {
 
     private _referencedObject: any;
-    private _loader: Loader | undefined;
+    public loader: Loader | undefined;
     // TODO@BE refactor to package
     public namespace: string | undefined = undefined;
     // TODO@BE refactor to versionString
@@ -169,26 +168,26 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
         return result;
     }
 
-    get loader(): Loader {
 
-        if (!this._loader) {
-            this._loader = DefaultLoader.findLoader(this);
-        }
-        if (!this._loader) throw new Error("No loader found")
-        return this._loader;
-    }
-
-    set loader(newLoader: Loader) {
-        this._loader = newLoader;
-    }
 
     clone(): IOR {
         return new DefaultIOR().init(this.href);
     }
 
+    async discoverLoader(): Promise<Loader | undefined> {
+        if (this.loader === undefined) {
+            const DefaultLoader = (await import("./DefaultLoader.class")).default;
+            this.loader = DefaultLoader.findLoader(this);
+        }
+        return this.loader;
+    }
+
 
     async load(config?: loadingConfig) {
         // return Promise.resolve(this.loader.load(this));
+        await this.discoverLoader();
+        if (!this.loader) throw new Error("No Loader found");
+
         let loadingPromiseOrObject = this.loader.load(this, config);
         loadingPromiseOrObject.then(object => {
             if (object) {
