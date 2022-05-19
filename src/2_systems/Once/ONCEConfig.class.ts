@@ -1,9 +1,9 @@
 import UcpComponent from "../../3_services/UcpComponent.interface";
 import UcpModel from "../../3_services/UcpModel.interface";
 import BaseUcpComponent from "../../1_infrastructure/BaseUcpComponent.class";
-import { z } from "zod";
 import ClassDescriptor from "../Things/DefaultClassDescriptor.class";
 import DefaultUcpModel, { UcpModelProxyIORSchema, UcpModelProxySchema } from "../Things/DefaultUcpModel.class";
+import { z } from "../Zod";
 
 export interface OnceConfig extends UcpComponent<ModelDataType, DefaultOnceConfig> {
     hostname: string;

@@ -1,11 +1,12 @@
-import { z } from "zod";
 import ClassDescriptor from "../2_systems/Things/DefaultClassDescriptor.class";
 import DefaultIOR from "../2_systems/Things/DefaultIOR.class";
 import { UcpModelProxySchema } from "../2_systems/Things/DefaultUcpModel.class";
 import { DefaultPersistanceManagerHandler } from "../2_systems/Things/PersistanceManagerHandler.class";
 import RelatedObjectStore from "../2_systems/Things/RelatedObjectStore.class";
+import { z } from "../2_systems/Zod";
 import IOR from "../3_services/IOR.interface";
 import { JSONProvider } from "../3_services/JSON.interface";
+import { OnceMode } from "../3_services/Once.interface";
 import { PersistanceManagerHandler } from "../3_services/PersistanceManagerHandler.interface";
 import RelatedObjectStoreInterface from "../3_services/RelatedObjectStore.interface";
 import UcpComponent from "../3_services/UcpComponent.interface";
@@ -13,10 +14,11 @@ import UcpModel from "../3_services/UcpModel.interface";
 import { BasePersistanceManager } from "./BasePersistanceManager.class";
 import BaseThing from "./BaseThing.class";
 
-// HACK: ONCE should be there
-//if (ONCE && ONCE.mode === OnceMode.NODE_JS) {
-await import("../2_systems/Things/FilePersistanceManager.class")
-//}
+// HACK: ONCE should be there 
+// ONCE ist undefined beim Import, wenn es auf dem Server läuft
+if (typeof ONCE === "undefined" || ONCE.mode !== OnceMode.BROWSER) {
+    await import("../2_systems/Things/FilePersistanceManager.class")
+}
 @ClassDescriptor.componentExport('namedExport')
 export default abstract class BaseUcpComponent<ModelDataType, ClassInterface> extends BaseThing<ClassInterface> implements UcpComponent<ModelDataType, ClassInterface>, JSONProvider {
     readonly Store: RelatedObjectStoreInterface = new RelatedObjectStore();

@@ -5,6 +5,7 @@ import DefaultThing from "./BaseThing.class";
 import { OnceConfig } from "../2_systems/Once/ONCEConfig.class";
 import DefaultIOR from "../2_systems/Things/DefaultIOR.class";
 import ClassDescriptor from "../2_systems/Things/DefaultClassDescriptor.class";
+import IOR from "../3_services/IOR.interface";
 
 @ClassDescriptor.componentExport('namedExport')
 export abstract class BaseOnce extends DefaultThing<Once> implements Once {
@@ -17,6 +18,15 @@ export abstract class BaseOnce extends DefaultThing<Once> implements Once {
   protected _config: OnceConfig | undefined;
 
 
+  async load(ior: IOR | string) {
+    let iorObject: IOR;
+    if (typeof ior === "string") {
+      iorObject = new DefaultIOR().init(ior);
+    } else {
+      iorObject = ior;
+    }
+    return iorObject.load();
+  }
 
   constructor(glob: typeof globalThis) {
     super();

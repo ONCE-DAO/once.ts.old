@@ -12,6 +12,7 @@ export default interface Once extends Thing<Once> {
   state: OnceState;
   start(): void;
   getConfig(): Promise<OnceConfig>;
+  load(ior: IOR | string): Promise<any>;
 }
 
 export const OnceID = InterfaceDescriptor.lastDescriptor;

@@ -1,4 +1,3 @@
-import { z } from "zod";
 import BaseThing from "../../1_infrastructure/BaseThing.class";
 import EventService, { EventServiceConsumer } from "../../3_services/EventService.interface";
 import Particle, { ParticleUDEStructure } from "../../3_services/Particle.interface";
@@ -6,6 +5,7 @@ import UcpComponent from "../../3_services/UcpComponent.interface";
 import UcpModel, { UcpModelChangelog as UcpModelChangelog, UcpModelChangeLogMethods, UcpModelEvents, UcpModelTransactionStates } from "../../3_services/UcpModel.interface";
 import Wave from "../../3_services/Wave.interface";
 import ExtendedPromise from "../JSExtensions/Promise.class";
+import { z } from "../Zod";
 import DefaultEventService from "./DefaultEventService.class";
 import DefaultIOR from "./DefaultIOR.class";
 import DefaultParticle from "./DefaultParticle.class";

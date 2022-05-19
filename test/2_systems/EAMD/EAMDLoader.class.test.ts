@@ -1,4 +1,4 @@
-import EAMDLoader from "../../../src/2_systems/EAMD/EAMDLoader.class";
+import ServerSideEAMDLoader from "../../../src/2_systems/EAMD/ServerSideEAMDLoader.class";
 import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class";
 import OnceNodeServer from "../../../src/2_systems/Once/OnceNodeServer.class";
 
@@ -13,7 +13,7 @@ describe("EAMD Loader", () => {
     let ior = new DefaultIOR().init("ior:esm:git:tla.EAM.Once");
     expect(ior.loader).toBe(undefined);
     let loader = (await ior.discoverLoader())
-    expect(loader).toBeInstanceOf(EAMDLoader);
+    expect(loader).toBeInstanceOf(ServerSideEAMDLoader);
   });
 
   test(`IOR load Thing from Namespace`, async () => {
@@ -25,14 +25,14 @@ describe("EAMD Loader", () => {
   test(`CanHandler`, async () => {
     let ior = new DefaultIOR().init("ior:esm:git:tla.EAM.Once");
 
-    expect(EAMDLoader.canHandle(ior)).toBe(1);
+    expect(ServerSideEAMDLoader.canHandle(ior)).toBe(1);
 
     //@ts-ignore
     expect((await ior.discoverLoader()).canHandle(ior)).toBe(1);
 
     let ior2 = new DefaultIOR().init("ior:google.de");
 
-    expect(EAMDLoader.canHandle(ior2)).toBe(0);
+    expect(ServerSideEAMDLoader.canHandle(ior2)).toBe(0);
   });
   // TODO@PB Transform .js into .mjs
 

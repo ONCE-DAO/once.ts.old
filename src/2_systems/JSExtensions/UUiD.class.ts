@@ -1,4 +1,3 @@
-import { z } from "zod";
 
 export default class UUiD {
     static uuidv4() {

@@ -2,7 +2,6 @@ import Server, { ServerStatusType } from "../../3_services/Server.interface";
 
 import Fastify, { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import BaseUcpComponent from "../../1_infrastructure/BaseUcpComponent.class";
-import { z } from "zod";
 import DefaultUcpModel, { UcpModelProxyIORSchema, UcpModelProxySchema } from "../Things/DefaultUcpModel.class";
 import UcpModel from "../../3_services/UcpModel.interface";
 import DefaultUrl from "../Things/DefaultUrl.class";
@@ -13,6 +12,9 @@ import path from 'path';
 import middie from 'middie';
 
 import serveStatic from 'serve-static';
+import { z } from "../Zod";
+import DefaultIOR from "../Things/DefaultIOR.class";
+import { loaderReturnValue } from "../../3_services/Loader.interface";
 
 
 const modelSchema =
@@ -81,17 +83,53 @@ export default class OnceWebserver extends BaseUcpComponent<ModelDataType, Serve
         this._fastify.use('/EAMD.ucp', serveStatic(baseDirectory));
         this._fastify.use('/EAMD.ucp/tla/EAM/once.ts', serveStatic(onceBaseDir));
 
-        this._fastify.get('/*', async (request: FastifyRequest, reply: FastifyReply) => {
+        this._fastify.get('/ior*', async (request: FastifyRequest, reply: FastifyReply) => {
             let url = request.url;
-            if (url.match('EAMD.ucp/tla/EAM/once.ts') && (url.endsWith('.class') || url.endsWith('.interface'))) {
-                let matchResult = url.match(/EAMD.ucp\/tla\/EAM\/once.ts\/(.*)/);
-                if (matchResult) {
-                    let file = path.join(onceBaseDir, matchResult[1] + '.js');
-                    if (fs.existsSync(file)) {
-                        reply.header('Content-Type', 'application/javascript; charset=UTF-8');
-                        return fs.readFileSync(file, 'utf8');
-                    }
+            if (url.startsWith('/ior:esm:')) {
+                if (request.headers['sec-fetch-dest'] === 'script') {
+                    // This all is a resolver!
+                    const ior = new DefaultIOR().init(url.replace(/^\//, ''))
+                    let urlPath: string = await ior.load({ returnValue: loaderReturnValue.path });
 
+                    ONCE.eamd?.eamdDirectory
+                    // HACK as once is not in EAMD.ucp!
+                    if (urlPath.endsWith('/once.ts/src') && !urlPath.match(/EAMD\.ucp/)) {
+                        urlPath = 'EAMD.ucp/tla/EAM/once.ts/src';
+                    } else {
+                        urlPath = path.relative(path.join(ONCE.eamd?.eamdDirectory as string, '..'), urlPath)
+
+                    }
+                    reply.redirect('/' + urlPath + '/');
+                }
+            }
+            throw new Error("Not Found");
+
+        })
+
+
+        this._fastify.get('/*', async (request: FastifyRequest, reply: FastifyReply) => {
+            if (request.headers['sec-fetch-dest'] === 'script') {
+                let url = request.url;
+                if (url.match('EAMD.ucp/tla/EAM/once.ts')) {
+                    let matchResult = url.match(/EAMD.ucp\/tla\/EAM\/once.ts\/(.*)/);
+                    if (matchResult) {
+                        if ((url.endsWith('.class') || url.endsWith('.interface'))) {
+                            let file = path.join(onceBaseDir, matchResult[1] + '.js');
+                            if (fs.existsSync(file)) {
+                                reply.header('Content-Type', 'application/javascript; charset=UTF-8');
+                                return fs.readFileSync(file, 'utf8');
+                            }
+
+                        }
+                        let files: string[] = ['index.mjs', 'index.js'];
+                        for (let fileName of files) {
+                            let file = path.join(onceBaseDir, matchResult[1] + fileName);
+                            if (fs.existsSync(file)) {
+                                reply.header('Content-Type', 'application/javascript; charset=UTF-8');
+                                return fs.readFileSync(file, 'utf8');
+                            }
+                        }
+                    }
                 }
             }
             throw new Error("Not Found");

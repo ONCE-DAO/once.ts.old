@@ -52,7 +52,7 @@ export default class DefaultUrl extends BaseThing<DefaultUrl> implements Url {
     }
 
     protected _parseProtocols(url: string) {
-        const protocolMatch = url.match(/^([^\/]+):(\/\/)?/);
+        const protocolMatch = url.match(/^([^\/]+):(\/\/?)?/);
 
         let protocolList: urlProtocol[] = [];
         if (protocolMatch) {

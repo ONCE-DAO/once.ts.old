@@ -2,8 +2,8 @@ import UcpComponent from "../../3_services/UcpComponent.interface";
 import UcpModel from "../../3_services/UcpModel.interface";
 import DefaultUcpModel, { UcpModelProxyIORSchema, UcpModelProxySchema } from "./DefaultUcpModel.class";
 import BaseUcpComponent from "../../1_infrastructure/BaseUcpComponent.class";
-import { z } from "zod";
 import ClassDescriptor from "./DefaultClassDescriptor.class";
+import { z } from "../Zod";
 
 
 

@@ -83,7 +83,7 @@ describe("IOR Class", () => {
       isLoaded: false,
       namespace: "tla.EAM.Once",
       namespaceVersion: "^1.0.0",
-      href: "ior:esm:git:tla.EAM.Once[^1.0.0]"
+      href: "ior:esm:git:/tla.EAM.Once[^1.0.0]"
     },
   });
 
@@ -97,7 +97,7 @@ describe("IOR Class", () => {
       isLoaded: false,
       namespace: "tla.EAM.Once",
       namespaceVersion: "latest",
-      href: "ior:esm:git:tla.EAM.Once[latest]"
+      href: "ior:esm:git:/tla.EAM.Once[latest]"
     },
   });
 
@@ -113,7 +113,7 @@ describe("IOR Class", () => {
       isLoaded: false,
       namespace: "tla.EAM.Namespace",
       namespaceVersion: "#branchName",
-      href: "ior:esm:git:tla.EAM.Namespace[#branchName]"
+      href: "ior:esm:git:/tla.EAM.Namespace[#branchName]"
     },
   });
 
@@ -128,7 +128,21 @@ describe("IOR Class", () => {
       namespace: "tla.EAM.Once",
       namespaceVersion: "latest",
       namespaceObject: "someClassName",
-      href: "ior:esm:git:tla.EAM.Once[latest]/someClassName"
+      href: "ior:esm:git:/tla.EAM.Once[latest]/someClassName"
+    },
+  });
+
+  validate.push({
+    url: "ior:esm:git:/tla.EAM.Once[latest]",
+    result: {
+      protocol: ["ior", "esm", "git"],
+      hostName: undefined,
+      pathName: undefined,
+      origin: undefined,
+      isLoaded: false,
+      namespace: "tla.EAM.Once",
+      namespaceVersion: "latest",
+      href: "ior:esm:git:/tla.EAM.Once[latest]"
     },
   });
 

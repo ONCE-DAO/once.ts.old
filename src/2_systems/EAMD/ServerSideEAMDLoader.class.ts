@@ -3,6 +3,7 @@ import Loader, { loaderReturnValue, LoaderStatic, loadingConfig } from "../../3_
 import { urlProtocol } from "../../3_services/Url.interface";
 import BaseLoader from "../../1_infrastructure/BaseLoader.class";
 import UcpComponentInterface from "../../3_services/UcpComponent.interface";
+import path from "path";
 
 
 class EAMDLoader extends BaseLoader implements Loader {
@@ -26,14 +27,13 @@ class EAMDLoader extends BaseLoader implements Loader {
 
     let modulePath: string;
     if (ior.namespace === 'tla.EAM.Once') {
-      modulePath = "../../";
+      modulePath = path.resolve("./src");
     } else if (ior.namespace === 'tla.EAM.once.ts') {
-      modulePath = "../../";
-
+      modulePath = path.resolve("./src");
     } else {
 
-      if (!global.ONCE) throw new Error("Missing ONCE");
-      if (!global.ONCE.eamd) throw new Error("Missing EAMD in ONCE");
+      if (typeof ONCE === "undefined") throw new Error("Missing ONCE");
+      if (ONCE.eamd == undefined) throw new Error("Missing EAMD in ONCE");
 
       let eamdRepos = await global.ONCE?.eamd?.discover() as Object;
 
@@ -43,11 +43,11 @@ class EAMDLoader extends BaseLoader implements Loader {
         throw new Error("Missing Mapping from Namespace to Repository")
       }
 
-      if (!global.ONCE.eamd.eamdRepository) throw new Error("Missing eamdRepository");
+      if (!ONCE.eamd.eamdRepository) throw new Error("Missing eamdRepository");
 
-      let submodules = await global.ONCE.eamd.eamdRepository.getAndInstallSubmodule(ior, repoPath);
+      let submodules = await ONCE.eamd.eamdRepository.getAndInstallSubmodule(ior, repoPath);
 
-      modulePath = global.ONCE.eamd.eamdDirectory + '/' + submodules.devPath + "/../../dist/current/src/";
+      modulePath = ONCE.eamd.eamdDirectory + '/' + submodules.devPath + "/../../dist/current/src/";
     }
     if (config?.returnValue === loaderReturnValue.path) {
       return modulePath;

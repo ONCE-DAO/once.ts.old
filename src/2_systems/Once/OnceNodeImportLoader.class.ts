@@ -47,17 +47,17 @@ export default class OnceNodeImportLoader extends BaseNodeOnce {
     return defaultResolve(specifier, context, defaultResolve);
   }
 
-  async load(
-    url: string,
-    context: loadContext,
-    defaultLoad: Function
-  ): Promise<{
-    format: "builtin" | "commonjs" | "json" | "module" | "wasm";
-    source: string | ArrayBuffer | Int8Array;
-  }> {
-    // TODO hook it load via IOR
-    return defaultLoad(url, context, defaultLoad);
-  }
+  // async load(
+  //   url: string,
+  //   context: loadContext,
+  //   defaultLoad: Function
+  // ): Promise<{
+  //   format: "builtin" | "commonjs" | "json" | "module" | "wasm";
+  //   source: string | ArrayBuffer | Int8Array;
+  // }> {
+  //   // TODO hook it load via IOR
+  //   return defaultLoad(url, context, defaultLoad);
+  // }
 
   /**
  * This example has the application context send a message to the loader

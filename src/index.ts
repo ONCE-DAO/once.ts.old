@@ -1,8 +1,11 @@
 // ########## Default Export ##########
 import ClassDescriptor, { InterfaceDescriptor } from "./2_systems/Things/DefaultClassDescriptor.class";
+import OnceKernel from "./1_infrastructure/OnceKernel.class";
+
 import Thing from "./3_services/Thing.interface";
 
 export { Thing, InterfaceDescriptor, ClassDescriptor };
+export default OnceKernel;
 // ########## Default Export END ##########
 
 // ########## Generated Export ##########

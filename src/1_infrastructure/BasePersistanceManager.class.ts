@@ -1,4 +1,3 @@
-import { InterfaceDescriptor } from "../2_systems/Things/DefaultClassDescriptor.class";
 import IOR from "../3_services/IOR.interface";
 import PersistanceManager, { PersistanceManagerID, UDEObject } from "../3_services/PersistanceManager.interface";
 import UcpComponent from "../3_services/UcpComponent.interface";

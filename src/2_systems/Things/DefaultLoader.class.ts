@@ -1,9 +1,15 @@
 import BaseLoader from "../../1_infrastructure/BaseLoader.class";
 import IOR from "../../3_services/IOR.interface";
 import Loader, { LoaderID, LoaderStatic, loadingConfig } from "../../3_services/Loader.interface";
-import EAMDLoader from "../EAMD/EAMDLoader.class";
-import { InterfaceDescriptor } from "./DefaultClassDescriptor.class";
-import UDELoader from "./UDELoader.class";
+import { OnceMode } from "../../3_services/Once.interface";
+
+
+if (ONCE.mode === OnceMode.BROWSER) {
+    await import("../EAMD/BrowserEAMDLoader.class");
+} else {
+    await import("../EAMD/ServerSideEAMDLoader.class");
+}
+await import("./UDELoader.class");
 
 
 export default class DefaultLoader extends BaseLoader {
@@ -21,11 +27,6 @@ export default class DefaultLoader extends BaseLoader {
     }
 
     static discover(): LoaderStatic[] {
-        // Make sure Loader is present;
-        // TODO Make it dynamic
-        EAMDLoader;
-        UDELoader;
-
         return LoaderID.implementations.map(d => d.class)
     }
 

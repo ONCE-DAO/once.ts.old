@@ -109,7 +109,7 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
             protocol = this.protocol
         }
         if (type === formatType.origin) return '';
-        url += protocol.join(':') + ':';
+        url += protocol.join(':') + ':/';
         url += this.namespace;
         if (this.namespaceVersion) url += `[${this.namespaceVersion}]`
 
