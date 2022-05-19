@@ -96,12 +96,12 @@ describe("Once WebServer", () => {
 
 
         let url = server.internalUrl;
-        url.pathName = "/EAMD.ucp/tla/EAM/once.ts/src";
+        url.pathName = "/EAMD.ucp/tla/EAM/once.ts";
         let href = url.href
         let result = await fetch(href);
         let text = await result.text();
 
-        await ExtendedPromise.wait(1000000)
+        //await ExtendedPromise.wait(1000000)
 
         expect(result.ok).toBe(true);
 

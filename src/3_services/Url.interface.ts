@@ -12,7 +12,8 @@ export enum urlProtocol {
   "git" = "git",
   "github" = "github",
   "file" = "file",
-  "esm" = "esm"
+  "esm" = "esm",
+  "rest" = "rest"
 }
 
 type numberOrUndefined = number | undefined
@@ -38,6 +39,7 @@ export interface Url extends JSONProvider {
   fileName: string | undefined;
   fileType: string | undefined;
   fileTypes: string[];
+  normalizedHref: string;
   init(href: string): this;
   clone(): Url;
 }

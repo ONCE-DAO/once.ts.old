@@ -9,7 +9,6 @@ import OnceNodeServer from "../Once/OnceNodeServer.class";
 
 export class FilePersistanceManager extends BasePersistanceManager {
 
-
     get backendActive(): boolean {
         return this.backendVersion !== undefined;
     }
@@ -20,7 +19,7 @@ export class FilePersistanceManager extends BasePersistanceManager {
 
     static canHandle(ior: IOR): number {
         if (ONCE && (ONCE.mode === OnceMode.NODE_JS || ONCE.mode === OnceMode.NODE_LOADER)) {
-            if (ior.hostName === 'localhost' && ior.id) {
+            if ((ior.hostName === 'localhost' || ior.hostName == undefined) && ior.id) {
                 return 1;
             }
         }
@@ -187,10 +186,16 @@ export class FilePersistanceManager extends BasePersistanceManager {
         const data = JSON.parse(fs.readFileSync(filepath, 'utf-8'));
 
         const udeObject = UDELoader.validateUDEStructure(data);
+        await this.retrieveFromData(data);
 
+        return udeObject;
+    }
+
+    async retrieveFromData(udeObject: UDEObject): Promise<UDEObject> {
         if (this.ucpComponent) {
             this.ucpComponent.model = udeObject.particle.data;
             this.backendVersion = udeObject.particle.data.version;
+            if (udeObject.alias) this.alias = udeObject.alias;
         }
         return udeObject;
     }

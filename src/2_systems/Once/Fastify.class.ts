@@ -15,6 +15,8 @@ import serveStatic from 'serve-static';
 import { z } from "../Zod";
 import DefaultIOR from "../Things/DefaultIOR.class";
 import { loaderReturnValue } from "../../3_services/Loader.interface";
+import { urlProtocol } from "../../3_services/Url.interface";
+import UcpComponent from "../../3_services/UcpComponent.interface";
 
 
 const modelSchema =
@@ -82,6 +84,22 @@ export default class OnceWebserver extends BaseUcpComponent<ModelDataType, Serve
 
         this._fastify.use('/EAMD.ucp', serveStatic(baseDirectory));
         this._fastify.use('/EAMD.ucp/tla/EAM/once.ts', serveStatic(onceBaseDir));
+
+
+        this._fastify.get('/UDE/*', async (request: FastifyRequest, reply: FastifyReply) => {
+            let url = request.url;
+            reply.header('Content-Type', 'application/json; charset=utf-8');
+
+            const ior = new DefaultIOR().init(url);
+            ior.protocol.push(urlProtocol.ude);
+            let udeObject = await ior.load() as UcpComponent<any, any>;
+
+            //Hack works for now, but should be changed
+            //@ts-ignore
+            return udeObject.persistanceManager.list[0].ucpComponentData;
+
+        })
+
 
         this._fastify.get('/ior*', async (request: FastifyRequest, reply: FastifyReply) => {
             let url = request.url;

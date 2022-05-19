@@ -198,8 +198,8 @@ export default class DefaultIOR extends DefaultUrl implements IOR {
     }
 
     static createUdeIor(): IOR {
-        //TODO Need to change that later
-        const IOR = new DefaultIOR().init('ior:ude://localhost/UDE/' + UUiD.uuidv4());
+        //HACK Need to change that later
+        const IOR = new DefaultIOR().init('ior:ude:http://localhost:3000/UDE/' + UUiD.uuidv4());
         return IOR;
     }
 }

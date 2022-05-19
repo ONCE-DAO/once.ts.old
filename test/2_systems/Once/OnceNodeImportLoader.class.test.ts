@@ -10,6 +10,6 @@ test("resolve", async () => {
 
     const defaultResolve = (x: string) => { return { url: x } }
     let result = (await (resolve("ior:esm:git:tla.EAM.Once", { conditions: [''], importAssertions: {}, parentURL: '' }, defaultResolve)));
-    expect(result.url).toBe('../../')
+    expect(result.url.endsWith("once.ts/src")).toBe(true);
 
 })

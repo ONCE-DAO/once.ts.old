@@ -5,6 +5,7 @@ export interface PersistanceManagerHandler {
     retrieve(): Promise<UDEObject[]>;
     update(): Promise<any[]>;
     delete(): Promise<any[]>;
+    retrieveFromData(udeData: UDEObject): Promise<any[]>;
     list: PersistanceManager[];
 
     addAlias(alias: string): Promise<any[]>;

@@ -146,6 +146,21 @@ describe("IOR Class", () => {
     },
   });
 
+  validate.push({
+    url: "ior:ude:http://localhost:3000/UDE/6b8c04b7-c88f-4cde-ba97-325e6914d2bd",
+    result: {
+      protocol: ["ior", "ude", "http"],
+      port: 3000,
+      hostName: "localhost",
+      pathName: "/UDE/6b8c04b7-c88f-4cde-ba97-325e6914d2bd",
+      origin: "http://localhost:3000",
+      isLoaded: false,
+      id: "6b8c04b7-c88f-4cde-ba97-325e6914d2bd",
+      href: "ior:ude:http://localhost:3000/UDE/6b8c04b7-c88f-4cde-ba97-325e6914d2bd"
+    },
+  });
+
+
   // validate.push({
   //   url: "ior:esm:github:tla.EAM.OnceService.Once.express#/ONCE-DAO/Once.express",
   //   result: {

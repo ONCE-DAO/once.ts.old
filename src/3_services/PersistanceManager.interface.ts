@@ -8,6 +8,7 @@ import { UcpModelChangelog } from "./UcpModel.interface";
 export default interface PersistanceManager {
   create(): Promise<void>;
   retrieve(ior?: IOR): Promise<UDEObject>;
+  retrieveFromData(data: UDEObject): Promise<UDEObject>;
   update(): Promise<void>;
   delete(): Promise<void>;
   onModelChanged(changeObject: UcpModelChangelog): Promise<void>;

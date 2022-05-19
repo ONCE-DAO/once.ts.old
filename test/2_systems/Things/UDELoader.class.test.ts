@@ -1,7 +1,10 @@
+import OnceWebserver from "../../../src/2_systems/Once/Fastify.class";
 import OnceNodeServer from "../../../src/2_systems/Once/OnceNodeServer.class";
 import DefaultIOR from "../../../src/2_systems/Things/DefaultIOR.class";
 import SomeExampleUcpComponent from "../../../src/2_systems/Things/SomeExampleUcpComponent.class";
 import UDELoader from "../../../src/2_systems/Things/UDELoader.class";
+
+import fetch from "node-fetch";
 
 beforeEach(async () => {
     if (ONCE_STARTED === false) await OnceNodeServer.start();
@@ -93,5 +96,31 @@ describe("UDE Loader", () => {
 
 
     })
+
+    let server: OnceWebserver;
+
+    afterEach(async () => {
+        if (server && server.stop)
+            await server.stop();
+    })
+
+
+    describe("UDE Loader over http", () => {
+        test("Load with Alias", async () => {
+
+            server = new OnceWebserver();
+
+            await server.start();
+
+            let result = await fetch("http://localhost:3000/UDE/onceConfig");
+            expect(result.ok).toBe(true);
+            let json = await result.json() as any;
+            expect(json.alias).toStrictEqual(["onceConfig"]);
+
+        })
+
+
+    })
+
 
 })

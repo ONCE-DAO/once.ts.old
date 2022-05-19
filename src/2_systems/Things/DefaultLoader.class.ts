@@ -4,8 +4,9 @@ import Loader, { LoaderID, LoaderStatic, loadingConfig } from "../../3_services/
 import { OnceMode } from "../../3_services/Once.interface";
 
 
-if (ONCE.mode === OnceMode.BROWSER) {
+if (typeof ONCE !== "undefined" && ONCE.mode === OnceMode.BROWSER) {
     await import("../EAMD/BrowserEAMDLoader.class");
+    await import("./BrowserUDEPersistanceManager.class");
 } else {
     await import("../EAMD/ServerSideEAMDLoader.class");
 }

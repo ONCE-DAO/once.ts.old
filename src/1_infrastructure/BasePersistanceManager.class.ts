@@ -1,10 +1,12 @@
 import IOR from "../3_services/IOR.interface";
+import { OnceMode } from "../3_services/Once.interface";
 import PersistanceManager, { PersistanceManagerID, UDEObject } from "../3_services/PersistanceManager.interface";
 import UcpComponent from "../3_services/UcpComponent.interface";
 import { UcpModelChangelog, UcpModelEvents } from "../3_services/UcpModel.interface";
 import BaseThing from "./BaseThing.class";
 
-export enum PM_ACTION { create = "create", retrieve = "retrieve", update = "update", delete = "delete", addAlias = "addAlias", removeAlias = "removeAlias" }
+
+export enum PM_ACTION { create = "create", retrieve = "retrieve", update = "update", delete = "delete", addAlias = "addAlias", removeAlias = "removeAlias", retrieveFromData = "retrieveFromData" }
 
 export abstract class BasePersistanceManager extends BaseThing<any> implements PersistanceManager {
     public alias: string[] = [];
@@ -15,7 +17,7 @@ export abstract class BasePersistanceManager extends BaseThing<any> implements P
     abstract delete(): Promise<void>
     abstract onModelChanged(changeObject: UcpModelChangelog): Promise<void>
     abstract onNotification(changeObject: UcpModelChangelog): Promise<void>
-
+    abstract retrieveFromData(data: UDEObject): Promise<UDEObject>
     abstract get backendActive(): boolean
 
     protected ucpComponent: UcpComponent<any, any> | undefined;
@@ -94,6 +96,6 @@ export abstract class BasePersistanceManager extends BaseThing<any> implements P
     }
 
 
-}
 
+}
 

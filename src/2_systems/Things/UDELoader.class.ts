@@ -19,11 +19,11 @@ export default class UDELoader extends BaseLoader {
     private instanceStore: WeakRefPromiseStore = new WeakRefPromiseStore();
 
     static canHandle(ior: IOR): number {
-        if (ONCE && ONCE.mode === OnceMode.NODE_JS) {
-            if ((ior.hostName === 'localhost' || !ior.hostName) && ior.id && ior.protocol.includes(urlProtocol.ude)) {
-                return 1;
-            }
+        //if (ONCE && ONCE.mode === OnceMode.NODE_JS) {
+        if ((ior.hostName === 'localhost' || !ior.hostName) && ior.id && ior.protocol.includes(urlProtocol.ude)) {
+            return 1;
         }
+        //}
         return 0;
     }
 
@@ -80,7 +80,7 @@ export default class UDELoader extends BaseLoader {
 
             instance.IOR = resultIOR;
 
-            await instance.persistanceManager.retrieve();
+            await instance.persistanceManager.retrieveFromData(udeData);
             promiseHandler.setSuccess(instance);
 
             return instance;
@@ -107,4 +107,3 @@ export default class UDELoader extends BaseLoader {
     }
 
 }
-

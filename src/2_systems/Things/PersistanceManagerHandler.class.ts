@@ -1,4 +1,5 @@
 import { PM_ACTION } from "../../1_infrastructure/BasePersistanceManager.class";
+import { OnceMode } from "../../3_services/Once.interface";
 import PersistanceManager, { PersistanceManagerID, UDEObject } from "../../3_services/PersistanceManager.interface";
 import { PersistanceManagerHandler } from "../../3_services/PersistanceManagerHandler.interface";
 import UcpComponent from "../../3_services/UcpComponent.interface";
@@ -24,6 +25,10 @@ export class DefaultPersistanceManagerHandler implements PersistanceManagerHandl
         return this.runPMAction(PM_ACTION.removeAlias, alias)
     }
 
+    retrieveFromData(udeData: UDEObject): Promise<any[]> {
+        return this.runPMAction(PM_ACTION.retrieveFromData, udeData);
+    }
+
     get list(): PersistanceManager[] {
         return this.ucpComponent.Store.lookup(PersistanceManagerID) as PersistanceManager[];
     }
@@ -31,14 +36,16 @@ export class DefaultPersistanceManagerHandler implements PersistanceManagerHandl
     private async runPMAction(action: PM_ACTION, param1?: any): Promise<any[]> {
         const persistenceManagerList = this.list;
         const resultPromises = [];
-        if (persistenceManagerList) {
+        if (persistenceManagerList.length > 0) {
             for (let pm of persistenceManagerList) {
-                if (action === PM_ACTION.addAlias || action === PM_ACTION.removeAlias) {
+                if (action === PM_ACTION.addAlias || action === PM_ACTION.removeAlias || action === PM_ACTION.retrieveFromData) {
                     resultPromises.push(pm[action](param1));
                 } else {
                     resultPromises.push(pm[action]());
                 }
             }
+        } else {
+            throw new Error("No PersistanceManager Found")
         }
         let result = await Promise.all(resultPromises);
 
@@ -48,4 +55,9 @@ export class DefaultPersistanceManagerHandler implements PersistanceManagerHandl
     constructor(private ucpComponent: UcpComponent<any, any>) {
     }
 
+
+}
+
+if (typeof ONCE !== "undefined" && ONCE.mode === OnceMode.BROWSER) {
+    //await import('./BrowserUDEPersistanceManager.class')
 }

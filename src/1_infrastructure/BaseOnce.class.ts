@@ -40,11 +40,12 @@ export abstract class BaseOnce extends DefaultThing<Once> implements Once {
 
   async getConfig(): Promise<OnceConfig> {
     const configAlias = 'onceConfig';
+
     if (this._config === undefined) {
       try {
-        this._config = await new DefaultIOR().init('ior:ude:localhost/UDE/' + configAlias).load();
+        this._config = await new DefaultIOR().init('ior:ude:http://localhost:3000/UDE/' + configAlias).load();
       } catch (e) {
-        console.log("No stored ONCE Config Instance found");
+        console.warn("No stored ONCE Config Instance found");
       }
       if (this._config === undefined) {
 
