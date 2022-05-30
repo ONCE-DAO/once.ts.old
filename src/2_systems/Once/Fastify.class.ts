@@ -17,6 +17,7 @@ import DefaultIOR from "../Things/DefaultIOR.class";
 import { loaderReturnValue } from "../../3_services/Loader.interface";
 import { urlProtocol } from "../../3_services/Url.interface";
 import UcpComponent from "../../3_services/UcpComponent.interface";
+import UDELoader from "../Things/UDELoader.class";
 
 
 const modelSchema =
@@ -86,19 +87,12 @@ export default class OnceWebserver extends BaseUcpComponent<ModelDataType, Serve
         this._fastify.use('/EAMD.ucp/tla/EAM/once.ts', serveStatic(onceBaseDir));
 
 
-        this._fastify.get('/UDE/*', async (request: FastifyRequest, reply: FastifyReply) => {
-            let url = request.url;
-            reply.header('Content-Type', 'application/json; charset=utf-8');
+        this._fastify.get('/UDE/*', this._handleUDE_CRUD)
+        this._fastify.put('/UDE/*', this._handleUDE_CRUD)
+        this._fastify.post('/UDE/*', this._handleUDE_CRUD)
+        this._fastify.post('/UDE', this._handleUDE_CRUD)
+        this._fastify.delete('/UDE/*', this._handleUDE_CRUD)
 
-            const ior = new DefaultIOR().init(url);
-            ior.protocol.push(urlProtocol.ude);
-            let udeObject = await ior.load() as UcpComponent<any, any>;
-
-            //Hack works for now, but should be changed
-            //@ts-ignore
-            return udeObject.persistanceManager.list[0].ucpComponentData;
-
-        })
 
 
         this._fastify.get('/ior*', async (request: FastifyRequest, reply: FastifyReply) => {
@@ -164,6 +158,67 @@ export default class OnceWebserver extends BaseUcpComponent<ModelDataType, Serve
             // Server is now listening on ${address}
         })
 
+    }
+
+    // TODO@BE Need rework
+    private async _handleUDE_CRUD(request: FastifyRequest, reply: FastifyReply) {
+        let url = request.url;
+        reply.header('Content-Type', 'application/json; charset=utf-8');
+
+        if (request.method === 'GET') {
+
+            const ior = new DefaultIOR().init(url);
+            ior.protocol.push(urlProtocol.ude);
+            let udeComponent = await ior.load() as UcpComponent<any, any>;
+
+            //Hack works for now, but should be changed
+            //@ts-ignore
+            return udeComponent.persistanceManager.list[0].ucpComponentData;
+
+        } else if (request.method === 'POST') {
+            let udeData = UDELoader.validateUDEStructure(request.body);
+            let udeComponentClass = await DefaultIOR.load(udeData.typeIOR);
+            let udeComponent = new udeComponentClass() as UcpComponent<any, any>;
+
+            udeComponent.model = udeData.particle.data;
+            udeComponent.IOR.id = udeData.id;
+
+            let persistanceManagerHandler = udeComponent.persistanceManager;
+            if (udeData.alias !== undefined) {
+                for (let alias of udeData.alias) {
+                    persistanceManagerHandler.addAlias(alias);
+                }
+            }
+
+            await udeComponent.persistanceManager.create();
+
+            //Hack works for now, but should be changed
+            //@ts-ignore
+            return udeComponent.persistanceManager.list[0].ucpComponentData;
+        } else if (request.method === 'DELETE') {
+            const ior = new DefaultIOR().init(url);
+            ior.protocol.push(urlProtocol.ude);
+            let udeComponent = await ior.load() as UcpComponent<any, any>;
+
+            await udeComponent.persistanceManager.delete();
+            return { delete: 'ok' }
+
+        } else if (request.method === 'PUT') {
+            let udeData = UDELoader.validateUDEStructure(request.body);
+
+            const ior = new DefaultIOR().init(url);
+            ior.protocol.push(urlProtocol.ude);
+            let udeComponent = await ior.load() as UcpComponent<any, any>;
+            udeComponent.model = udeData.particle.data;
+
+
+
+            //Hack works for now, but should be changed
+            //@ts-ignore
+            return udeComponent.persistanceManager.list[0].ucpComponentData;
+        }
+
+        throw new Error("Method not implemented")
     }
 
     async stop(): Promise<any> {

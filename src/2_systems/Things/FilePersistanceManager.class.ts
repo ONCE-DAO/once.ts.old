@@ -141,7 +141,7 @@ export class FilePersistanceManager extends BasePersistanceManager {
     async create(): Promise<void> {
         if (!this.ucpComponent || !this.IOR) throw new Error("Missing UCP Component");
 
-        this._validateAliasList();
+        await this._validateAliasList();
 
         let fileName = await this.fileName();
 
@@ -194,7 +194,7 @@ export class FilePersistanceManager extends BasePersistanceManager {
     async retrieveFromData(udeObject: UDEObject): Promise<UDEObject> {
         if (this.ucpComponent) {
             this.ucpComponent.model = udeObject.particle.data;
-            this.backendVersion = udeObject.particle.data.version;
+            this.backendVersion = udeObject.particle.version;
             if (udeObject.alias) this.alias = udeObject.alias;
         }
         return udeObject;

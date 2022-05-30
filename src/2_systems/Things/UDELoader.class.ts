@@ -88,7 +88,8 @@ export default class UDELoader extends BaseLoader {
         }
     }
 
-    static validateUDEStructure(udeObject: UDEObject): UDEObject {
+    static validateUDEStructure(udeObject: any): UDEObject {
+        if (typeof udeObject !== 'object' || udeObject == null) throw new Error(`Is not a udeObject`);
         if (typeof udeObject.id !== 'string') throw new Error(`Parameter 'id' is wrong in Object value: '${udeObject.id}`)
         if (typeof udeObject.instanceIOR !== 'string') throw new Error(`Parameter 'instanceIOR' is wrong in Object value: '${udeObject.instanceIOR}`)
         if (typeof udeObject.typeIOR !== 'string') throw new Error(`Parameter 'typeIOR' is wrong in Object value: '${udeObject.typeIOR}`)

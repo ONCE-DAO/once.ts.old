@@ -14,7 +14,7 @@ type Response = import("node-fetch/@types/index").Response;
 let internalFetch: (url: RequestInfo, init?: RequestInit | undefined) => Promise<Response>;
 
 
-if (ONCE.mode !== OnceMode.BROWSER) {
+if (typeof ONCE == 'undefined' || ONCE.mode !== OnceMode.BROWSER) {
     internalFetch = (await import('node-fetch')).default;
 } else {
     //@ts-ignore
