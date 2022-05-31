@@ -7,3 +7,4 @@ src/**/*.d.ts
 src/**/*.js
 src/**/*.d.ts.map
 src/**/*.ts.tmp
+!src/2_systems/Zod/**
